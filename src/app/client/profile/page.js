@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'react-hot-toast';
 import { User, Mail, Phone, Calendar, Baby, Settings, Edit3, Save, X } from 'lucide-react';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -130,7 +131,8 @@ export default function ClientProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <DashboardLayout>
+      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">내 프로필</h1>
@@ -330,5 +332,6 @@ export default function ClientProfilePage() {
         </Tabs>
       </div>
     </div>
+    </DashboardLayout>
   );
 }
