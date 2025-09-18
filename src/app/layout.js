@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "셸메이트 - 느린학습자 상담 플랫폼",
-  description: "느린학습자 아이의 학부모와 전문가를 연결하는 비대면 상담 서비스",
+  description: "느린학습자 아이의 학부모와 전문가를 연결하는 비대면 상담 서비스, 셸메이트",
 };
 
 export default function RootLayout({ children }) {
