@@ -53,7 +53,6 @@ export function DashboardLayout({ children }) {
         { name: 'Q&A 커뮤니티', href: '/client/qna', icon: MessageSquare },
         { name: '전문가 칼럼', href: '/client/columns', icon: FileText },
         { name: '상담 예약', href: '/client/consultations', icon: Video },
-        { name: '내 정보', href: '/client/profile', icon: User },
       ];
     }
     n 
@@ -64,7 +63,6 @@ export function DashboardLayout({ children }) {
         { name: '칼럼 작성', href: '/expert/columns', icon: FileText },
         { name: '상담 관리', href: '/expert/consultations', icon: Video },
         { name: '통계', href: '/expert/analytics', icon: BarChart3 },
-        { name: '내 정보', href: '/expert/profile', icon: User },
       ];
     }
     
@@ -149,7 +147,7 @@ export function DashboardLayout({ children }) {
       
       {/* 메인 컨텐츠 */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* 헤더 */}
+        {/* 헤더 
         <header className="bg-white shadow-sm border-b h-16 flex items-center justify-between px-6 lg:px-8">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -164,7 +162,7 @@ export function DashboardLayout({ children }) {
             </span>
           </div>
         </header>
-        
+        */}
         {/* 메인 컨텐츠 영역 */}
         <main className="flex-1 overflow-auto p-6 lg:p-8">
           {children}
