@@ -3,8 +3,16 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { 
-  Menu, 
+  Menu,
   X, 
   Home, 
   MessageSquare, 
@@ -13,8 +21,8 @@ import {
   User, 
   LogOut,
   Settings,
-  Users,
-  BarChart3
+  BarChart3,
+  ChevronUp
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -97,32 +105,51 @@ export function DashboardLayout({ children }) {
         </nav>
         
         <div className="absolute bottom-0 w-full p-6 border-t">
-          <div className="flex items-center mb-4">
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-medium">
-              {user?.name?.charAt(0)}
-            </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-              <p className="text-xs text-gray-500">
-                {isExpert ? '전문가' : isClient ? '내담자' : '사용자'}
-              </p>
-            </div>
-          </div>
-          
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleLogout}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            로그아웃
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="w-full justify-start p-0 h-auto">
+                <div className="flex items-center w-full">
+                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-medium">
+                    {user?.name?.charAt(0)}
+                  </div>
+                  <div className="ml-3 text-left flex-1">
+                    <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                    <p className="text-xs text-gray-500">
+                      {isExpert ? '전문가' : isClient ? '내담자' : '사용자'}
+                    </p>
+                  </div>
+                  <ChevronUp className="h-4 w-4 text-gray-400" />
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuLabel>내 계정</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href={`/${user?.user_type}/profile`} className="flex items-center w-full">
+                  <User className="mr-2 h-4 w-4" />
+                  프로필 설정
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/${user?.user_type}/settings`} className="flex items-center w-full">
+                  <Settings className="mr-2 h-4 w-4" />
+                  계정 설정
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
+                <LogOut className="mr-2 h-4 w-4" />
+                로그아웃
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       
       {/* 메인 컨텐츠 */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* 헤더 
+        {/* 헤더 */}
         <header className="bg-white shadow-sm border-b h-16 flex items-center justify-between px-6 lg:px-8">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -137,7 +164,6 @@ export function DashboardLayout({ children }) {
             </span>
           </div>
         </header>
-        */}
         
         {/* 메인 컨텐츠 영역 */}
         <main className="flex-1 overflow-auto p-6 lg:p-8">
