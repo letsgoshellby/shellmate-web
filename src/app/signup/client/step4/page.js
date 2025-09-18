@@ -11,7 +11,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { SignupProgress } from '@/components/auth/SignupProgress';
 import { toast } from 'react-hot-toast';
-import { Loader2, ArrowLeft, CheckCircle } from 'lucide-react';
+import { IoArrowBack, IoArrowForward, IoCheckmarkCircle } from 'react-icons/io5';
+import { Loader2 } from 'lucide-react';
+import { TokenStorage } from '@/lib/auth/tokenStorage';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -57,7 +59,7 @@ export default function ClientSignupStep4Page() {
   const handleStep4Submit = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
+      const token = TokenStorage.getAccessToken();
       if (!token) {
         toast.error('인증이 필요합니다. 다시 로그인해주세요.');
         router.push('/login');
@@ -153,7 +155,7 @@ export default function ClientSignupStep4Page() {
 
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <IoCheckmarkCircle className="h-5 w-5 text-green-600" />
                   <p className="text-sm text-green-800">
                     <strong>회원가입이 거의 완료되었습니다!</strong>
                   </p>
@@ -170,7 +172,7 @@ export default function ClientSignupStep4Page() {
                   variant="outline"
                   onClick={() => router.push('/signup/client/step3')}
                 >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  <IoArrowBack className="mr-2 h-4 w-4" />
                   이전 단계
                 </Button>
                 <div className="space-x-2">
@@ -193,7 +195,7 @@ export default function ClientSignupStep4Page() {
                     ) : (
                       <>
                         완료하기
-                        <CheckCircle className="ml-2 h-4 w-4" />
+                        <IoCheckmarkCircle className="ml-2 h-4 w-4" />
                       </>
                     )}
                   </Button>

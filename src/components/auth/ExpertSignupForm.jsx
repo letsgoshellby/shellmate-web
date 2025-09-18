@@ -11,7 +11,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'react-hot-toast';
-import { Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
+import { IoEye, IoEyeOff, IoArrowBack } from 'react-icons/io5';
+import { Loader2 } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -145,9 +146,9 @@ export function ExpertSignupForm() {
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
-                  <EyeOff className="h-4 w-4 text-gray-400" />
+                  <IoEyeOff className="h-4 w-4 text-gray-400" />
                 ) : (
-                  <Eye className="h-4 w-4 text-gray-400" />
+                  <IoEye className="h-4 w-4 text-gray-400" />
                 )}
               </button>
             </div>
@@ -172,9 +173,9 @@ export function ExpertSignupForm() {
                 onClick={() => setShowPassword2(!showPassword2)}
               >
                 {showPassword2 ? (
-                  <EyeOff className="h-4 w-4 text-gray-400" />
+                  <IoEyeOff className="h-4 w-4 text-gray-400" />
                 ) : (
-                  <Eye className="h-4 w-4 text-gray-400" />
+                  <IoEye className="h-4 w-4 text-gray-400" />
                 )}
               </button>
             </div>

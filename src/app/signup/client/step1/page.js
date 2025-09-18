@@ -12,7 +12,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { SignupProgress } from '@/components/auth/SignupProgress';
 import { toast } from 'react-hot-toast';
-import { Loader2, ArrowRight } from 'lucide-react';
+import { IoArrowBack, IoArrowForward, IoCheckmarkCircle } from 'react-icons/io5';
+import { Loader2 } from 'lucide-react';
+import { TokenStorage } from '@/lib/auth/tokenStorage';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -46,7 +48,7 @@ export default function ClientSignupStep1Page() {
   const handleStep1Submit = async (data) => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
+      const token = TokenStorage.getAccessToken();
       if (!token) {
         toast.error('인증이 필요합니다. 다시 로그인해주세요.');
         router.push('/login');
@@ -206,7 +208,7 @@ export default function ClientSignupStep1Page() {
                   ) : (
                     <>
                       다음 단계
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      <IoArrowForward className="ml-2 h-4 w-4" />
                     </>
                   )}
                 </Button>

@@ -12,20 +12,21 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'react-hot-toast';
 import { 
-  User, 
-  Mail, 
-  Phone, 
-  Calendar, 
-  GraduationCap, 
-  Settings, 
-  Edit3, 
-  Save, 
-  X, 
-  Award,
-  Building,
-  Clock,
-  FileText
-} from 'lucide-react';
+  IoPerson, 
+  IoMail, 
+  IoCall, 
+  IoCalendar, 
+  IoSchool, 
+  IoSettings, 
+  IoCreate, 
+  IoSave, 
+  IoClose, 
+  IoTrophy,
+  IoBusiness,
+  IoTime,
+  IoDocumentText
+} from 'react-icons/io5';
+import { TokenStorage } from '@/lib/auth/tokenStorage';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -53,7 +54,7 @@ export default function ExpertProfilePage() {
 
   const fetchProfileData = async () => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = TokenStorage.getAccessToken();
       const response = await fetch(`${API_BASE_URL}/user/me/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -94,7 +95,7 @@ export default function ExpertProfilePage() {
   const handleSave = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
+      const token = TokenStorage.getAccessToken();
       const response = await fetch(`${API_BASE_URL}/user/me/`, {
         method: 'PATCH',
         headers: {
@@ -169,7 +170,7 @@ export default function ExpertProfilePage() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
+                    <IoPerson className="h-5 w-5" />
                     기본 정보
                   </CardTitle>
                   <CardDescription>
@@ -178,17 +179,17 @@ export default function ExpertProfilePage() {
                 </div>
                 {!isEditing ? (
                   <Button onClick={handleEdit} variant="outline" size="sm">
-                    <Edit3 className="h-4 w-4 mr-2" />
+                    <IoCreate className="h-4 w-4 mr-2" />
                     수정
                   </Button>
                 ) : (
                   <div className="flex gap-2">
                     <Button onClick={handleCancel} variant="outline" size="sm">
-                      <X className="h-4 w-4 mr-2" />
+                      <IoClose className="h-4 w-4 mr-2" />
                       취소
                     </Button>
                     <Button onClick={handleSave} size="sm" disabled={loading}>
-                      <Save className="h-4 w-4 mr-2" />
+                      <IoSave className="h-4 w-4 mr-2" />
                       저장
                     </Button>
                   </div>
@@ -198,7 +199,7 @@ export default function ExpertProfilePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="email" className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
+                      <IoMail className="h-4 w-4" />
                       이메일
                     </Label>
                     <Input
@@ -225,7 +226,7 @@ export default function ExpertProfilePage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="phone" className="flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
+                      <IoCall className="h-4 w-4" />
                       전화번호
                     </Label>
                     {isEditing ? (
@@ -241,7 +242,7 @@ export default function ExpertProfilePage() {
 
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
-                      <GraduationCap className="h-4 w-4" />
+                      <IoSchool className="h-4 w-4" />
                       회원 유형
                     </Label>
                     <div className="flex items-center space-x-2">
@@ -251,7 +252,7 @@ export default function ExpertProfilePage() {
 
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
+                      <IoCalendar className="h-4 w-4" />
                       가입일
                     </Label>
                     <Input
@@ -264,7 +265,7 @@ export default function ExpertProfilePage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="bio" className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
+                    <IoDocumentText className="h-4 w-4" />
                     자기소개
                   </Label>
                   {isEditing ? (
@@ -292,7 +293,7 @@ export default function ExpertProfilePage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5" />
+                  <IoTrophy className="h-5 w-5" />
                   전문가 정보
                 </CardTitle>
                 <CardDescription>
@@ -303,7 +304,7 @@ export default function ExpertProfilePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
+                      <IoTime className="h-4 w-4" />
                       경력 (년)
                     </Label>
                     {isEditing ? (
@@ -324,7 +325,7 @@ export default function ExpertProfilePage() {
 
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
-                      <Building className="h-4 w-4" />
+                      <IoBusiness className="h-4 w-4" />
                       소속기관
                     </Label>
                     {isEditing ? (
@@ -394,7 +395,7 @@ export default function ExpertProfilePage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
+                  <IoSettings className="h-5 w-5" />
                   승인 현황
                 </CardTitle>
                 <CardDescription>

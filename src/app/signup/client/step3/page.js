@@ -14,7 +14,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { SignupProgress } from '@/components/auth/SignupProgress';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'react-hot-toast';
-import { Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
+import { IoArrowBack, IoArrowForward, IoCheckmarkCircle } from 'react-icons/io5';
+import { Loader2 } from 'lucide-react';
+import { TokenStorage } from '@/lib/auth/tokenStorage';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -54,7 +56,7 @@ export default function ClientSignupStep3Page() {
   const handleStep3Submit = async (data) => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
+      const token = TokenStorage.getAccessToken();
       if (!token) {
         toast.error('인증이 필요합니다. 다시 로그인해주세요.');
         router.push('/login');
@@ -235,7 +237,7 @@ export default function ClientSignupStep3Page() {
                   variant="outline"
                   onClick={() => router.push('/signup/client/step2')}
                 >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  <IoArrowBack className="mr-2 h-4 w-4" />
                   이전 단계
                 </Button>
                 <div className="space-x-2">
@@ -258,7 +260,7 @@ export default function ClientSignupStep3Page() {
                     ) : (
                       <>
                         다음 단계
-                        <ArrowRight className="ml-2 h-4 w-4" />
+                        <IoArrowForward className="ml-2 h-4 w-4" />
                       </>
                     )}
                   </Button>

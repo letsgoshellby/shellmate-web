@@ -4,7 +4,7 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, FileText, Video, Users, TrendingUp, Clock } from 'lucide-react';
+import { IoChatbubbleEllipses, IoDocumentText, IoVideocam, IoPeople, IoTrendingUp, IoTime } from 'react-icons/io5';
 import Link from 'next/link';
 
 export default function ExpertDashboard() {
@@ -25,7 +25,7 @@ export default function ExpertDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">대기 중인 질문</CardTitle>
-                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                <IoChatbubbleEllipses className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-orange-600">5</div>
@@ -38,7 +38,7 @@ export default function ExpertDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">이번 달 상담</CardTitle>
-                <Video className="h-4 w-4 text-muted-foreground" />
+                <IoVideocam className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-blue-600">12</div>
@@ -51,7 +51,7 @@ export default function ExpertDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">도움받은 가정</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <IoPeople className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">23</div>
@@ -64,7 +64,7 @@ export default function ExpertDashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">만족도 평균</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <IoTrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-purple-600">4.8</div>
@@ -81,7 +81,7 @@ export default function ExpertDashboard() {
               <Link href="/expert/qna">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <MessageSquare className="mr-2 h-5 w-5" />
+                    <IoChatbubbleEllipses className="mr-2 h-5 w-5" />
                     Q&A 답변하기
                   </CardTitle>
                   <CardDescription>
@@ -98,7 +98,7 @@ export default function ExpertDashboard() {
               <Link href="/expert/columns">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <FileText className="mr-2 h-5 w-5" />
+                    <IoDocumentText className="mr-2 h-5 w-5" />
                     칼럼 작성하기
                   </CardTitle>
                   <CardDescription>
@@ -115,7 +115,7 @@ export default function ExpertDashboard() {
               <Link href="/expert/consultations">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Video className="mr-2 h-5 w-5" />
+                    <IoVideocam className="mr-2 h-5 w-5" />
                     상담 일정 관리
                   </CardTitle>
                   <CardDescription>
@@ -178,7 +178,7 @@ export default function ExpertDashboard() {
                     <div className="flex-1">
                       <h4 className="text-sm font-medium">김○○ 학부모 상담</h4>
                       <p className="text-xs text-muted-foreground">
-                        <Clock className="w-3 h-3 inline mr-1" />
+                        <IoTime className="w-3 h-3 inline mr-1" />
                         오후 2:00 - 3:00
                       </p>
                     </div>
@@ -189,7 +189,7 @@ export default function ExpertDashboard() {
                     <div className="flex-1">
                       <h4 className="text-sm font-medium">이○○ 학부모 상담</h4>
                       <p className="text-xs text-muted-foreground">
-                        <Clock className="w-3 h-3 inline mr-1" />
+                        <IoTime className="w-3 h-3 inline mr-1" />
                         오후 4:00 - 5:00
                       </p>
                     </div>

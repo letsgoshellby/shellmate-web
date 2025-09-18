@@ -10,8 +10,9 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'react-hot-toast';
-import { User, Mail, Phone, Calendar, Baby, Settings, Edit3, Save, X } from 'lucide-react';
+import { IoPerson, IoMail, IoCall, IoCalendar, IoPeople, IoSettings, IoCreate, IoSave, IoClose } from 'react-icons/io5';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { TokenStorage } from '@/lib/auth/tokenStorage';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -39,7 +40,7 @@ export default function ClientProfilePage() {
 
   const fetchProfileData = async () => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = TokenStorage.getAccessToken();
       const response = await fetch(`${API_BASE_URL}/user/me/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -76,7 +77,7 @@ export default function ClientProfilePage() {
   const handleSave = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
+      const token = TokenStorage.getAccessToken();
       const response = await fetch(`${API_BASE_URL}/user/me/`, {
         method: 'PATCH',
         headers: {
@@ -150,7 +151,7 @@ export default function ClientProfilePage() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
+                    <IoPerson className="h-5 w-5" />
                     기본 정보
                   </CardTitle>
                   <CardDescription>
@@ -159,17 +160,17 @@ export default function ClientProfilePage() {
                 </div>
                 {!isEditing ? (
                   <Button onClick={handleEdit} variant="outline" size="sm">
-                    <Edit3 className="h-4 w-4 mr-2" />
+                    <IoCreate className="h-4 w-4 mr-2" />
                     수정
                   </Button>
                 ) : (
                   <div className="flex gap-2">
                     <Button onClick={handleCancel} variant="outline" size="sm">
-                      <X className="h-4 w-4 mr-2" />
+                      <IoClose className="h-4 w-4 mr-2" />
                       취소
                     </Button>
                     <Button onClick={handleSave} size="sm" disabled={loading}>
-                      <Save className="h-4 w-4 mr-2" />
+                      <IoSave className="h-4 w-4 mr-2" />
                       저장
                     </Button>
                   </div>
@@ -179,7 +180,7 @@ export default function ClientProfilePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="email" className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
+                      <IoMail className="h-4 w-4" />
                       이메일
                     </Label>
                     <Input
@@ -219,7 +220,7 @@ export default function ClientProfilePage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="phone" className="flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
+                      <IoCall className="h-4 w-4" />
                       전화번호
                     </Label>
                     {isEditing ? (
@@ -235,7 +236,7 @@ export default function ClientProfilePage() {
 
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
-                      <Baby className="h-4 w-4" />
+                      <IoPeople className="h-4 w-4" />
                       회원 유형
                     </Label>
                     <div className="flex items-center space-x-2">
@@ -245,7 +246,7 @@ export default function ClientProfilePage() {
 
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
+                      <IoCalendar className="h-4 w-4" />
                       가입일
                     </Label>
                     <Input
@@ -263,7 +264,7 @@ export default function ClientProfilePage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
+                  <IoSettings className="h-5 w-5" />
                   회원가입 현황
                 </CardTitle>
                 <CardDescription>

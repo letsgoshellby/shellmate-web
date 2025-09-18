@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, GraduationCap } from 'lucide-react';
+import { IoPeople, IoSchool } from 'react-icons/io5';
 
 export default function SignupSelectionPage() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function SignupSelectionPage() {
               onClick={() => router.push('/signup/client')}
               className="group p-8 border-2 border-gray-200 rounded-xl hover:border-primary hover:shadow-lg transition-all duration-200"
             >
-              <Users className="h-16 w-16 mx-auto mb-4 text-primary group-hover:scale-110 transition-transform" />
+              <IoPeople className="h-16 w-16 mx-auto mb-4 text-primary group-hover:scale-110 transition-transform" />
               <h3 className="text-xl font-semibold mb-3">학부모</h3>
               <p className="text-gray-600 text-sm">
                 느린학습자 자녀를 둔 학부모로서
@@ -34,7 +34,7 @@ export default function SignupSelectionPage() {
               onClick={() => router.push('/signup/expert')}
               className="group p-8 border-2 border-gray-200 rounded-xl hover:border-primary hover:shadow-lg transition-all duration-200"
             >
-              <GraduationCap className="h-16 w-16 mx-auto mb-4 text-primary group-hover:scale-110 transition-transform" />
+              <IoSchool className="h-16 w-16 mx-auto mb-4 text-primary group-hover:scale-110 transition-transform" />
               <h3 className="text-xl font-semibold mb-3">전문가</h3>
               <p className="text-gray-600 text-sm">
                 느린학습자를 도울 수 있는

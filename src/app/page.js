@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageSquare, FileText, Video, Users, Heart, Shield } from 'lucide-react';
+import { IoChatbubbleEllipses, IoDocumentText, IoVideocam, IoPeople, IoHeart, IoShield } from 'react-icons/io5';
 
 export default function Home() {
   return (
@@ -61,7 +61,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="text-center hover:shadow-lg transition-shadow">
               <CardHeader>
-                <MessageSquare className="h-12 w-12 text-primary mx-auto mb-4" />
+                <IoChatbubbleEllipses className="h-12 w-12 text-primary mx-auto mb-4" />
                 <CardTitle>Q&A 커뮤니티</CardTitle>
                 <CardDescription>
                   전문가에게 궁금한 점을 언제든지 질문하고 빠른 답변을 받아보세요
@@ -71,7 +71,7 @@ export default function Home() {
 
             <Card className="text-center hover:shadow-lg transition-shadow">
               <CardHeader>
-                <FileText className="h-12 w-12 text-primary mx-auto mb-4" />
+                <IoDocumentText className="h-12 w-12 text-primary mx-auto mb-4" />
                 <CardTitle>전문가 칼럼</CardTitle>
                 <CardDescription>
                   각 분야 전문가들이 작성한 유익한 정보와 육아 팁을 확인하세요
@@ -81,7 +81,7 @@ export default function Home() {
 
             <Card className="text-center hover:shadow-lg transition-shadow">
               <CardHeader>
-                <Video className="h-12 w-12 text-primary mx-auto mb-4" />
+                <IoVideocam className="h-12 w-12 text-primary mx-auto mb-4" />
                 <CardTitle>비대면 상담</CardTitle>
                 <CardDescription>
                   1:1 화상 상담을 통해 개인 맞춤형 전문 상담을 받아보세요
@@ -100,17 +100,17 @@ export default function Home() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <Users className="h-12 w-12 text-primary mx-auto mb-4" />
+              <IoPeople className="h-12 w-12 text-primary mx-auto mb-4" />
               <h3 className="text-4xl font-bold text-primary mb-2">1,000+</h3>
               <p className="text-gray-600">등록된 가정 수</p>
             </div>
             <div>
-              <Heart className="h-12 w-12 text-primary mx-auto mb-4" />
+              <IoHeart className="h-12 w-12 text-primary mx-auto mb-4" />
               <h3 className="text-4xl font-bold text-primary mb-2">50+</h3>
               <p className="text-gray-600">검증된 전문가</p>
             </div>
             <div>
-              <Shield className="h-12 w-12 text-primary mx-auto mb-4" />
+              <IoShield className="h-12 w-12 text-primary mx-auto mb-4" />
               <h3 className="text-4xl font-bold text-primary mb-2">4.8</h3>
               <p className="text-gray-600">만족도 평점</p>
             </div>
