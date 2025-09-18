@@ -122,7 +122,7 @@ export function DashboardLayout({ children }) {
       
       {/* 메인 컨텐츠 */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* 헤더 */}
+        {/* 헤더 
         <header className="bg-white shadow-sm border-b h-16 flex items-center justify-between px-6 lg:px-8">
           <button
             onClick={() => setSidebarOpen(true)}
@@ -137,6 +137,7 @@ export function DashboardLayout({ children }) {
             </span>
           </div>
         </header>
+        */}
         
         {/* 메인 컨텐츠 영역 */}
         <main className="flex-1 overflow-auto p-6 lg:p-8">
