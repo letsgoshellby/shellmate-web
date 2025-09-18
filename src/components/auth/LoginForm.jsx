@@ -36,7 +36,7 @@ export function LoginForm() {
     setLoading(true);
     
     try {
-      const response = await login(data.email, data.password);
+      const response = await login(data.email, data.password, data.rememberMe);
       
       // 사용자 타입에 따라 리다이렉트
       if (response.user.user_type === 'expert') {

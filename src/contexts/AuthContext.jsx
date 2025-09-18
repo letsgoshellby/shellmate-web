@@ -80,9 +80,9 @@ export function AuthProvider({ children }) {
     }
   };
   
-  const login = async (email, password) => {
+  const login = async (email, password, rememberMe = false) => {
     try {
-      const response = await AuthAPI.login({ email, password });
+      const response = await AuthAPI.login({ email, password }, rememberMe);
       setUser(response.user);
       // 사용자 정보를 로컬스토리지에 저장
       localStorage.setItem('user_data', JSON.stringify(response.user));

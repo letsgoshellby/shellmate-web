@@ -12,7 +12,7 @@ const cookieOptions = {
 
 export class TokenStorage {
   // 토큰 저장
-  static setTokens(access, refresh) {
+  static setTokens(access, refresh, rememberMe = false) {
     
     // Access Token: 개발환경에서는 더 긴 시간 (2시간)
     const accessExpires = process.env.NODE_ENV === 'production' ? 1 / 24 : 1 / 12; // 프로덕션: 1시간, 개발: 2시간
@@ -21,10 +21,11 @@ export class TokenStorage {
       expires: accessExpires,
     });
     
-    // Refresh Token: 긴 만료 시간 (7일)
+    // Refresh Token: 로그인 상태 유지 여부에 따라 만료 시간 조정
+    const refreshExpires = rememberMe ? 30 : 7; // 체크: 30일, 미체크: 7일
     Cookies.set(REFRESH_TOKEN_KEY, refresh, {
       ...cookieOptions,
-      expires: 7,
+      expires: refreshExpires,
     });
     
   }

@@ -3,11 +3,11 @@ import { TokenStorage } from '@/lib/auth/tokenStorage';
 
 export class AuthAPI {
   // 이메일 로그인
-  static async login(credentials) {
+  static async login(credentials, rememberMe = false) {
     const response = await apiClient.post('/auth/login/', credentials);
     
     // 토큰 저장
-    TokenStorage.setTokens(response.data.access, response.data.refresh);
+    TokenStorage.setTokens(response.data.access, response.data.refresh, rememberMe);
     
     return response.data;
   }
