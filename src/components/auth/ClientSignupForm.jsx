@@ -118,7 +118,7 @@ export function ClientSignupForm() {
           onClick={() => router.push('/signup')}
           className="absolute left-4 top-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
-          <ArrowLeft className="h-5 w-5" />
+          <IoArrowBack className="h-5 w-5" />
         </button>
         <CardTitle className="text-2xl font-bold">학부모 회원가입</CardTitle>
         <CardDescription>
