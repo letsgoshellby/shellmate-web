@@ -12,19 +12,20 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { 
-  Menu,
-  X, 
-  Home, 
-  MessageSquare, 
-  FileText, 
-  Video, 
-  User, 
-  LogOut,
-  Settings,
-  BarChart3,
-  ChevronUp
-} from 'lucide-react';
+  IoMenu,
+  IoClose, 
+  IoHome, 
+  IoChatbubbleEllipses, 
+  IoDocumentText, 
+  IoVideocam, 
+  IoPerson, 
+  IoLogOut,
+  IoSettings,
+  IoBarChart,
+  IoChevronUp
+} from 'react-icons/io5';
 import { toast } from 'react-hot-toast';
+import Image from 'next/image';
 
 export function DashboardLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -44,25 +45,25 @@ export function DashboardLayout({ children }) {
   // 사용자 타입에 따른 네비게이션 메뉴
   const getNavigationItems = () => {
     const baseItems = [
-      { name: '대시보드', href: `/${user?.user_type}/dashboard`, icon: Home },
+      { name: '대시보드', href: `/${user?.user_type}/dashboard`, icon: IoHome },
     ];
     
     if (isClient) {
       return [
         ...baseItems,
-        { name: 'Q&A 커뮤니티', href: '/client/qna', icon: MessageSquare },
-        { name: '전문가 칼럼', href: '/client/columns', icon: FileText },
-        { name: '상담 예약', href: '/client/consultations', icon: Video },
+        { name: 'Q&A 커뮤니티', href: '/client/qna', icon: IoChatbubbleEllipses },
+        { name: '전문가 칼럼', href: '/client/columns', icon: IoDocumentText },
+        { name: '상담 예약', href: '/client/consultations', icon: IoVideocam },
       ];
     }
-    n 
+    
     if (isExpert) {
       return [
         ...baseItems,
-        { name: 'Q&A 답변', href: '/expert/qna', icon: MessageSquare },
-        { name: '칼럼 작성', href: '/expert/columns', icon: FileText },
-        { name: '상담 관리', href: '/expert/consultations', icon: Video },
-        { name: '통계', href: '/expert/analytics', icon: BarChart3 },
+        { name: 'Q&A 답변', href: '/expert/qna', icon: IoChatbubbleEllipses },
+        { name: '칼럼 작성', href: '/expert/columns', icon: IoDocumentText },
+        { name: '상담 관리', href: '/expert/consultations', icon: IoVideocam },
+        { name: '통계', href: '/expert/analytics', icon: IoBarChart },
       ];
     }
     
@@ -75,13 +76,20 @@ export function DashboardLayout({ children }) {
     <div className="h-screen flex bg-gray-100">
       {/* 사이드바 */}
       <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
-        <div className="flex items-center justify-between h-16 px-6 border-b">
+        <div className="flex items-center gap-2 h-16 px-6 border-b">
+          <Image
+            src="/shellmate_logo.png"
+            alt="셸메이트 로고"
+            width={128}
+            height={128}
+            className=' w-8'
+          />
           <h1 className="text-xl font-bold text-primary">셸메이트</h1>
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden"
           >
-            <X className="h-6 w-6" />
+            <IoClose className="h-6 w-6" />
           </button>
         </div>
         
@@ -116,7 +124,7 @@ export function DashboardLayout({ children }) {
                       {isExpert ? '전문가' : isClient ? '내담자' : '사용자'}
                     </p>
                   </div>
-                  <ChevronUp className="h-4 w-4 text-gray-400" />
+                  <IoChevronUp className="h-4 w-4 text-gray-400" />
                 </div>
               </Button>
             </DropdownMenuTrigger>
@@ -125,19 +133,19 @@ export function DashboardLayout({ children }) {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href={`/${user?.user_type}/profile`} className="flex items-center w-full">
-                  <User className="mr-2 h-4 w-4" />
+                  <IoPerson className="mr-2 h-4 w-4" />
                   프로필 설정
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={`/${user?.user_type}/settings`} className="flex items-center w-full">
-                  <Settings className="mr-2 h-4 w-4" />
+                  <IoSettings className="mr-2 h-4 w-4" />
                   계정 설정
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
-                <LogOut className="mr-2 h-4 w-4" />
+                <IoLogOut className="mr-2 h-4 w-4" />
                 로그아웃
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -153,7 +161,7 @@ export function DashboardLayout({ children }) {
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden"
           >
-            <Menu className="h-6 w-6" />
+            <IoMenu className="h-6 w-6" />
           </button>
           
           <div className="flex items-center space-x-4">
