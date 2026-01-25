@@ -29,7 +29,7 @@ export default function ClientProfilePage() {
       router.push('/login');
       return;
     }
-    
+
     if (!isClient) {
       router.push('/');
       return;
@@ -59,6 +59,37 @@ export default function ClientProfilePage() {
     } catch (error) {
       toast.error('프로필 정보를 불러오는데 실패했습니다');
     }
+  };
+
+  // 각 단계별 완료 여부 확인 (profileData.child 필드 사용)
+  const isStep1Completed = () => {
+    // 앱과 동일하게 birth_date, gender 확인
+    const child = profileData?.child;
+    return child &&
+           child.birth_date &&
+           child.gender;
+  };
+
+  const isStep2Completed = () => {
+    // official_diagnosis 필드 확인
+    const child = profileData?.child;
+    return child &&
+           child.official_diagnosis &&
+           child.official_diagnosis.length > 0;
+  };
+
+  const isStep3Completed = () => {
+    // main_interests 필드 확인 (interests가 profileData에 포함되어 있다면)
+    // 현재 API 응답에 interests가 없으므로 false 반환
+    // TODO: 백엔드에서 interests 필드 추가 필요
+    return false;
+  };
+
+  const getOverallStatus = () => {
+    if (isStep3Completed()) return 'completed';
+    if (isStep2Completed()) return 'step2_completed';
+    if (isStep1Completed()) return 'step1_completed';
+    return 'basic';
   };
 
   const handleEdit = () => {
@@ -103,15 +134,16 @@ export default function ClientProfilePage() {
     }
   };
 
-  const getSignupStatusBadge = (status) => {
+  const getSignupStatusBadge = () => {
+    const status = getOverallStatus();
     const statusMap = {
-      'basic': { label: '기본 정보', variant: 'secondary' },
+      'basic': { label: '미완료', variant: 'secondary' },
       'step1_completed': { label: '1단계 완료', variant: 'secondary' },
-      'step2_completed': { label: '필수 완료', variant: 'default' },
-      'step3_completed': { label: '3단계 완료', variant: 'default' },
+      'step2_completed': { label: '2단계 완료', variant: 'default' },
+      'step3_completed': { label: '완료', variant: 'default' },
       'completed': { label: '완료', variant: 'default' },
     };
-    
+
     const statusInfo = statusMap[status] || { label: status, variant: 'secondary' };
     return (
       <Badge variant={statusInfo.variant}>
@@ -278,44 +310,36 @@ export default function ClientProfilePage() {
                       <h3 className="font-medium">현재 상태</h3>
                       <p className="text-sm text-gray-600">회원가입 진행 상황</p>
                     </div>
-                    {getSignupStatusBadge(profileData.signup_status)}
+                    {getSignupStatusBadge()}
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="p-4 border rounded-lg">
-                      <h4 className="font-medium mb-2">1단계: 아이 기본정보</h4>
-                      <p className="text-sm text-gray-600">생년월일, 성별, 출생순서</p>
-                      <Badge variant="outline" className="mt-2">
-                        {['step1_completed', 'step2_completed', 'step3_completed', 'completed'].includes(profileData.signup_status) ? '완료' : '미완료'}
+                      <h4 className="font-medium mb-2">1단계: 아이 정보 (필수)</h4>
+                      <p className="text-sm text-gray-600">기본정보 및 세부정보</p>
+                      <Badge variant={isStep1Completed() ? 'default' : 'outline'} className="mt-2">
+                        {isStep1Completed() ? '완료' : '미완료'}
                       </Badge>
                     </div>
 
                     <div className="p-4 border rounded-lg">
-                      <h4 className="font-medium mb-2">2단계: 아이 세부정보</h4>
-                      <p className="text-sm text-gray-600">학습/감각/정서 문제</p>
-                      <Badge variant="outline" className="mt-2">
-                        {['step2_completed', 'step3_completed', 'completed'].includes(profileData.signup_status) ? '완료' : '미완료'}
-                      </Badge>
-                    </div>
-
-                    <div className="p-4 border rounded-lg">
-                      <h4 className="font-medium mb-2">3단계: 특이사항 (선택)</h4>
+                      <h4 className="font-medium mb-2">2단계: 추가 정보 (선택)</h4>
                       <p className="text-sm text-gray-600">진단여부, 치료현황</p>
-                      <Badge variant="outline" className="mt-2">
-                        {['step3_completed', 'completed'].includes(profileData.signup_status) ? '완료' : '선택사항'}
+                      <Badge variant={isStep2Completed() ? 'default' : 'outline'} className="mt-2">
+                        {isStep2Completed() ? '완료' : '선택사항'}
                       </Badge>
                     </div>
 
                     <div className="p-4 border rounded-lg">
-                      <h4 className="font-medium mb-2">4단계: 맞춤설정 (선택)</h4>
+                      <h4 className="font-medium mb-2">3단계: 관심사 (선택)</h4>
                       <p className="text-sm text-gray-600">관심분야 설정</p>
-                      <Badge variant="outline" className="mt-2">
-                        {profileData.signup_status === 'completed' ? '완료' : '선택사항'}
+                      <Badge variant={isStep3Completed() ? 'default' : 'outline'} className="mt-2">
+                        {isStep3Completed() ? '완료' : '선택사항'}
                       </Badge>
                     </div>
                   </div>
 
-                  {profileData.signup_status !== 'completed' && (
+                  {!isStep1Completed() && (
                     <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                       <h4 className="font-medium text-blue-900 mb-2">추가 정보 입력</h4>
                       <p className="text-sm text-blue-800 mb-3">
