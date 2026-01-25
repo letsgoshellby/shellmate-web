@@ -415,7 +415,7 @@ export default function QuestionDetailPage() {
             ))}
           </div>
 
-          {/* 답변 작성 */}
+          {/* 답변 작성
           <Card>
             <CardHeader>
               <CardTitle>답변 작성</CardTitle>
@@ -448,7 +448,7 @@ export default function QuestionDetailPage() {
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </DashboardLayout>
     </AuthGuard>
