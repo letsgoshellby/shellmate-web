@@ -3,20 +3,19 @@
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export function SignupProgress({ currentStep = 1, totalSteps = 4 }) {
+export function SignupProgress({ currentStep = 1, totalSteps = 3 }) {
   const steps = [
-    { number: 1, title: '아이 기본정보', required: true },
-    { number: 2, title: '아이 세부정보', required: true },
-    { number: 3, title: '특이사항', required: false },
-    { number: 4, title: '맞춤 설정', required: false },
+    { number: 1, title: '아이 정보', required: true },
+    { number: 2, title: '추가 정보', required: false },
+    { number: 3, title: '관심사', required: false },
   ];
 
   return (
-    <div className="w-full mb-8">
-      <div className="flex justify-between items-center">
+    <div className="w-full mb-16">
+      <div className="flex justify-between items-start">
         {steps.map((step, index) => (
           <div key={step.number} className="flex items-center flex-1">
-            <div className="relative flex flex-col items-center">
+            <div className="flex flex-col items-center w-full">
               <div
                 className={cn(
                   'w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors',
@@ -33,10 +32,10 @@ export function SignupProgress({ currentStep = 1, totalSteps = 4 }) {
                   <span className="text-sm font-semibold">{step.number}</span>
                 )}
               </div>
-              <div className="absolute -bottom-6 text-center whitespace-nowrap">
+              <div className="mt-2 text-center">
                 <p
                   className={cn(
-                    'text-xs font-medium',
+                    'text-xs font-medium leading-tight',
                     currentStep >= step.number ? 'text-gray-900' : 'text-gray-400'
                   )}
                 >
@@ -44,7 +43,7 @@ export function SignupProgress({ currentStep = 1, totalSteps = 4 }) {
                 </p>
                 <p
                   className={cn(
-                    'text-xs',
+                    'text-xs leading-tight',
                     step.required ? 'text-red-500' : 'text-gray-400'
                   )}
                 >
@@ -55,7 +54,7 @@ export function SignupProgress({ currentStep = 1, totalSteps = 4 }) {
             {index < steps.length - 1 && (
               <div
                 className={cn(
-                  'flex-1 h-0.5 mx-2 transition-colors',
+                  'flex-1 h-0.5 -mt-5 mx-1 transition-colors',
                   currentStep > step.number ? 'bg-primary' : 'bg-gray-300'
                 )}
               />

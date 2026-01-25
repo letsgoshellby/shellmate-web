@@ -24,6 +24,8 @@ const expertSignupSchema = z.object({
   phone_number: z.string().regex(/^01[0-9][0-9]{8}$/, '올바른 전화번호를 입력해주세요 (11자리 숫자)'),
   service_terms: z.boolean().refine(val => val === true, '전문가 이용약관에 동의해야 합니다'),
   privacy_policy: z.boolean().refine(val => val === true, '개인정보 처리방침에 동의해야 합니다'),
+  personal_info_and_third_party: z.boolean().refine(val => val === true, '개인정보 수집·이용 및 제3자 제공에 동의해야 합니다'),
+  marketing_consent: z.boolean().optional(),
 }).refine((data) => data.password === data.password2, {
   message: "비밀번호가 일치하지 않습니다",
   path: ["password2"],
@@ -46,16 +48,20 @@ export function ExpertSignupForm() {
     defaultValues: {
       service_terms: false,
       privacy_policy: false,
+      personal_info_and_third_party: false,
+      marketing_consent: false,
     }
   });
 
   const watchServiceTerms = watch('service_terms');
   const watchPrivacyPolicy = watch('privacy_policy');
+  const watchPersonalInfoAndThirdParty = watch('personal_info_and_third_party');
+  const watchMarketingConsent = watch('marketing_consent');
   
   const handleSignup = async (data) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/expert/signup/basic/`, {
+      const response = await fetch(`${API_BASE_URL}/auth/expert/signup/1/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,9 +72,24 @@ export function ExpertSignupForm() {
       const responseData = await response.json();
 
       if (!response.ok) {
+        // 이메일 중복 에러 처리
+        if (responseData.email) {
+          const emailError = Array.isArray(responseData.email) ? responseData.email[0] : responseData.email;
+          if (emailError.includes('이미') || emailError.includes('exist') || emailError.includes('already')) {
+            toast.error('이미 가입된 이메일입니다.');
+          } else {
+            toast.error(emailError);
+          }
+          return;
+        }
         if (responseData.errors) {
           Object.entries(responseData.errors).forEach(([key, value]) => {
-            toast.error(Array.isArray(value) ? value[0] : value);
+            const errorMsg = Array.isArray(value) ? value[0] : value;
+            if (key === 'email' && (errorMsg.includes('이미') || errorMsg.includes('exist') || errorMsg.includes('already'))) {
+              toast.error('이미 가입된 이메일입니다.');
+            } else {
+              toast.error(errorMsg);
+            }
           });
         } else {
           toast.error(responseData.detail || '회원가입 중 오류가 발생했습니다');
@@ -246,7 +267,32 @@ export function ExpertSignupForm() {
             {errors.privacy_policy && (
               <p className="text-sm text-red-500 ml-6">{errors.privacy_policy.message}</p>
             )}
-            
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="personal_info_and_third_party"
+                checked={watchPersonalInfoAndThirdParty}
+                onCheckedChange={(checked) => setValue('personal_info_and_third_party', checked)}
+              />
+              <Label htmlFor="personal_info_and_third_party" className="text-sm font-normal cursor-pointer">
+                (필수) 개인정보 수집·이용 및 제3자 제공에 동의합니다
+              </Label>
+            </div>
+            {errors.personal_info_and_third_party && (
+              <p className="text-sm text-red-500 ml-6">{errors.personal_info_and_third_party.message}</p>
+            )}
+
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="marketing_consent"
+                checked={watchMarketingConsent}
+                onCheckedChange={(checked) => setValue('marketing_consent', checked)}
+              />
+              <Label htmlFor="marketing_consent" className="text-sm font-normal cursor-pointer">
+                (선택) 마케팅 정보 수신에 동의합니다
+              </Label>
+            </div>
+
           </div>
           
           <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">

@@ -21,13 +21,12 @@ const clientSignupSchema = z.object({
   password: z.string().min(8, '비밀번호는 8자 이상이어야 합니다'),
   password2: z.string(),
   name: z.string().min(2, '이름은 2자 이상이어야 합니다'),
-  nickname: z.string().min(2, '닉네임은 2자 이상이어야 합니다'),
+  nickname: z.string().min(2, '닉네임은 2자 이상이어야 합니다').max(20, '닉네임은 20자 이하여야 합니다'),
   phone_number: z.string().regex(/^01[0-9][0-9]{8}$/, '올바른 전화번호를 입력해주세요 (11자리 숫자)'),
   service_terms: z.boolean().refine(val => val === true, '이용약관에 동의해야 합니다'),
   privacy_policy: z.boolean().refine(val => val === true, '개인정보 처리방침에 동의해야 합니다'),
-  legal_guardian_consent: z.boolean().refine(val => val === true, '법정대리인 동의가 필요합니다'),
-  third_party_info: z.boolean().refine(val => val === true, '제3자 정보 제공에 동의해야 합니다'),
-  sensitive_info: z.boolean().optional(),
+  detailed_privacy_consent: z.boolean().refine(val => val === true, '개인정보 수집·이용 동의가 필요합니다'),
+  sensitive_info_and_third_party: z.boolean().refine(val => val === true, '민감정보 및 제3자 제공에 동의해야 합니다'),
   marketing_consent: z.boolean().optional(),
 }).refine((data) => data.password === data.password2, {
   message: "비밀번호가 일치하지 않습니다",
@@ -51,24 +50,22 @@ export function ClientSignupForm() {
     defaultValues: {
       service_terms: false,
       privacy_policy: false,
-      legal_guardian_consent: false,
-      third_party_info: false,
-      sensitive_info: false,
+      detailed_privacy_consent: false,
+      sensitive_info_and_third_party: false,
       marketing_consent: false,
     }
   });
 
   const watchServiceTerms = watch('service_terms');
   const watchPrivacyPolicy = watch('privacy_policy');
-  const watchLegalGuardianConsent = watch('legal_guardian_consent');
-  const watchThirdPartyInfo = watch('third_party_info');
-  const watchSensitiveInfo = watch('sensitive_info');
+  const watchDetailedPrivacyConsent = watch('detailed_privacy_consent');
+  const watchSensitiveInfoAndThirdParty = watch('sensitive_info_and_third_party');
   const watchMarketingConsent = watch('marketing_consent');
   
   const handleSignup = async (data) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/client/signup/basic/`, {
+      const response = await fetch(`${API_BASE_URL}/auth/client/signup/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -273,44 +270,33 @@ export function ClientSignupForm() {
             )}
             
             <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="legal_guardian_consent"
-                checked={watchLegalGuardianConsent}
-                onCheckedChange={(checked) => setValue('legal_guardian_consent', checked)}
+              <Checkbox
+                id="detailed_privacy_consent"
+                checked={watchDetailedPrivacyConsent}
+                onCheckedChange={(checked) => setValue('detailed_privacy_consent', checked)}
               />
-              <Label htmlFor="legal_guardian_consent" className="text-sm font-normal cursor-pointer">
-                (필수) 법정대리인 동의합니다
+              <Label htmlFor="detailed_privacy_consent" className="text-sm font-normal cursor-pointer">
+                (필수) 개인정보 수집·이용에 동의합니다
               </Label>
             </div>
-            {errors.legal_guardian_consent && (
-              <p className="text-sm text-red-500 ml-6">{errors.legal_guardian_consent.message}</p>
+            {errors.detailed_privacy_consent && (
+              <p className="text-sm text-red-500 ml-6">{errors.detailed_privacy_consent.message}</p>
             )}
-            
+
             <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="third_party_info"
-                checked={watchThirdPartyInfo}
-                onCheckedChange={(checked) => setValue('third_party_info', checked)}
+              <Checkbox
+                id="sensitive_info_and_third_party"
+                checked={watchSensitiveInfoAndThirdParty}
+                onCheckedChange={(checked) => setValue('sensitive_info_and_third_party', checked)}
               />
-              <Label htmlFor="third_party_info" className="text-sm font-normal cursor-pointer">
-                (필수) 제3자 정보 제공에 동의합니다
+              <Label htmlFor="sensitive_info_and_third_party" className="text-sm font-normal cursor-pointer">
+                (필수) 민감정보 및 제3자 제공에 동의합니다
               </Label>
             </div>
-            {errors.third_party_info && (
-              <p className="text-sm text-red-500 ml-6">{errors.third_party_info.message}</p>
+            {errors.sensitive_info_and_third_party && (
+              <p className="text-sm text-red-500 ml-6">{errors.sensitive_info_and_third_party.message}</p>
             )}
-            
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="sensitive_info"
-                checked={watchSensitiveInfo}
-                onCheckedChange={(checked) => setValue('sensitive_info', checked)}
-              />
-              <Label htmlFor="sensitive_info" className="text-sm font-normal cursor-pointer">
-                (선택) 민감정보 처리에 동의합니다
-              </Label>
-            </div>
-            
+
             <div className="flex items-center space-x-2">
               <Checkbox 
                 id="marketing_consent"
