@@ -28,95 +28,121 @@ export default function ExpertQnAPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all'); // all, unanswered, answered
   
-  // 임시 데이터
-  const mockQuestions = [
-    {
-      id: 1,
-      title: '6세 아이가 집중을 잘 못해요',
-      content: '우리 아이가 한 가지 일에 집중하는 시간이 너무 짧습니다. 어떻게 도와줄 수 있을까요?',
-      category: 'attention',
-      author: {
-        name: '김○○',
-        type: 'client'
-      },
-      created_at: '2024-01-15T10:30:00Z',
-      answers_count: 2,
-      likes_count: 5,
-      is_resolved: false,
-      has_accepted_answer: false,
-      has_expert_answer: true,
-      urgency: 'medium',
-      tags: ['집중력', '주의력', '6세']
-    },
-    {
-      id: 2,
-      title: '언어 발달이 또래보다 늦는 것 같아요',
-      content: '5세인데 아직 문장을 완전히 만들어서 말하지 못합니다. 언어치료를 받아야 할까요?',
-      category: 'language',
-      author: {
-        name: '이○○',
-        type: 'client'
-      },
-      created_at: '2024-01-14T15:20:00Z',
-      answers_count: 0,
-      likes_count: 8,
-      is_resolved: false,
-      has_accepted_answer: false,
-      has_expert_answer: false,
-      urgency: 'high',
-      tags: ['언어발달', '언어치료', '5세']
-    },
-    {
-      id: 3,
-      title: '친구들과 어울리지 못하는 아이',
-      content: '어린이집에서 혼자 노는 경우가 많다고 합니다. 사회성 발달을 위해 어떤 도움을 줄 수 있을까요?',
-      category: 'social',
-      author: {
-        name: '박○○',
-        type: 'client'
-      },
-      created_at: '2024-01-13T09:15:00Z',
-      answers_count: 1,
-      likes_count: 3,
-      is_resolved: false,
-      has_accepted_answer: false,
-      has_expert_answer: false,
-      urgency: 'medium',
-      tags: ['사회성', '친구관계', '어린이집']
-    },
-    {
-      id: 4,
-      title: '감정 조절이 어려운 7세 아이',
-      content: '작은 일에도 크게 화를 내고 진정하는데 시간이 오래 걸립니다.',
-      category: 'emotion',
-      author: {
-        name: '최○○',
-        type: 'client'
-      },
-      created_at: '2024-01-12T16:45:00Z',
-      answers_count: 0,
-      likes_count: 12,
-      is_resolved: false,
-      has_accepted_answer: false,
-      has_expert_answer: false,
-      urgency: 'high',
-      tags: ['감정조절', '화', '7세']
-    }
-  ];
+  // 임시 데이터 (주석 처리)
+  // const mockQuestions = [
+  //   {
+  //     id: 1,
+  //     title: '6세 아이가 집중을 잘 못해요',
+  //     content: '우리 아이가 한 가지 일에 집중하는 시간이 너무 짧습니다. 어떻게 도와줄 수 있을까요?',
+  //     category: 'attention',
+  //     author: {
+  //       name: '김○○',
+  //       type: 'client'
+  //     },
+  //     created_at: '2024-01-15T10:30:00Z',
+  //     answers_count: 2,
+  //     likes_count: 5,
+  //     is_resolved: false,
+  //     has_accepted_answer: false,
+  //     has_expert_answer: true,
+  //     urgency: 'medium',
+  //     tags: ['집중력', '주의력', '6세']
+  //   },
+  //   {
+  //     id: 2,
+  //     title: '언어 발달이 또래보다 늦는 것 같아요',
+  //     content: '5세인데 아직 문장을 완전히 만들어서 말하지 못합니다. 언어치료를 받아야 할까요?',
+  //     category: 'language',
+  //     author: {
+  //       name: '이○○',
+  //       type: 'client'
+  //     },
+  //     created_at: '2024-01-14T15:20:00Z',
+  //     answers_count: 0,
+  //     likes_count: 8,
+  //     is_resolved: false,
+  //     has_accepted_answer: false,
+  //     has_expert_answer: false,
+  //     urgency: 'high',
+  //     tags: ['언어발달', '언어치료', '5세']
+  //   },
+  //   {
+  //     id: 3,
+  //     title: '친구들과 어울리지 못하는 아이',
+  //     content: '어린이집에서 혼자 노는 경우가 많다고 합니다. 사회성 발달을 위해 어떤 도움을 줄 수 있을까요?',
+  //     category: 'social',
+  //     author: {
+  //       name: '박○○',
+  //       type: 'client'
+  //     },
+  //     created_at: '2024-01-13T09:15:00Z',
+  //     answers_count: 1,
+  //     likes_count: 3,
+  //     is_resolved: false,
+  //     has_accepted_answer: false,
+  //     has_expert_answer: false,
+  //     urgency: 'medium',
+  //     tags: ['사회성', '친구관계', '어린이집']
+  //   },
+  //   {
+  //     id: 4,
+  //     title: '감정 조절이 어려운 7세 아이',
+  //     content: '작은 일에도 크게 화를 내고 진정하는데 시간이 오래 걸립니다.',
+  //     category: 'emotion',
+  //     author: {
+  //       name: '최○○',
+  //       type: 'client'
+  //     },
+  //     created_at: '2024-01-12T16:45:00Z',
+  //     answers_count: 0,
+  //     likes_count: 12,
+  //     is_resolved: false,
+  //     has_accepted_answer: false,
+  //     has_expert_answer: false,
+  //     urgency: 'high',
+  //     tags: ['감정조절', '화', '7세']
+  //   }
+  // ];
 
   useEffect(() => {
     loadQuestions();
-  }, []);
+  }, [selectedCategory, statusFilter]);
+
+  // 검색어 입력 시 디바운스 적용
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      loadQuestions();
+    }, 500);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchTerm]);
+
+  // Enter 키로 즉시 검색
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      loadQuestions();
+    }
+  };
 
   const loadQuestions = async () => {
     try {
-      // 실제 API 호출 시
-      // const data = await QnAAPI.getQuestions({ role: 'expert' });
-      // setQuestions(data.results);
-      
+      // 실제 API 호출 (Expert도 같은 API 사용)
+      const params = {};
+      if (selectedCategory !== 'all') {
+        params.category = selectedCategory;
+      }
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+
+      const data = await QnAAPI.getQuestions(params);
+      setQuestions(data.results || data);
+
       // 임시로 목 데이터 사용
-      setQuestions(mockQuestions);
+      // setQuestions(mockQuestions);
     } catch (error) {
+      console.error('질문 목록 로딩 실패:', error);
       toast.error('질문 목록을 불러오는데 실패했습니다');
     } finally {
       setLoading(false);
@@ -276,6 +302,7 @@ export default function ExpertQnAPage() {
                       placeholder="질문 검색..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
+                      onKeyDown={handleSearchKeyDown}
                       className="pl-10"
                     />
                   </div>
@@ -357,19 +384,21 @@ export default function ExpertQnAPage() {
                           {question.content}
                         </p>
                         
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {question.tags.map((tag, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
+                        {question.tags && question.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {question.tags.map((tag, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                         
                         <div className="flex items-center justify-between">
                           <div className="flex items-center text-sm text-gray-500 space-x-4">
                             <div className="flex items-center">
                               <User className="mr-1 h-4 w-4" />
-                              {question.author.name}
+                              {question.author?.name || question.author_nickname || '익명'}
                             </div>
                             <div className="flex items-center">
                               <Clock className="mr-1 h-4 w-4" />

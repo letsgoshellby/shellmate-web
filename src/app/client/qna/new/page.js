@@ -76,21 +76,24 @@ export default function NewQuestionPage() {
 
   const onSubmit = async (data) => {
     setLoading(true);
-    
+
     try {
       const questionData = {
-        ...data,
-        tags: tags,
+        title: data.title,
+        content: data.content,
+        category: data.category,
+        is_anonymous: false, // 익명 여부 (추후 UI 추가 가능)
       };
-      
+
       // 실제 API 호출
-      // const result = await QnAAPI.createQuestion(questionData);
-      
-      // 임시로 성공 처리
+      const result = await QnAAPI.createQuestion(questionData);
+
       toast.success('질문이 성공적으로 등록되었습니다');
-      router.push('/client/qna');
+      router.push(`/client/qna/${result.id}`);
     } catch (error) {
-      toast.error('질문 등록에 실패했습니다');
+      console.error('질문 등록 실패:', error);
+      const errorMessage = error.response?.data?.detail || '질문 등록에 실패했습니다';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

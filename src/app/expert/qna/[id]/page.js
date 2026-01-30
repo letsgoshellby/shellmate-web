@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { QnAAPI } from '@/lib/api/qna';
+import { QnAAPI, QnAExpertAPI } from '@/lib/api/qna';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   ArrowLeft, 
@@ -36,77 +36,77 @@ export default function ExpertQuestionDetailPage() {
   const [newAnswer, setNewAnswer] = useState('');
   const [submittingAnswer, setSubmittingAnswer] = useState(false);
 
-  // 임시 데이터 (실제로는 API에서 가져올 것)
-  const mockQuestion = {
-    id: 1,
-    title: '6세 아이가 집중을 잘 못해요',
-    content: `우리 아이가 한 가지 일에 집중하는 시간이 너무 짧습니다. 
-    
-    상황:
-    - 나이: 6세 남아
-    - 증상: 숙제나 놀이를 시작해도 5분도 안 되어서 다른 일을 하려고 함
-    - 시작 시기: 약 6개월 전부터
-    - 어린이집에서도 비슷한 이야기를 들음
-    
-    지금까지 시도해본 것:
-    - 조용한 환경 만들어주기
-    - 짧은 시간으로 나누어서 활동하기
-    - 보상 시스템 도입
-    
-    어떻게 도와줄 수 있을까요? 전문적인 도움이 필요한 상황인지도 궁금합니다.`,
-    category: 'attention',
-    author: {
-      id: 1,
-      name: '김○○',
-      type: 'client',
-      profile_image: null,
-      children_info: {
-        age: 6,
-        gender: 'M',
-        concerns: ['집중력', '주의력']
-      }
-    },
-    created_at: '2024-01-15T10:30:00Z',
-    updated_at: '2024-01-15T10:30:00Z',
-    likes_count: 5,
-    is_liked: false,
-    is_resolved: false,
-    has_accepted_answer: false,
-    urgency: 'medium',
-    tags: ['집중력', '주의력', '6세', '남아']
-  };
+  // 임시 데이터 (주석 처리)
+  // const mockQuestion = {
+  //   id: 1,
+  //   title: '6세 아이가 집중을 잘 못해요',
+  //   content: `우리 아이가 한 가지 일에 집중하는 시간이 너무 짧습니다.
+  //
+  //   상황:
+  //   - 나이: 6세 남아
+  //   - 증상: 숙제나 놀이를 시작해도 5분도 안 되어서 다른 일을 하려고 함
+  //   - 시작 시기: 약 6개월 전부터
+  //   - 어린이집에서도 비슷한 이야기를 들음
+  //
+  //   지금까지 시도해본 것:
+  //   - 조용한 환경 만들어주기
+  //   - 짧은 시간으로 나누어서 활동하기
+  //   - 보상 시스템 도입
+  //
+  //   어떻게 도와줄 수 있을까요? 전문적인 도움이 필요한 상황인지도 궁금합니다.`,
+  //   category: 'attention',
+  //   author: {
+  //     id: 1,
+  //     name: '김○○',
+  //     type: 'client',
+  //     profile_image: null,
+  //     children_info: {
+  //       age: 6,
+  //       gender: 'M',
+  //       concerns: ['집중력', '주의력']
+  //     }
+  //   },
+  //   created_at: '2024-01-15T10:30:00Z',
+  //   updated_at: '2024-01-15T10:30:00Z',
+  //   likes_count: 5,
+  //   is_liked: false,
+  //   is_resolved: false,
+  //   has_accepted_answer: false,
+  //   urgency: 'medium',
+  //   tags: ['집중력', '주의력', '6세', '남아']
+  // };
 
-  const mockAnswers = [
-    {
-      id: 2,
-      content: `집중력 문제로 고민이 많으시겠어요. 
-
-저희 아이도 비슷한 시기에 같은 문제가 있었는데, 몇 가지 도움이 된 것들을 공유해드릴게요:
-
-**실제로 효과가 있었던 것들:**
-- 타이머 사용: 5분씩 시작해서 점차 늘려가기
-- 집중 후 충분한 자유시간 주기
-- 아이와 함께 집중시간 목표 정하기
-
-**주의할 점:**
-- 너무 조용한 환경보다는 적당한 백색소음
-- 완벽을 요구하지 말고 작은 발전도 칭찬
-
-지금 6세면 아직 충분히 개선 가능한 시기입니다. 너무 걱정하지 마세요!`,
-      author: {
-        id: 3,
-        name: '박○○',
-        type: 'client',
-        title: null,
-        profile_image: null
-      },
-      created_at: '2024-01-15T16:45:00Z',
-      likes_count: 3,
-      is_liked: false,
-      is_accepted: false,
-      is_expert: false
-    }
-  ];
+  // const mockAnswers = [
+  //   {
+  //     id: 2,
+  //     content: `집중력 문제로 고민이 많으시겠어요.
+  //
+  // 저희 아이도 비슷한 시기에 같은 문제가 있었는데, 몇 가지 도움이 된 것들을 공유해드릴게요:
+  //
+  // **실제로 효과가 있었던 것들:**
+  // - 타이머 사용: 5분씩 시작해서 점차 늘려가기
+  // - 집중 후 충분한 자유시간 주기
+  // - 아이와 함께 집중시간 목표 정하기
+  //
+  // **주의할 점:**
+  // - 너무 조용한 환경보다는 적당한 백색소음
+  // - 완벽을 요구하지 말고 작은 발전도 칭찬
+  //
+  // 지금 6세면 아직 충분히 개선 가능한 시기입니다. 너무 걱정하지 마세요!`,
+  //     author: {
+  //       id: 3,
+  //       name: '박○○',
+  //       type: 'client',
+  //       title: null,
+  //       profile_image: null
+  //     },
+  //     created_at: '2024-01-15T16:45:00Z',
+  //     likes_count: 3,
+  //     is_liked: false,
+  //     is_accepted: false,
+  //     is_expert: false
+  //   }
+  // ];
 
   useEffect(() => {
     loadQuestionDetail();
@@ -114,15 +114,16 @@ export default function ExpertQuestionDetailPage() {
 
   const loadQuestionDetail = async () => {
     try {
-      // 실제 API 호출 시
-      // const questionData = await QnAAPI.getQuestion(params.id);
-      // setQuestion(questionData);
-      // setAnswers(questionData.answers || []);
-      
+      // 실제 API 호출
+      const questionData = await QnAAPI.getQuestion(params.id);
+      setQuestion(questionData);
+      setAnswers(questionData.answers || []);
+
       // 임시로 목 데이터 사용
-      setQuestion(mockQuestion);
-      setAnswers(mockAnswers);
+      // setQuestion(mockQuestion);
+      // setAnswers(mockAnswers);
     } catch (error) {
+      console.error('질문 상세 로딩 실패:', error);
       toast.error('질문을 불러오는데 실패했습니다');
       router.back();
     } finally {
@@ -138,30 +139,17 @@ export default function ExpertQuestionDetailPage() {
 
     setSubmittingAnswer(true);
     try {
-      // const answer = await QnAAPI.createAnswer(question.id, { content: newAnswer });
-      
-      // 임시로 새 답변 추가
-      const newAnswerObj = {
-        id: Date.now(),
-        content: newAnswer,
-        author: {
-          id: user.id,
-          name: user.name,
-          type: user.user_type,
-          title: '전문가'
-        },
-        created_at: new Date().toISOString(),
-        likes_count: 0,
-        is_liked: false,
-        is_accepted: false,
-        is_expert: true
-      };
-      
-      setAnswers([...answers, newAnswerObj]);
+      // 실제 API 호출 - Expert 답변 작성
+      const result = await QnAExpertAPI.createAnswer(question.id, { content: newAnswer });
+
+      // 답변 목록에 추가
+      setAnswers([...answers, result]);
       setNewAnswer('');
       toast.success('전문가 답변이 등록되었습니다');
     } catch (error) {
-      toast.error('답변 등록에 실패했습니다');
+      console.error('답변 등록 실패:', error);
+      const errorMessage = error.response?.data?.detail || '답변 등록에 실패했습니다';
+      toast.error(errorMessage);
     } finally {
       setSubmittingAnswer(false);
     }

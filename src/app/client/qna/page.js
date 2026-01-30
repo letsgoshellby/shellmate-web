@@ -29,70 +29,103 @@ export default function ClientQnAPage() {
   const [sortBy, setSortBy] = useState('recent');
   
   // 임시 데이터 (실제로는 API에서 가져올 데이터)
-  const mockQuestions = [
-    {
-      id: 1,
-      title: '6세 아이가 집중을 잘 못해요',
-      content: '우리 아이가 한 가지 일에 집중하는 시간이 너무 짧습니다. 어떻게 도와줄 수 있을까요?',
-      category: 'attention',
-      author: {
-        name: '김○○',
-        type: 'client'
-      },
-      created_at: '2024-01-15T10:30:00Z',
-      answers_count: 3,
-      likes_count: 5,
-      is_resolved: false,
-      has_accepted_answer: false,
-      tags: ['집중력', '주의력', '6세']
-    },
-    {
-      id: 2,
-      title: '언어 발달이 또래보다 늦는 것 같아요',
-      content: '5세인데 아직 문장을 완전히 만들어서 말하지 못합니다. 언어치료를 받아야 할까요?',
-      category: 'language',
-      author: {
-        name: '이○○',
-        type: 'client'
-      },
-      created_at: '2024-01-14T15:20:00Z',
-      answers_count: 2,
-      likes_count: 8,
-      is_resolved: true,
-      has_accepted_answer: true,
-      tags: ['언어발달', '언어치료', '5세']
-    },
-    {
-      id: 3,
-      title: '친구들과 어울리지 못하는 아이',
-      content: '어린이집에서 혼자 노는 경우가 많다고 합니다. 사회성 발달을 위해 어떤 도움을 줄 수 있을까요?',
-      category: 'social',
-      author: {
-        name: '박○○',
-        type: 'client'
-      },
-      created_at: '2024-01-13T09:15:00Z',
-      answers_count: 1,
-      likes_count: 3,
-      is_resolved: false,
-      has_accepted_answer: false,
-      tags: ['사회성', '친구관계', '어린이집']
-    }
-  ];
+  // const mockQuestions = [
+  //   {
+  //     id: 1,
+  //     title: '6세 아이가 집중을 잘 못해요',
+  //     content: '우리 아이가 한 가지 일에 집중하는 시간이 너무 짧습니다. 어떻게 도와줄 수 있을까요?',
+  //     category: 'attention',
+  //     author: {
+  //       name: '김○○',
+  //       type: 'client'
+  //     },
+  //     created_at: '2024-01-15T10:30:00Z',
+  //     answers_count: 3,
+  //     likes_count: 5,
+  //     is_resolved: false,
+  //     has_accepted_answer: false,
+  //     tags: ['집중력', '주의력', '6세']
+  //   },
+  //   {
+  //     id: 2,
+  //     title: '언어 발달이 또래보다 늦는 것 같아요',
+  //     content: '5세인데 아직 문장을 완전히 만들어서 말하지 못합니다. 언어치료를 받아야 할까요?',
+  //     category: 'language',
+  //     author: {
+  //       name: '이○○',
+  //       type: 'client'
+  //     },
+  //     created_at: '2024-01-14T15:20:00Z',
+  //     answers_count: 2,
+  //     likes_count: 8,
+  //     is_resolved: true,
+  //     has_accepted_answer: true,
+  //     tags: ['언어발달', '언어치료', '5세']
+  //   },
+  //   {
+  //     id: 3,
+  //     title: '친구들과 어울리지 못하는 아이',
+  //     content: '어린이집에서 혼자 노는 경우가 많다고 합니다. 사회성 발달을 위해 어떤 도움을 줄 수 있을까요?',
+  //     category: 'social',
+  //     author: {
+  //       name: '박○○',
+  //       type: 'client'
+  //     },
+  //     created_at: '2024-01-13T09:15:00Z',
+  //     answers_count: 1,
+  //     likes_count: 3,
+  //     is_resolved: false,
+  //     has_accepted_answer: false,
+  //     tags: ['사회성', '친구관계', '어린이집']
+  //   }
+  // ];
 
   useEffect(() => {
     loadQuestions();
-  }, []);
+  }, [selectedCategory, sortBy]);
+
+  // 검색어 입력 시 디바운스 적용
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      loadQuestions();
+    }, 500);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchTerm]);
+
+  // Enter 키로 즉시 검색
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      loadQuestions();
+    }
+  };
 
   const loadQuestions = async () => {
     try {
-      // 실제 API 호출 시
-      // const data = await QnAAPI.getQuestions();
-      // setQuestions(data.results);
-      
+      // 실제 API 호출
+      const params = {};
+      if (selectedCategory !== 'all') {
+        params.category = selectedCategory;
+      }
+      if (searchTerm) {
+        params.search = searchTerm;
+      }
+      if (sortBy === 'recent') {
+        params.ordering = '-created_at';
+      } else if (sortBy === 'popular') {
+        params.ordering = '-sympathy_count';
+      } else if (sortBy === 'answered') {
+        params.ordering = '-answers_count';
+      }
+
+      const data = await QnAAPI.getQuestions(params);
+      setQuestions(data.results || data);
+
       // 임시로 목 데이터 사용
-      setQuestions(mockQuestions);
+      // setQuestions(mockQuestions);
     } catch (error) {
+      console.error('질문 목록 로딩 실패:', error);
       toast.error('질문 목록을 불러오는데 실패했습니다');
     } finally {
       setLoading(false);
@@ -122,12 +155,14 @@ export default function ClientQnAPage() {
     return categories[category] || category;
   };
 
-  const filteredQuestions = questions.filter(question => {
-    const matchesSearch = question.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         question.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || question.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // API에서 필터링된 결과를 가져오므로 클라이언트 필터링 불필요
+  // const filteredQuestions = questions.filter(question => {
+  //   const matchesSearch = question.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //                        question.content.toLowerCase().includes(searchTerm.toLowerCase());
+  //   const matchesCategory = selectedCategory === 'all' || question.category === selectedCategory;
+  //   return matchesSearch && matchesCategory;
+  // });
+  const filteredQuestions = questions;
 
   if (loading) {
     return (
@@ -170,6 +205,7 @@ export default function ClientQnAPage() {
                       placeholder="질문 검색..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
+                      onKeyDown={handleSearchKeyDown}
                       className="pl-10"
                     />
                   </div>
@@ -246,18 +282,20 @@ export default function ClientQnAPage() {
                           {question.content}
                         </p>
                         
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {question.tags.map((tag, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
+                        {question.tags && question.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {question.tags.map((tag, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                         
                         <div className="flex items-center text-sm text-gray-500 space-x-4">
                           <div className="flex items-center">
                             <User className="mr-1 h-4 w-4" />
-                            {question.author.name}
+                            {question.author?.name || question.author_nickname || '익명'}
                           </div>
                           <div className="flex items-center">
                             <Clock className="mr-1 h-4 w-4" />
@@ -269,7 +307,7 @@ export default function ClientQnAPage() {
                           </div>
                           <div className="flex items-center">
                             <Heart className="mr-1 h-4 w-4" />
-                            {question.likes_count}
+                            {question.sympathy_count || 0}
                           </div>
                         </div>
                       </div>
