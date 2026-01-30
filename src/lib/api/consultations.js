@@ -27,7 +27,7 @@ export class ConsultationsAPI {
   
   // 상담 취소
   static async cancelConsultation(id, reason) {
-    const response = await apiClient.post(`/consultations/${id}/cancel/`, { reason });
+    const response = await apiClient.post(`/consultation/counseling-requests/${id}/cancel/`, { reason });
     return response.data;
   }
   
@@ -39,7 +39,7 @@ export class ConsultationsAPI {
   
   // 상담 거절 (전문가용)
   static async rejectConsultation(id, reason) {
-    const response = await apiClient.post(`/consultations/${id}/reject/`, { reason });
+    const response = await apiClient.post(`/consultations/${id}/cancel/`, { reason });
     return response.data;
   }
   
@@ -120,7 +120,7 @@ export class ConsultationsAPI {
   
   // 내 상담 목록 (역할에 따라)
   static async getMyConsultations(params = {}) {
-    const response = await apiClient.get('/consultations/my/', { params });
+    const response = await apiClient.get('/consultation/counseling-requests/', { params });
     return response.data;
   }
   

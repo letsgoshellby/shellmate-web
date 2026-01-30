@@ -21,7 +21,7 @@ export const consultationAPI = {
 
   // 상담 취소
   async cancelConsultation(id) {
-    const response = await apiClient.patch(`/consultations/${id}/cancel/`);
+    const response = await apiClient.post(`/consultations/${id}/cancel/`);
     return response.data;
   },
 
