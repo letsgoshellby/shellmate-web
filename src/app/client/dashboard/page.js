@@ -1,13 +1,46 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, FileText, Video, Calendar, TrendingUp } from 'lucide-react';
+import { MessageSquare, FileText, Video, Calendar, TrendingUp, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { QnAAPI } from '@/lib/api/qna';
 
 export default function ClientDashboard() {
+  const [recentQuestions, setRecentQuestions] = useState([]);
+  const [loadingQuestions, setLoadingQuestions] = useState(true);
+
+  useEffect(() => {
+    loadRecentQuestions();
+  }, []);
+
+  const loadRecentQuestions = async () => {
+    try {
+      const data = await QnAAPI.getQuestions({ ordering: '-created_at' });
+      const questions = data.results || data;
+      setRecentQuestions(questions.slice(0, 3)); // 최근 3개만
+    } catch (error) {
+      console.error('최근 Q&A 로딩 실패:', error);
+    } finally {
+      setLoadingQuestions(false);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) return '어제';
+    if (diffDays < 7) return `${diffDays}일 전`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)}주 전`;
+    return date.toLocaleDateString('ko-KR');
+  };
+
   return (
     <AuthGuard requiredRole="client">
       <DashboardLayout>
@@ -90,20 +123,33 @@ export default function ClientDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="text-sm font-medium">아이가 집중을 잘 못해요</h4>
-                      <p className="text-xs text-muted-foreground">2일 전</p>
+                  {loadingQuestions ? (
+                    <div className="flex justify-center py-4">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
-                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">답변완료</span>
-                  </div>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="text-sm font-medium">언어 발달이 늦는 것 같아요</h4>
-                      <p className="text-xs text-muted-foreground">1주 전</p>
-                    </div>
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">해결됨</span>
-                  </div>
+                  ) : recentQuestions.length > 0 ? (
+                    recentQuestions.map((question) => (
+                      <Link key={question.id} href={`/client/qna/${question.id}`}>
+                        <div className="flex justify-between items-start hover:bg-gray-50 p-2 rounded -m-2">
+                          <div>
+                            <h4 className="text-sm font-medium line-clamp-1">{question.title}</h4>
+                            <p className="text-xs text-muted-foreground">{formatDate(question.created_at)}</p>
+                          </div>
+                          <span className={`text-xs px-2 py-1 rounded whitespace-nowrap ml-2 ${
+                            question.answer_count > 0
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-gray-100 text-gray-600'
+                          }`}>
+                            {question.answer_count > 0 ? `답변 ${question.answer_count}` : '답변대기'}
+                          </span>
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      아직 작성한 질문이 없습니다
+                    </p>
+                  )}
                 </div>
                 <Button variant="outline" size="sm" className="w-full mt-4">
                   <Link href="/client/qna">모든 질문 보기</Link>

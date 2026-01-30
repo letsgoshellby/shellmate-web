@@ -11,18 +11,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { 
+import {
   IoMenu,
-  IoClose, 
-  IoHome, 
-  IoChatbubbleEllipses, 
-  IoDocumentText, 
-  IoVideocam, 
-  IoPerson, 
+  IoClose,
+  IoHome,
+  IoChatbubbleEllipses,
+  IoChatbubbles,
+  IoDocumentText,
+  IoVideocam,
+  IoPerson,
   IoLogOut,
   IoSettings,
   IoBarChart,
-  IoChevronUp
+  IoChevronUp,
+  IoAdd
 } from 'react-icons/io5';
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
@@ -54,6 +56,8 @@ export function DashboardLayout({ children }) {
         { name: 'Q&A 커뮤니티', href: '/client/qna', icon: IoChatbubbleEllipses },
         { name: '전문가 칼럼', href: '/client/columns', icon: IoDocumentText },
         { name: '상담 예약', href: '/client/consultations', icon: IoVideocam },
+        { name: '채팅', href: '/client/chat', icon: IoChatbubbles },
+        { name: '에그 충전', href: '/client/wallet/charge', icon: IoAdd },
       ];
     }
     
@@ -63,6 +67,7 @@ export function DashboardLayout({ children }) {
         { name: 'Q&A 답변', href: '/expert/qna', icon: IoChatbubbleEllipses },
         { name: '칼럼 작성', href: '/expert/columns', icon: IoDocumentText },
         { name: '상담 관리', href: '/expert/consultations', icon: IoVideocam },
+        { name: '채팅', href: '/expert/chat', icon: IoChatbubbles },
         { name: '통계', href: '/expert/analytics', icon: IoBarChart },
       ];
     }
