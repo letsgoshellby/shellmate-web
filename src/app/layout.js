@@ -1,6 +1,7 @@
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "react-hot-toast";
+import Script from "next/script";
 
 export const metadata = {
   title: "셸메이트 - 느린학습자 상담 플랫폼",
@@ -12,9 +13,9 @@ export default function RootLayout({ children }) {
     <html lang="ko">
       <head>
         <link rel="stylesheet" as="style" crossOrigin="" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
-        {/* PortOne V2 결제 SDK */}
-        <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
       </head>
+      {/* PortOne V2 결제 SDK */}
+      <Script src="https://cdn.portone.io/v2/browser-sdk.js" strategy="beforeInteractive" />
       <body className="antialiased font-sans">
         <AuthProvider>
           {children}
