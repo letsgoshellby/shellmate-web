@@ -70,11 +70,51 @@ export class ConsultationsAPI {
     return response.data;
   }
   
-  // 전문가 가능한 시간 조회
+  // 전문가 가능한 시간 조회 (기존 - deprecated)
   static async getExpertAvailability(expertId, date) {
     const response = await apiClient.get(`/experts/${expertId}/availability/`, {
       params: { date }
     });
+    return response.data;
+  }
+
+  /**
+   * 전문가 가격 설정 조회
+   * GET /consultation/experts/{expert_id}/pricing/
+   * @param {number} expertId - 전문가 프로필 ID
+   * @returns {Array} 가격 설정 목록
+   */
+  static async getExpertPricing(expertId) {
+    const response = await apiClient.get(`/consultation/experts/${expertId}/pricing/`);
+    return response.data;
+  }
+
+  /**
+   * 전문가 가능 시간 조회 (내담자용)
+   * GET /consultation/experts/{expert_id}/available-slots/
+   * @param {number} expertId - 전문가 ID
+   * @param {string} date - 조회할 날짜 (YYYY-MM-DD)
+   * @returns {Object} { available_time_ranges: Array }
+   */
+  static async getExpertAvailableSlots(expertId, date) {
+    const response = await apiClient.get(`/consultation/experts/${expertId}/available-slots/`, {
+      params: { date }
+    });
+    return response.data;
+  }
+
+  /**
+   * 상담 신청 생성
+   * POST /consultation/counseling-requests/create/
+   * @param {Object} data - 상담 신청 데이터
+   * @param {number} data.expert_id - 전문가 ID
+   * @param {string} data.session_type - 세션 타입 (SINGLE, PACKAGE 등)
+   * @param {string} data.client_notes - 내담자 메모
+   * @param {Object} data.first_session_schedule - 첫 세션 일정
+   * @returns {Object} 생성된 상담 신청 정보
+   */
+  static async createCounselingRequest(data) {
+    const response = await apiClient.post('/consultation/counseling-requests/create/', data);
     return response.data;
   }
   
