@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { set, z } from 'zod';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -130,16 +130,6 @@ export default function BookConsultationPage() {
     }
   ];
 
-  // 임시 가능한 시간 슬롯
-  const mockTimeSlots = [
-    { slot_number: 1, start_time: '09:00', end_time: '10:00' },
-    { slot_number: 2, start_time: '10:00', end_time: '11:00' },
-    { slot_number: 3, start_time: '11:00', end_time: '12:00' },
-    { slot_number: 4, start_time: '14:00', end_time: '15:00' },
-    { slot_number: 5, start_time: '15:00', end_time: '16:00' },
-    { slot_number: 6, start_time: '16:00', end_time: '17:00' },
-    { slot_number: 7, start_time: '17:00', end_time: '18:00' },
-  ];
 
   useEffect(() => {
     loadExperts();
@@ -213,19 +203,11 @@ export default function BookConsultationPage() {
       const data = await ConsultationsAPI.getExpertAvailableSlots(expertId, date);
       const slots = data.available_time_ranges || [];
 
-      if (slots.length > 0) {
-        setAvailableSlots(slots);
-      } else {
-        // API 응답이 비어있으면 목 데이터 사용
-        setAvailableSlots(mockTimeSlots);
-      }
+      setAvailableSlots(slots);
 
-      // 임시로 목 데이터 사용
-      // setAvailableSlots(mockTimeSlots);
     } catch (error) {
       console.error('가능 시간 로딩 실패:', error);
-      // API 실패 시 목 데이터 사용
-      setAvailableSlots(mockTimeSlots);
+      setAvailableSlots([]);
     } finally {
       setSlotsLoading(false);
     }

@@ -90,21 +90,23 @@ export default function ClientChatPage() {
                       <div className="flex items-center gap-4">
                         {/* 프로필 이미지 */}
                         <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-medium shrink-0">
-                          {room.partner?.charAt(0) || <User className="h-6 w-6" />}
+                          {room.partner?.name 
+                          ? room.partner.name.charAt(0) 
+                          : <User className="h-6 w-6" />}
                         </div>
 
                         {/* 채팅 정보 */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
                             <h3 className="font-medium text-gray-900 truncate">
-                              {room.partner || '전문가'}
+                              {room.partner?.name || '전문가'}
                             </h3>
                             <span className="text-xs text-gray-500 shrink-0 ml-2">
                               {formatDate(room.created_at)}
                             </span>
                           </div>
                           <p className="text-sm text-gray-600 truncate">
-                            {room.last_message || '대화를 시작해보세요'}
+                            {room.last_message?.content || '대화를 시작해보세요'}
                           </p>
                         </div>
 
