@@ -12,6 +12,8 @@ export default function RootLayout({ children }) {
     <html lang="ko">
       <head>
         <link rel="stylesheet" as="style" crossOrigin="" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+        {/* PortOne V2 결제 SDK */}
+        <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
       </head>
       <body className="antialiased font-sans">
         <AuthProvider>
