@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -20,7 +20,7 @@ import {
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
-export default function PaymentPage() {
+function PaymentPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -273,5 +273,21 @@ export default function PaymentPage() {
         </div>
       </DashboardLayout>
     </AuthGuard>
+  );
+}
+
+export default function PaymentPage() {
+  return (
+    <Suspense fallback={
+      <AuthGuard requiredRole="client">
+        <DashboardLayout>
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        </DashboardLayout>
+      </AuthGuard>
+    }>
+      <PaymentPageContent />
+    </Suspense>
   );
 }
