@@ -5,16 +5,20 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, FileText, Video, Calendar, TrendingUp, Loader2 } from 'lucide-react';
+import { MessageSquare, FileText, Video, Calendar, Search, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { QnAAPI } from '@/lib/api/qna';
+import { ConsultationsAPI } from '@/lib/api/consultations';
 
 export default function ClientDashboard() {
   const [recentQuestions, setRecentQuestions] = useState([]);
   const [loadingQuestions, setLoadingQuestions] = useState(true);
+  const [upcomingConsultations, setUpcomingConsultations] = useState([]);
+  const [loadingConsultations, setLoadingConsultations] = useState(true);
 
   useEffect(() => {
     loadRecentQuestions();
+    loadUpcomingConsultations();
   }, []);
 
   const loadRecentQuestions = async () => {
@@ -29,6 +33,31 @@ export default function ClientDashboard() {
     }
   };
 
+  const loadUpcomingConsultations = async () => {
+    try {
+      // PENDING 또는 CONFIRMED 상태의 상담 가져오기
+      const data = await ConsultationsAPI.getMyConsultations();
+      const consultationList = Array.isArray(data) ? data : data.results || [];
+
+      // PENDING 또는 CONFIRMED 상태만 필터링
+      const upcoming = consultationList.filter(c =>
+        ['PENDING', 'CONFIRMED'].includes(c.status?.toUpperCase())
+      );
+
+      // next_session.scheduled_at 기준으로 정렬하고 최근 2개만
+      const sorted = upcoming
+        .filter(c => c.next_session?.scheduled_at)
+        .sort((a, b) => new Date(a.next_session.scheduled_at) - new Date(b.next_session.scheduled_at))
+        .slice(0, 2);
+
+      setUpcomingConsultations(sorted);
+    } catch (error) {
+      console.error('다가오는 상담 로딩 실패:', error);
+    } finally {
+      setLoadingConsultations(false);
+    }
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -39,6 +68,18 @@ export default function ClientDashboard() {
     if (diffDays < 7) return `${diffDays}일 전`;
     if (diffDays < 30) return `${Math.floor(diffDays / 7)}주 전`;
     return date.toLocaleDateString('ko-KR');
+  };
+
+  const formatConsultationDateTime = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('ko-KR', {
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
   };
 
   return (
@@ -100,17 +141,19 @@ export default function ClientDashboard() {
               </Link>
             </Card>
             
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">진행 상황</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-primary">3</div>
-                <p className="text-xs text-muted-foreground">
-                  이번 달 상담 횟수
-                </p>
-              </CardContent>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <Link href="/client/experts">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">전문가 찾기</CardTitle>
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-primary">찾기</div>
+                  <p className="text-xs text-muted-foreground">
+                    전문가를 찾아보세요
+                  </p>
+                </CardContent>
+              </Link>
             </Card>
           </div>
           
@@ -164,26 +207,34 @@ export default function ClientDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                    <div className="flex-1">
-                      <h4 className="text-sm font-medium">김전문가와 상담</h4>
-                      <p className="text-xs text-muted-foreground">
-                        <Calendar className="w-3 h-3 inline mr-1" />
-                        12월 20일 오후 2시
-                      </p>
+                  {loadingConsultations ? (
+                    <div className="flex justify-center py-4">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                    <div className="flex-1">
-                      <h4 className="text-sm font-medium">이전문가와 상담</h4>
-                      <p className="text-xs text-muted-foreground">
-                        <Calendar className="w-3 h-3 inline mr-1" />
-                        12월 25일 오전 10시
-                      </p>
-                    </div>
-                  </div>
+                  ) : upcomingConsultations.length > 0 ? (
+                    upcomingConsultations.map((consultation, index) => (
+                      <div key={consultation.id} className="flex items-center space-x-4">
+                        <div className={`w-2 h-2 rounded-full ${
+                          index === 0 ? 'bg-red-500' : 'bg-yellow-500'
+                        }`}></div>
+                        <div className="flex-1">
+                          <h4 className="text-sm font-medium">
+                            {consultation.expert?.name || '전문가'} 전문가와 상담
+                          </h4>
+                          <p className="text-xs text-muted-foreground">
+                            <Calendar className="w-3 h-3 inline mr-1" />
+                            {consultation.next_session?.scheduled_at
+                              ? formatConsultationDateTime(consultation.next_session.scheduled_at)
+                              : '일정 미정'}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      예정된 상담이 없습니다
+                    </p>
+                  )}
                 </div>
                 <Button variant="outline" size="sm" className="w-full mt-4">
                   <Link href="/client/consultations">모든 상담 보기</Link>

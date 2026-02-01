@@ -20,7 +20,7 @@ import {
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
-function PaymentPageContent() {
+function PaymentContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -287,7 +287,7 @@ export default function PaymentPage() {
         </DashboardLayout>
       </AuthGuard>
     }>
-      <PaymentPageContent />
+      <PaymentContent />
     </Suspense>
   );
 }

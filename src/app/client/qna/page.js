@@ -8,15 +8,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { QnAAPI } from '@/lib/api/qna';
-import { 
-  Search, 
-  Plus, 
-  MessageSquare, 
-  Clock, 
-  User, 
+import {
+  Search,
+  Plus,
+  MessageSquare,
+  Clock,
+  User,
   CheckCircle,
   Heart,
-  Filter
+  Filter,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
@@ -27,6 +29,8 @@ export default function ClientQnAPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   
   // 임시 데이터 (실제로는 API에서 가져올 데이터)
   // const mockQuestions = [
@@ -164,6 +168,23 @@ export default function ClientQnAPage() {
   // });
   const filteredQuestions = questions;
 
+  // 페이지네이션
+  const totalPages = Math.ceil(filteredQuestions.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentQuestions = filteredQuestions.slice(startIndex, endIndex);
+
+  // 페이지 변경 시 맨 위로 스크롤
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // 필터 변경 시 첫 페이지로
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory, sortBy]);
+
   if (loading) {
     return (
       <AuthGuard requiredRole="client">
@@ -239,7 +260,7 @@ export default function ClientQnAPage() {
 
           {/* 질문 목록 */}
           <div className="space-y-4">
-            {filteredQuestions.length === 0 ? (
+            {currentQuestions.length === 0 ? (
               <Card>
                 <CardContent className="p-12 text-center">
                   <MessageSquare className="mx-auto h-12 w-12 text-gray-400 mb-4" />
@@ -255,7 +276,7 @@ export default function ClientQnAPage() {
                 </CardContent>
               </Card>
             ) : (
-              filteredQuestions.map((question) => (
+              currentQuestions.map((question) => (
                 <Card key={question.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
@@ -317,13 +338,63 @@ export default function ClientQnAPage() {
               ))
             )}
           </div>
-          
-          {/* 페이지네이션 (나중에 구현) */}
-          <div className="flex justify-center">
-            <div className="text-sm text-gray-500">
-              더 많은 질문을 보려면 페이지네이션을 구현해야 합니다
-            </div>
-          </div>
+
+          {/* 페이지네이션 */}
+          {totalPages > 1 && (
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    전체 {filteredQuestions.length}개 중 {startIndex + 1}-{Math.min(endIndex, filteredQuestions.length)}개 표시
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+
+                    {[...Array(totalPages)].map((_, index) => {
+                      const page = index + 1;
+                      // 현재 페이지 주변 페이지만 표시
+                      if (
+                        page === 1 ||
+                        page === totalPages ||
+                        (page >= currentPage - 1 && page <= currentPage + 1)
+                      ) {
+                        return (
+                          <Button
+                            key={page}
+                            variant={currentPage === page ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handlePageChange(page)}
+                            className="min-w-[2.5rem]"
+                          >
+                            {page}
+                          </Button>
+                        );
+                      } else if (page === currentPage - 2 || page === currentPage + 2) {
+                        return <span key={page} className="text-gray-400">...</span>;
+                      }
+                      return null;
+                    })}
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </DashboardLayout>
     </AuthGuard>

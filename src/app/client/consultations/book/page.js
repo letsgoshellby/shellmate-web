@@ -257,9 +257,8 @@ export default function BookConsultationPage() {
   };
 
   const getMinDate = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
+    const today = new Date();
+    return today.toISOString().split('T')[0];
   };
 
   const getMaxDate = () => {
@@ -520,7 +519,7 @@ export default function BookConsultationPage() {
                       className="w-full"
                     />
                     <p className="text-sm text-gray-500 mt-2">
-                      최소 하루 전부터 최대 30일 후까지 예약 가능합니다
+                      당일부터 최대 30일 후까지 예약 가능합니다
                     </p>
                   </CardContent>
                 </Card>

@@ -8,15 +8,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { QnAAPI } from '@/lib/api/qna';
-import { 
-  Search, 
-  MessageSquare, 
-  Clock, 
-  User, 
+import {
+  Search,
+  MessageSquare,
+  Clock,
+  User,
   CheckCircle,
   AlertCircle,
   TrendingUp,
-  Filter
+  Filter,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
@@ -27,6 +29,8 @@ export default function ExpertQnAPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all'); // all, unanswered, answered
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   
   // 임시 데이터 (주석 처리)
   // const mockQuestions = [
@@ -205,10 +209,27 @@ export default function ExpertQnAPage() {
   const sortedQuestions = filteredQuestions.sort((a, b) => {
     if (!a.has_expert_answer && b.has_expert_answer) return -1;
     if (a.has_expert_answer && !b.has_expert_answer) return 1;
-    
+
     const urgencyOrder = { high: 3, medium: 2, low: 1 };
     return urgencyOrder[b.urgency] - urgencyOrder[a.urgency];
   });
+
+  // 페이지네이션
+  const totalPages = Math.ceil(sortedQuestions.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentQuestions = sortedQuestions.slice(startIndex, endIndex);
+
+  // 페이지 변경 시 맨 위로 스크롤
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // 필터 변경 시 첫 페이지로
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory, statusFilter]);
 
   if (loading) {
     return (
@@ -337,7 +358,7 @@ export default function ExpertQnAPage() {
 
           {/* 질문 목록 */}
           <div className="space-y-4">
-            {sortedQuestions.length === 0 ? (
+            {currentQuestions.length === 0 ? (
               <Card>
                 <CardContent className="p-12 text-center">
                   <MessageSquare className="mx-auto h-12 w-12 text-gray-400 mb-4" />
@@ -350,7 +371,7 @@ export default function ExpertQnAPage() {
                 </CardContent>
               </Card>
             ) : (
-              sortedQuestions.map((question) => (
+              currentQuestions.map((question) => (
                 <Card key={question.id} className={`hover:shadow-md transition-shadow ${!question.has_expert_answer ? 'border-orange-200 bg-orange-50/30' : ''}`}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
@@ -423,6 +444,63 @@ export default function ExpertQnAPage() {
               ))
             )}
           </div>
+
+          {/* 페이지네이션 */}
+          {totalPages > 1 && (
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    전체 {sortedQuestions.length}개 중 {startIndex + 1}-{Math.min(endIndex, sortedQuestions.length)}개 표시
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+
+                    {[...Array(totalPages)].map((_, index) => {
+                      const page = index + 1;
+                      // 현재 페이지 주변 페이지만 표시
+                      if (
+                        page === 1 ||
+                        page === totalPages ||
+                        (page >= currentPage - 1 && page <= currentPage + 1)
+                      ) {
+                        return (
+                          <Button
+                            key={page}
+                            variant={currentPage === page ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handlePageChange(page)}
+                            className="min-w-[2.5rem]"
+                          >
+                            {page}
+                          </Button>
+                        );
+                      } else if (page === currentPage - 2 || page === currentPage + 2) {
+                        return <span key={page} className="text-gray-400">...</span>;
+                      }
+                      return null;
+                    })}
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </DashboardLayout>
     </AuthGuard>

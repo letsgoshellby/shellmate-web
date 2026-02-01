@@ -1,13 +1,66 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { IoChatbubbleEllipses, IoDocumentText, IoVideocam, IoPeople, IoTrendingUp, IoTime } from 'react-icons/io5';
+import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { ConsultationsAPI } from '@/lib/api/consultations';
 
 export default function ExpertDashboard() {
+  const [todayConsultations, setTodayConsultations] = useState([]);
+  const [loadingConsultations, setLoadingConsultations] = useState(true);
+
+  useEffect(() => {
+    loadTodayConsultations();
+  }, []);
+
+  const loadTodayConsultations = async () => {
+    try {
+      // CONFIRMED 상태의 상담 가져오기
+      const data = await ConsultationsAPI.getMyConsultations();
+      const consultationList = Array.isArray(data) ? data : data.results || [];
+
+      // 오늘 날짜 확인
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      // CONFIRMED 상태이고 오늘 예정된 상담만 필터링
+      const todaySessions = consultationList.filter(c => {
+        if (c.status?.toUpperCase() !== 'CONFIRMED') return false;
+        if (!c.next_session?.scheduled_at) return false;
+
+        const sessionDate = new Date(c.next_session.scheduled_at);
+        return sessionDate >= today && sessionDate < tomorrow;
+      });
+
+      // 시간순 정렬
+      const sorted = todaySessions.sort((a, b) =>
+        new Date(a.next_session.scheduled_at) - new Date(b.next_session.scheduled_at)
+      );
+
+      setTodayConsultations(sorted);
+    } catch (error) {
+      console.error('오늘의 상담 로딩 실패:', error);
+    } finally {
+      setLoadingConsultations(false);
+    }
+  };
+
+  const formatTime = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('ko-KR', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
   return (
     <AuthGuard requiredRole="expert">
       <DashboardLayout>
@@ -171,34 +224,55 @@ export default function ExpertDashboard() {
                 <CardTitle>오늘의 상담 일정</CardTitle>
                 <CardDescription>오늘 예정된 상담 세션입니다</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                    <div className="flex-1">
-                      <h4 className="text-sm font-medium">김○○ 학부모 상담</h4>
-                      <p className="text-xs text-muted-foreground">
-                        <IoTime className="w-3 h-3 inline mr-1" />
-                        오후 2:00 - 3:00
+              <CardContent className="flex flex-col h-full">
+                <div className="space-y-4 flex-1">
+                  {loadingConsultations ? (
+                    <div className="flex justify-center items-center h-32">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : todayConsultations.length > 0 ? (
+                    todayConsultations.map((consultation, index) => {
+                      const now = Date.now();
+                      const sessionTime = new Date(consultation.next_session.scheduled_at).getTime();
+                      const fifteenMinutesAfter = sessionTime + (15 * 60 * 1000);
+                      const canJoin = now <= fifteenMinutesAfter; // 시작 시간 15분 후까지 참여 가능
+                      const isPast = now > fifteenMinutesAfter;
+
+                      return (
+                        <div key={consultation.id} className="flex items-center space-x-4">
+                          <div className={`w-2 h-2 rounded-full ${
+                            isPast ? 'bg-gray-400' : index === 0 ? 'bg-red-500' : 'bg-yellow-500'
+                          }`}></div>
+                          <div className="flex-1">
+                            <h4 className="text-sm font-medium">
+                              {consultation.client?.name || '내담자'} 상담
+                            </h4>
+                            <p className="text-xs text-muted-foreground">
+                              <IoTime className="w-3 h-3 inline mr-1" />
+                              {formatTime(consultation.next_session.scheduled_at)}
+                            </p>
+                          </div>
+                          {canJoin && consultation.next_session?.id && (
+                            <Link href={`/video-call/${consultation.next_session.id}`}>
+                              <Button size="sm" variant="outline">참여</Button>
+                            </Link>
+                          )}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="flex items-center justify-center h-32">
+                      <p className="text-sm text-muted-foreground">
+                        오늘 예정된 상담이 없습니다
                       </p>
                     </div>
-                    <Button size="sm" variant="outline">참여</Button>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                    <div className="flex-1">
-                      <h4 className="text-sm font-medium">이○○ 학부모 상담</h4>
-                      <p className="text-xs text-muted-foreground">
-                        <IoTime className="w-3 h-3 inline mr-1" />
-                        오후 4:00 - 5:00
-                      </p>
-                    </div>
-                    <Button size="sm" variant="outline">준비</Button>
-                  </div>
+                  )}
                 </div>
-                <Button variant="outline" size="sm" className="w-full mt-4">
-                  전체 일정 보기
-                </Button>
+                <Link href="/expert/consultations" className="mt-4">
+                  <Button variant="outline" size="sm" className="w-full">
+                    전체 일정 보기
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>

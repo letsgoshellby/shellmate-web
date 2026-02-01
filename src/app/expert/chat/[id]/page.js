@@ -69,10 +69,13 @@ export default function ExpertChatDetailPage() {
       const data = await ChatAPI.getMessages(chatRoomId, params);
       const messageList = Array.isArray(data) ? data : data.results || [];
 
+      // 메시지를 역순으로 정렬 (가장 오래된 메시지가 위, 최신 메시지가 아래)
+      const sortedMessages = messageList.reverse();
+
       if (before) {
-        setMessages((prev) => [...messageList, ...prev]);
+        setMessages((prev) => [...sortedMessages, ...prev]);
       } else {
-        setMessages(messageList);
+        setMessages(sortedMessages);
       }
     } catch (error) {
       console.error('메시지 로딩 실패:', error);

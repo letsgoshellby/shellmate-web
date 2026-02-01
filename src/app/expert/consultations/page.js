@@ -12,101 +12,22 @@ import {
   Clock,
   User,
   Video,
-  Plus,
   CheckCircle,
   XCircle,
   AlertCircle,
-  Star,
   MessageSquare,
-  FileText,
-  Edit
+  FileText
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
-export default function ClientConsultationsPage() {
+export default function ExpertConsultationsPage() {
   const [consultations, setConsultations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, upcoming, completed, cancelled
+  const [filter, setFilter] = useState('all'); // all, pending, upcoming, completed, cancelled
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [selectedConsultationId, setSelectedConsultationId] = useState(null);
   const [cancellationReason, setCancellationReason] = useState('');
-  
-  // // 임시 데이터
-  // const mockConsultations = [
-  //   {
-  //     id: 1,
-  //     expert: {
-  //       id: 2,
-  //       name: '김전문가',
-  //       title: '아동발달 전문가',
-  //       profile_image: null,
-  //       specialties: ['집중력', 'ADHD', '학습장애'],
-  //       rating: 4.8,
-  //       experience_years: 10
-  //     },
-  //     scheduled_date: '2024-01-20',
-  //     scheduled_time: '14:00',
-  //     duration: 60,
-  //     status: 'confirmed', // pending, confirmed, completed, cancelled
-  //     topic: '6세 아이 집중력 문제 상담',
-  //     description: '우리 아이가 집중을 잘 못해서 학습에 어려움이 있습니다. 전문가의 조언을 듣고 싶습니다.',
-  //     meeting_url: 'https://meet.example.com/room123',
-  //     created_at: '2024-01-15T10:30:00Z',
-  //     price: 50000,
-  //     rating: null,
-  //     feedback: null,
-  //     expert_notes: null
-  //   },
-  //   {
-  //     id: 2,
-  //     expert: {
-  //       id: 3,
-  //       name: '이언어치료사',
-  //       title: '언어치료사',
-  //       profile_image: null,
-  //       specialties: ['언어발달', '언어치료', '의사소통'],
-  //       rating: 4.9,
-  //       experience_years: 8
-  //     },
-  //     scheduled_date: '2024-01-18',
-  //     scheduled_time: '10:00',
-  //     duration: 60,
-  //     status: 'completed',
-  //     topic: '5세 아이 언어발달 지연 상담',
-  //     description: '또래에 비해 언어 발달이 늦는 것 같아 걱정입니다.',
-  //     meeting_url: null,
-  //     created_at: '2024-01-10T14:20:00Z',
-  //     price: 60000,
-  //     rating: 5,
-  //     feedback: '매우 도움이 되었습니다. 구체적인 방법을 알려주셔서 감사해요.',
-  //     expert_notes: '언어 자극 활동 권장, 3개월 후 재상담 예정'
-  //   },
-  //   {
-  //     id: 3,
-  //     expert: {
-  //       id: 4,
-  //       name: '박놀이치료사',
-  //       title: '놀이치료사',
-  //       profile_image: null,
-  //       specialties: ['놀이치료', '사회성', '정서발달'],
-  //       rating: 4.7,
-  //       experience_years: 12
-  //     },
-  //     scheduled_date: '2024-01-25',
-  //     scheduled_time: '16:00',
-  //     duration: 60,
-  //     status: 'pending',
-  //     topic: '사회성 발달 상담',
-  //     description: '또래 친구들과 어울리기 어려워하는 아이를 위한 상담',
-  //     meeting_url: null,
-  //     created_at: '2024-01-16T09:15:00Z',
-  //     price: 55000,
-  //     rating: null,
-  //     feedback: null,
-  //     expert_notes: null
-  //   }
-  // ];
 
   useEffect(() => {
     loadConsultations();
@@ -114,11 +35,12 @@ export default function ClientConsultationsPage() {
 
   const loadConsultations = async () => {
     try {
-      // 실제 API 호출
       const params = {};
 
       // 필터에 따라 상태값 설정
-      if (filter === 'upcoming') {
+      if (filter === 'pending') {
+        params.status = 'PENDING';
+      } else if (filter === 'upcoming') {
         params.status = 'CONFIRMED';
       } else if (filter === 'completed') {
         params.status = 'COMPLETED';
@@ -133,7 +55,6 @@ export default function ClientConsultationsPage() {
     } catch (error) {
       console.error('상담 목록 로딩 실패:', error);
       toast.error('상담 목록을 불러오는데 실패했습니다');
-      // API 실패 시 빈 배열
       setConsultations([]);
     } finally {
       setLoading(false);
@@ -150,6 +71,19 @@ export default function ClientConsultationsPage() {
     setCancelModalOpen(false);
     setSelectedConsultationId(null);
     setCancellationReason('');
+  };
+
+  const handleApprove = async (consultationId) => {
+    if (!confirm('이 상담을 승인하시겠습니까?')) return;
+
+    try {
+      await ConsultationsAPI.approveConsultation(consultationId);
+      toast.success('상담이 승인되었습니다');
+      loadConsultations();
+    } catch (error) {
+      console.error('상담 승인 실패:', error);
+      toast.error('상담 승인에 실패했습니다');
+    }
   };
 
   const handleCancel = async () => {
@@ -203,7 +137,6 @@ export default function ClientConsultationsPage() {
   };
 
   const getStatusText = (consultation) => {
-    // status_display 우선 사용, 없으면 status 기반 변환
     return consultation.status_display || consultation.status || '알 수 없음';
   };
 
@@ -231,7 +164,7 @@ export default function ClientConsultationsPage() {
 
   if (loading) {
     return (
-      <AuthGuard requiredRole="client">
+      <AuthGuard requiredRole="expert">
         <DashboardLayout>
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -242,21 +175,13 @@ export default function ClientConsultationsPage() {
   }
 
   return (
-    <AuthGuard requiredRole="client">
+    <AuthGuard requiredRole="expert">
       <DashboardLayout>
         <div className="space-y-6">
           {/* 헤더 */}
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">내 상담 관리</h1>
-              <p className="text-gray-600">예약한 상담을 확인하고 관리하세요</p>
-            </div>
-            <Link href="/client/consultations/book">
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                새 상담 예약
-              </Button>
-            </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">상담 관리</h1>
+            <p className="text-gray-600">내담자의 상담 신청을 확인하고 관리하세요</p>
           </div>
 
           {/* 필터 탭 */}
@@ -265,6 +190,7 @@ export default function ClientConsultationsPage() {
               <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
                 {[
                   { key: 'all', label: '전체' },
+                  { key: 'pending', label: '접수된 상담' },
                   { key: 'upcoming', label: '예정된 상담' },
                   { key: 'completed', label: '완료된 상담' },
                   { key: 'cancelled', label: '취소된 상담' }
@@ -294,12 +220,9 @@ export default function ClientConsultationsPage() {
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
                     상담 내역이 없습니다
                   </h3>
-                  <p className="text-gray-600 mb-4">
-                    전문가와의 첫 상담을 예약해보세요
+                  <p className="text-gray-600">
+                    내담자의 상담 신청을 기다려주세요
                   </p>
-                  <Link href="/client/consultations/book">
-                    <Button>상담 예약하기</Button>
-                  </Link>
                 </CardContent>
               </Card>
             ) : (
@@ -334,8 +257,8 @@ export default function ClientConsultationsPage() {
                           <div className="flex items-center space-x-2">
                             <User className="h-4 w-4 text-gray-400" />
                             <div>
-                              <span className="font-medium">{consultation.expert?.name || '-'}</span>
-                              <span className="text-gray-500 ml-1">({consultation.expert?.specialty_display || '-'})</span>
+                              <span className="font-medium">{consultation.client?.name || '-'}</span>
+                              <span className="text-gray-500 ml-1 text-sm">({consultation.client?.email || '-'})</span>
                             </div>
                           </div>
 
@@ -360,54 +283,43 @@ export default function ClientConsultationsPage() {
                           </div>
                         </div>
 
-                        {consultation.expert?.specialty && (
-                          <div className="flex flex-wrap gap-1 mb-4">
-                            <Badge variant="outline" className="text-xs">
-                              {consultation.expert.specialty_display || consultation.expert.specialty}
-                            </Badge>
-                          </div>
-                        )}
-                        
-                        {consultation.status === 'completed' && consultation.rating && (
-                          <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                            <div className="flex items-center mb-2">
-                              <span className="text-sm font-medium mr-2">내 평가:</span>
-                              <div className="flex">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                  <Star
-                                    key={star}
-                                    className={`h-4 w-4 ${
-                                      star <= consultation.rating
-                                        ? 'text-yellow-400 fill-current'
-                                        : 'text-gray-300'
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                            {consultation.feedback && (
-                              <p className="text-sm text-gray-600">{consultation.feedback}</p>
-                            )}
-                          </div>
-                        )}
-                        
-                        {consultation.expert_notes && (
+                        {consultation.client_notes && (
                           <div className="bg-blue-50 rounded-lg p-4 mb-4">
                             <div className="flex items-center mb-2">
                               <MessageSquare className="h-4 w-4 text-blue-600 mr-2" />
-                              <span className="text-sm font-medium text-blue-900">전문가 소견:</span>
+                              <span className="text-sm font-medium text-blue-900">내담자 요청사항:</span>
                             </div>
-                            <p className="text-sm text-blue-800">{consultation.expert_notes}</p>
+                            <p className="text-sm text-blue-800">{consultation.client_notes}</p>
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="flex flex-col space-y-2 ml-4">
-                        {/* PENDING 또는 CONFIRMED 상태일 때 취소 버튼 표시 */}
-                        {['PENDING', 'CONFIRMED'].includes(consultation.status?.toUpperCase()) && (
+                        {/* 접수된 상담 (PENDING) - 승인/취소 버튼 */}
+                        {consultation.status?.toUpperCase() === 'PENDING' && (
                           <>
-                            {consultation.status?.toUpperCase() === 'CONFIRMED'
-                            && consultation.next_session?.id
+                            <Button
+                              size="sm"
+                              onClick={() => handleApprove(consultation.id)}
+                              className="bg-green-600 hover:bg-green-700"
+                            >
+                              <CheckCircle className="mr-1 h-4 w-4" />
+                              승인
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openCancelModal(consultation.id)}
+                            >
+                              취소
+                            </Button>
+                          </>
+                        )}
+
+                        {/* 예정된 상담 (CONFIRMED) - 참여/취소 버튼 */}
+                        {consultation.status?.toUpperCase() === 'CONFIRMED' && (
+                          <>
+                            {consultation.next_session?.id
                             && consultation.next_session?.scheduled_at
                             && isUpcoming(consultation.next_session.scheduled_at) && (
                               <Link href={`/video-call/${consultation.next_session.id}`}>
@@ -426,27 +338,15 @@ export default function ClientConsultationsPage() {
                             </Button>
                           </>
                         )}
-                        
-                        {/* 완료된 상담 (COMPLETED) - 상담 일지 확인 & 리뷰 작성 버튼 */}
-                        {consultation.status?.toUpperCase() === 'COMPLETED' && (
-                          <>
-                            {consultation.next_session?.id && (
-                              <Link href={`/client/consultations/${consultation.next_session.id}/log`}>
-                                <Button size="sm" variant="outline">
-                                  <FileText className="mr-1 h-4 w-4" />
-                                  상담 일지
-                                </Button>
-                              </Link>
-                            )}
-                            {!consultation.rating && (
-                              <Link href={`/client/consultations/${consultation.id}/review`}>
-                                <Button size="sm" variant="outline">
-                                  <Star className="mr-1 h-4 w-4" />
-                                  리뷰 작성
-                                </Button>
-                              </Link>
-                            )}
-                          </>
+
+                        {/* 완료된 상담 (COMPLETED) - 상담 일지 작성 버튼 */}
+                        {consultation.status?.toUpperCase() === 'COMPLETED' && consultation.next_session?.id && (
+                          <Link href={`/expert/consultations/${consultation.next_session.id}/log`}>
+                            <Button size="sm" variant="outline">
+                              <FileText className="mr-1 h-4 w-4" />
+                              상담 일지 작성
+                            </Button>
+                          </Link>
                         )}
                       </div>
                     </div>

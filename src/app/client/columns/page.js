@@ -8,15 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ColumnsAPI } from '@/lib/api/columns';
-import { 
-  Search, 
-  Clock, 
-  User, 
-  Eye, 
+import {
+  Search,
+  Clock,
+  User,
+  Eye,
   Heart,
   BookOpen,
   TrendingUp,
-  Calendar
+  Calendar,
+  Lock
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
@@ -193,7 +194,21 @@ export default function ClientColumnsPage() {
   return (
     <AuthGuard requiredRole="client">
       <DashboardLayout>
-        <div className="space-y-6">
+        <div className="relative space-y-6">
+          {/* 제공 예정 서비스 오버레이 */}
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-lg">
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-gray-100 rounded-full mb-6">
+                <Lock className="w-12 h-12 text-gray-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">제공 예정 서비스입니다</h2>
+              <p className="text-gray-600">
+                칼럼 기능은 현재 준비 중입니다.<br />
+                빠른 시일 내에 제공하겠습니다.
+              </p>
+            </div>
+          </div>
+
           {/* 헤더 */}
           <div className="flex justify-between items-center">
             <div>

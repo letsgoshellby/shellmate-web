@@ -14,9 +14,19 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="stylesheet" as="style" crossOrigin="" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
       </head>
-      {/* PortOne V2 결제 SDK */}
-      <Script src="https://cdn.portone.io/v2/browser-sdk.js" strategy="beforeInteractive" />
       <body className="antialiased font-sans">
+        {/* PortOne V2 결제 SDK */}
+        <Script
+          src="https://cdn.portone.io/v2/browser-sdk.js"
+          strategy="beforeInteractive"
+        />
+        {/* Kakao JavaScript SDK */}
+        <Script
+          src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
+          integrity="sha384-TiCUE00h+afO/VrfOWoJdGLJhYIEBKzq+PtTbY0BELMRyDUTdLpJ1cC9F8s3h0wn"
+          crossOrigin="anonymous"
+          strategy="beforeInteractive"
+        />
         <AuthProvider>
           {children}
           <Toaster position="top-right" />
