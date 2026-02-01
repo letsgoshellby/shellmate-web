@@ -108,4 +108,90 @@ export class AuthAPI {
       password: newPassword,
     });
   }
+
+  // 소셜 로그인 - Client
+  static async clientSocialLogin(provider, accessToken, terms = {}) {
+    try {
+      console.log('🔵 [소셜 로그인] Client 요청 시작');
+      console.log('🔵 [소셜 로그인] Provider:', provider);
+
+      const response = await apiClient.post('/auth/client/social-login/', {
+        provider,
+        access_token: accessToken,
+        ...terms,
+      });
+
+      console.log('🔵 [소셜 로그인] 응답:', response.data);
+
+      // 토큰이 있으면 저장 (기존 회원)
+      if (response.data.access && response.data.refresh) {
+        TokenStorage.setTokens(response.data.access, response.data.refresh, false);
+        console.log('✅ [소셜 로그인] 토큰 저장 완료');
+
+        // 사용자 정보 가져오기
+        const userResponse = await apiClient.get('/user/me/');
+        console.log('✅ [소셜 로그인] 사용자 정보:', userResponse.data);
+
+        return {
+          ...response.data,
+          user: userResponse.data,
+          isNewUser: false,
+        };
+      }
+
+      // 토큰이 없으면 신규 회원
+      return {
+        ...response.data,
+        isNewUser: true,
+      };
+    } catch (error) {
+      console.log('🔴 [소셜 로그인] 에러 발생');
+      console.log('🔴 [소셜 로그인] 상태 코드:', error.response?.status);
+      console.log('🔴 [소셜 로그인] 에러 데이터:', error.response?.data);
+      throw error;
+    }
+  }
+
+  // 소셜 로그인 - Expert
+  static async expertSocialLogin(provider, accessToken, terms = {}) {
+    try {
+      console.log('🔵 [소셜 로그인] Expert 요청 시작');
+      console.log('🔵 [소셜 로그인] Provider:', provider);
+
+      const response = await apiClient.post('/auth/expert/social-login/', {
+        provider,
+        access_token: accessToken,
+        ...terms,
+      });
+
+      console.log('🔵 [소셜 로그인] 응답:', response.data);
+
+      // 토큰이 있으면 저장 (기존 회원)
+      if (response.data.access && response.data.refresh) {
+        TokenStorage.setTokens(response.data.access, response.data.refresh, false);
+        console.log('✅ [소셜 로그인] 토큰 저장 완료');
+
+        // 사용자 정보 가져오기
+        const userResponse = await apiClient.get('/user/me/');
+        console.log('✅ [소셜 로그인] 사용자 정보:', userResponse.data);
+
+        return {
+          ...response.data,
+          user: userResponse.data,
+          isNewUser: false,
+        };
+      }
+
+      // 토큰이 없으면 신규 회원
+      return {
+        ...response.data,
+        isNewUser: true,
+      };
+    } catch (error) {
+      console.log('🔴 [소셜 로그인] 에러 발생');
+      console.log('🔴 [소셜 로그인] 상태 코드:', error.response?.status);
+      console.log('🔴 [소셜 로그인] 에러 데이터:', error.response?.data);
+      throw error;
+    }
+  }
 }
