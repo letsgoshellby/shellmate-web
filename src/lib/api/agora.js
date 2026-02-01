@@ -5,6 +5,17 @@ import { apiClient } from './client';
  */
 export class AgoraAPI {
   /**
+   * 세션 정보 조회
+   * GET /consultation/sessions/{sessionId}/
+   * @param {number} sessionId - 상담 세션 ID
+   * @returns {Object} 세션 정보 (상담 요청 정보 포함)
+   */
+  static async getSession(sessionId) {
+    const response = await apiClient.get(`/consultation/sessions/${sessionId}/`);
+    return response.data;
+  }
+
+  /**
    * 화상 상담방 정보 조회 및 Agora 토큰 발급
    * GET /consultation/sessions/{sessionId}/video-room/
    * @param {number} sessionId - 상담 세션 ID

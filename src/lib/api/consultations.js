@@ -27,7 +27,9 @@ export class ConsultationsAPI {
   
   // 상담 취소
   static async cancelConsultation(id, reason) {
-    const response = await apiClient.post(`/consultation/counseling-requests/${id}/cancel/`, { reason });
+    const response = await apiClient.post(`/consultation/counseling-requests/${id}/cancel/`, {
+      cancellation_reason: reason
+    });
     return response.data;
   }
   
