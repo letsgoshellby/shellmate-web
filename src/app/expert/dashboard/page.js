@@ -5,18 +5,24 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { IoChatbubbleEllipses, IoDocumentText, IoVideocam, IoPeople, IoTrendingUp, IoTime } from 'react-icons/io5';
+import { IoChatbubbleEllipses, IoDocumentText, IoVideocam, IoPeople, IoTrendingUp, IoTime, IoStar } from 'react-icons/io5';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { ConsultationsAPI } from '@/lib/api/consultations';
+import { ReviewAPI } from '@/lib/api/review';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ExpertDashboard() {
+  const { user } = useAuth();
   const [todayConsultations, setTodayConsultations] = useState([]);
   const [loadingConsultations, setLoadingConsultations] = useState(true);
+  const [recentReviews, setRecentReviews] = useState([]);
+  const [loadingReviews, setLoadingReviews] = useState(true);
 
   useEffect(() => {
     loadTodayConsultations();
-  }, []);
+    loadRecentReviews();
+  }, [user]);
 
   const loadTodayConsultations = async () => {
     try {
@@ -52,6 +58,28 @@ export default function ExpertDashboard() {
     }
   };
 
+  const loadRecentReviews = async () => {
+    if (!user?.id) return;
+
+    try {
+      // 현재 전문가에게 작성된 리뷰 가져오기
+      const data = await ReviewAPI.getReviews({ expert_id: user.id });
+      const reviewList = Array.isArray(data) ? data : data.results || [];
+
+      // 최신순 정렬 후 최대 3개만
+      const sorted = reviewList
+        .filter(r => !r.is_deleted)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 3);
+
+      setRecentReviews(sorted);
+    } catch (error) {
+      console.error('리뷰 로딩 실패:', error);
+    } finally {
+      setLoadingReviews(false);
+    }
+  };
+
   const formatTime = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -60,6 +88,41 @@ export default function ExpertDashboard() {
       minute: '2-digit',
       hour12: true
     });
+  };
+
+  const formatRelativeTime = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return '방금 전';
+    if (diffMins < 60) return `${diffMins}분 전`;
+    if (diffHours < 24) return `${diffHours}시간 전`;
+    if (diffDays < 7) return `${diffDays}일 전`;
+
+    return date.toLocaleDateString('ko-KR', {
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const renderStars = (rating) => {
+    return (
+      <div className="flex items-center gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <IoStar
+            key={star}
+            className={`h-3 w-3 ${
+              star <= rating ? 'text-yellow-500' : 'text-gray-300'
+            }`}
+          />
+        ))}
+      </div>
+    );
   };
   return (
     <AuthGuard requiredRole="expert">
@@ -73,7 +136,7 @@ export default function ExpertDashboard() {
             </p>
           </div>
           
-          {/* 통계 카드들 */}
+          {/* 통계 카드들
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -127,7 +190,7 @@ export default function ExpertDashboard() {
               </CardContent>
             </Card>
           </div>
-          
+           */}
           {/* 빠른 액션 */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
@@ -186,36 +249,47 @@ export default function ExpertDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>최근 답변한 질문</CardTitle>
-                <CardDescription>최근에 답변하신 Q&A 목록입니다</CardDescription>
+                <CardTitle>최근 리뷰 확인</CardTitle>
+                <CardDescription>최근에 작성된 리뷰를 확인해보세요</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="text-sm font-medium">아이의 언어 발달 지연에 대해</h4>
-                      <p className="text-xs text-muted-foreground">1시간 전 답변</p>
+              <CardContent className="flex flex-col h-full">
+                <div className="space-y-4 flex-1">
+                  {loadingReviews ? (
+                    <div className="flex justify-center items-center h-32">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">완료</span>
-                  </div>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="text-sm font-medium">집중력 향상 방법</h4>
-                      <p className="text-xs text-muted-foreground">어제 답변</p>
+                  ) : recentReviews.length > 0 ? (
+                    recentReviews.map((review) => (
+                      <div key={review.id} className="border-b last:border-0 pb-3 last:pb-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <h4 className="text-sm font-medium line-clamp-1 flex-1">
+                            {review.title}
+                          </h4>
+                          {renderStars(review.rating)}
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-1 line-clamp-2">
+                          {review.content}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-muted-foreground">
+                            {review.client_name || '익명'} • {formatRelativeTime(review.created_at)}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex items-center justify-center h-32">
+                      <p className="text-sm text-muted-foreground">
+                        아직 작성된 리뷰가 없습니다
+                      </p>
                     </div>
-                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">채택됨</span>
-                  </div>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="text-sm font-medium">사회성 발달 도움 방법</h4>
-                      <p className="text-xs text-muted-foreground">3일 전 답변</p>
-                    </div>
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">완료</span>
-                  </div>
+                  )}
                 </div>
-                <Button variant="outline" size="sm" className="w-full mt-4">
-                  모든 답변 보기
-                </Button>
+                <Link href="/expert/reviews" className="mt-4">
+                  <Button variant="outline" size="sm" className="w-full">
+                    모든 리뷰 보기
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
             
