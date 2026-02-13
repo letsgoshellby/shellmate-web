@@ -7,6 +7,12 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { ChatAPI } from '@/lib/api/chat';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -14,6 +20,7 @@ import {
   Send,
   Image as ImageIcon,
   MoreVertical,
+  Trash2,
   Check,
   CheckCheck,
   Loader2
@@ -163,6 +170,14 @@ export default function ClientChatDetailPage() {
   };
 
   const isMyMessage = (message) => {
+    // sender 객체의 id와 user.id 비교
+    if (message.sender?.id && user?.id) {
+      return message.sender.id == user.id;
+    }
+    // 구버전 호환: sender_id와 비교
+    if (message.sender_id && user?.id) {
+      return message.sender_id == user.id;
+    }
     return message.sender === user?.name || message.sender === user?.email;
   };
 
@@ -171,6 +186,23 @@ export default function ClientChatDetailPage() {
     const currentDate = new Date(currentMsg.sent_at).toDateString();
     const prevDate = new Date(prevMsg.sent_at).toDateString();
     return currentDate !== prevDate;
+  };
+
+  const handleDeleteMessage = async (messageId) => {
+    if (!confirm('이 메시지를 삭제하시겠습니까?')) return;
+
+    try {
+      await ChatAPI.deleteMessage(chatRoomId, messageId);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId ? { ...msg, is_deleted: true, content: '' } : msg
+        )
+      );
+      toast.success('메시지가 삭제되었습니다');
+    } catch (error) {
+      console.error('메시지 삭제 실패:', error);
+      toast.error('메시지 삭제에 실패했습니다');
+    }
   };
 
   if (loading) {
@@ -233,7 +265,7 @@ export default function ClientChatDetailPage() {
 
                   {/* 메시지 */}
                   <div
-                    className={`flex ${isMyMessage(message) ? 'justify-end' : 'justify-start'}`}
+                    className={`flex gap-2 group ${isMyMessage(message) ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
                       className={`max-w-[70%] ${
@@ -289,6 +321,30 @@ export default function ClientChatDetailPage() {
                         )}
                       </div>
                     </div>
+
+                    {/* 메시지 옵션 (내가 보낸 메시지만) */}
+                    {isMyMessage(message) && !message.is_deleted && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            className="text-red-600 cursor-pointer"
+                            onClick={() => handleDeleteMessage(message.id)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            삭제
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
                 </div>
               ))
