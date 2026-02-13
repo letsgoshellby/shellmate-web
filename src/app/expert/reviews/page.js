@@ -132,7 +132,7 @@ export default function ExpertReviewsPage() {
           {/* 통계 카드 */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="py-3 flex items-center justify-center">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-1">총 리뷰</p>
                   <p className="text-3xl font-bold">{reviews.length}</p>
@@ -140,7 +140,7 @@ export default function ExpertReviewsPage() {
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="py-3 flex items-center justify-center">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-1">평균 별점</p>
                   <div className="flex items-center justify-center gap-2">
@@ -151,7 +151,7 @@ export default function ExpertReviewsPage() {
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="py-3 flex items-center justify-center">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-1">5점 리뷰</p>
                   <p className="text-3xl font-bold text-green-600">{ratingCounts[5]}</p>
@@ -159,7 +159,7 @@ export default function ExpertReviewsPage() {
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="py-3 flex items-center justify-center">
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground mb-1">이번 달</p>
                   <p className="text-3xl font-bold text-blue-600">
