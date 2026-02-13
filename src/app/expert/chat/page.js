@@ -21,9 +21,11 @@ export default function ExpertChatPage() {
   const loadChatRooms = async () => {
     try {
       const data = await ChatAPI.getChatRooms();
-      setChatRooms(Array.isArray(data) ? data : data.results || []);
+      const rooms = Array.isArray(data) ? data : data.results || [];
+      setChatRooms(rooms);
     } catch (error) {
       console.error('채팅방 목록 로딩 실패:', error);
+      console.error('Error details:', error.response?.data);
       toast.error('채팅방 목록을 불러오는데 실패했습니다');
     } finally {
       setLoading(false);
@@ -90,21 +92,25 @@ export default function ExpertChatPage() {
                       <div className="flex items-center gap-4">
                         {/* 프로필 이미지 */}
                         <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-medium shrink-0">
-                          {room.partner?.charAt(0) || <User className="h-6 w-6" />}
+                          {room.client?.name?.charAt(0) ||
+                           (typeof room.partner === 'string' ? room.partner.charAt(0) : room.partner?.name?.charAt(0)) ||
+                           <User className="h-6 w-6" />}
                         </div>
 
                         {/* 채팅 정보 */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-1">
                             <h3 className="font-medium text-gray-900 truncate">
-                              {room.partner || '내담자'}
+                              {room.client?.name ||
+                               (typeof room.partner === 'string' ? room.partner : room.partner?.name) ||
+                               '내담자'}
                             </h3>
                             <span className="text-xs text-gray-500 shrink-0 ml-2">
                               {formatDate(room.created_at)}
                             </span>
                           </div>
                           <p className="text-sm text-gray-600 truncate">
-                            {room.last_message || '대화를 시작해보세요'}
+                            {room.last_message?.content || '대화를 시작해보세요'}
                           </p>
                         </div>
 
