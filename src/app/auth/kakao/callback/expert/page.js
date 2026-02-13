@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthAPI } from '@/lib/api/auth';
+import { exchangeCodeForToken } from '@/lib/auth/kakaoAuth';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -16,55 +17,52 @@ export default function KakaoExpertCallbackPage() {
 
   const handleKakaoCallback = async () => {
     try {
-      // 카카오 SDK에서 Access Token 가져오기
-      if (!window.Kakao || !window.Kakao.Auth) {
-        throw new Error('카카오 SDK가 로드되지 않았습니다');
+      // URL에서 인증 코드 추출
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const error = params.get('error');
+
+      if (error) {
+        throw new Error(`카카오 로그인 실패: ${error}`);
       }
 
-      // 카카오 SDK를 통해 Access Token 가져오기
-      window.Kakao.Auth.getAccessToken()
-        .then(async (accessToken) => {
-          if (!accessToken) {
-            throw new Error('카카오 Access Token을 가져올 수 없습니다');
-          }
+      if (!code) {
+        throw new Error('인증 코드가 없습니다');
+      }
 
-          console.log('카카오 Access Token 획득:', accessToken);
+      console.log('카카오 인증 코드 획득:', code);
 
-          // 백엔드 소셜 로그인 API 호출 (약관 없이)
-          try {
-            const response = await AuthAPI.expertSocialLogin('kakao', accessToken);
+      // 인증 코드를 액세스 토큰으로 교환
+      const accessToken = await exchangeCodeForToken(code, 'expert');
+      console.log('카카오 액세스 토큰 획득 성공');
 
-            // 기존 회원인 경우
-            if (!response.isNewUser && response.access) {
-              toast.success('로그인되었습니다');
-              router.push('/expert/dashboard');
-              return;
-            }
+      // 백엔드로 액세스 토큰 전달
+      try {
+        // 액세스 토큰을 백엔드로 전송하여 처리
+        const response = await AuthAPI.expertSocialLogin('kakao', accessToken);
 
-            // 신규 회원인 경우 - Access Token 저장 후 약관 페이지로
-            localStorage.setItem('kakao_access_token', accessToken);
-            localStorage.setItem('kakao_provider', 'kakao');
-            router.push('/signup/expert/social-terms');
-          } catch (error) {
-            // 약관 미동의 에러 처리
-            if (error.response?.status === 400) {
-              // Access Token 저장 후 약관 페이지로
-              localStorage.setItem('kakao_access_token', accessToken);
-              localStorage.setItem('kakao_provider', 'kakao');
-              router.push('/signup/expert/social-terms');
-            } else {
-              throw error;
-            }
-          }
-        })
-        .catch((err) => {
-          console.error('카카오 로그인 처리 실패:', err);
-          setStatus('error');
-          toast.error('카카오 로그인에 실패했습니다');
-          setTimeout(() => {
-            router.push('/login');
-          }, 2000);
-        });
+        // 기존 회원인 경우
+        if (!response.is_new && response.access) {
+          toast.success('로그인되었습니다');
+          router.push('/expert/dashboard');
+          return;
+        }
+
+        // 신규 회원인 경우 - 약관 페이지로
+        localStorage.setItem('kakao_access_token', accessToken);
+        localStorage.setItem('kakao_provider', 'kakao');
+        router.push('/signup/expert/social-terms');
+      } catch (error) {
+        // 약관 미동의 에러 처리
+        if (error.response?.status === 400) {
+          // 액세스 토큰 저장 후 약관 페이지로
+          localStorage.setItem('kakao_access_token', accessToken);
+          localStorage.setItem('kakao_provider', 'kakao');
+          router.push('/signup/expert/social-terms');
+        } else {
+          throw error;
+        }
+      }
     } catch (error) {
       console.error('카카오 콜백 처리 실패:', error);
       setStatus('error');
@@ -74,6 +72,7 @@ export default function KakaoExpertCallbackPage() {
       }, 2000);
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

@@ -71,28 +71,31 @@ export function LoginForm() {
     setShowRoleModal(true);
   };
 
-  const handleRoleSelect = (role) => {
+  const handleRoleSelect = async (role) => {
     setShowRoleModal(false);
 
-    // 카카오 SDK 초기화 및 로그인
-    initKakaoSDK(role);
-
-    loginWithKakao(
-      role,
-      (accessToken) => {
-        // 성공 시 콜백 페이지로 리다이렉트
-        // 카카오 SDK가 자동으로 처리하지만, 수동으로도 가능
-        console.log('카카오 로그인 성공, Access Token:', accessToken);
-        // Access Token을 localStorage에 저장하고 콜백 페이지로 이동
-        localStorage.setItem('kakao_access_token', accessToken);
-        localStorage.setItem('kakao_provider', 'kakao');
-        router.push(`/auth/kakao/callback/${role}`);
-      },
-      (error) => {
-        console.error('카카오 로그인 실패:', error);
-        toast.error('카카오 로그인에 실패했습니다');
-      }
-    );
+    try {
+      // 카카오 SDK 초기화 및 로그인
+      await loginWithKakao(
+        role,
+        (accessToken) => {
+          // 성공 시 콜백 페이지로 리다이렉트
+          // 카카오 SDK가 자동으로 처리하지만, 수동으로도 가능
+          console.log('카카오 로그인 성공, Access Token:', accessToken);
+          // Access Token을 localStorage에 저장하고 콜백 페이지로 이동
+          localStorage.setItem('kakao_access_token', accessToken);
+          localStorage.setItem('kakao_provider', 'kakao');
+          router.push(`/auth/kakao/callback/${role}`);
+        },
+        (error) => {
+          console.error('카카오 로그인 실패:', error);
+          toast.error('카카오 로그인에 실패했습니다');
+        }
+      );
+    } catch (error) {
+      console.error('카카오 SDK 초기화 실패:', error);
+      toast.error('카카오 로그인을 시작할 수 없습니다. 페이지를 새로고침해주세요.');
+    }
   };
   
   return (
