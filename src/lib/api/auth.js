@@ -6,20 +6,15 @@ export class AuthAPI {
   static async login(credentials, rememberMe = false) {
     try {
       console.log('🔵 [로그인] 요청 시작');
-      console.log('🔵 [로그인] 이메일:', credentials.email);
 
       const response = await apiClient.post('/auth/login/', credentials);
-      console.log('🔵 [로그인] 응답:', response.data);
 
       // 토큰 저장
       TokenStorage.setTokens(response.data.access, response.data.refresh, rememberMe);
-      console.log('✅ [로그인] 토큰 저장 완료');
 
       // Flutter API는 user 정보를 별도로 반환하지 않으므로 토큰에서 추출하거나 별도 API 호출 필요
       // 로그인 후 사용자 정보 가져오기
-      console.log('🔵 [로그인] 사용자 정보 요청');
       const userResponse = await apiClient.get('/user/me/');
-      console.log('✅ [로그인] 사용자 정보:', userResponse.data);
 
       return {
         ...response.data,

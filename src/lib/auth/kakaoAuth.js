@@ -30,7 +30,6 @@ export const getKakaoAppKey = (role) => {
     throw new Error(`Kakao App Key not found for role: ${role}`);
   }
 
-  console.log(`카카오 앱 키 로드 성공 (${role}):`, appKey.substring(0, 10) + '...');
   return appKey;
 };
 
@@ -100,7 +99,6 @@ export const initKakaoSDK = async (role) => {
   }
 
   window.Kakao.init(appKey);
-  console.log('Kakao SDK initialized:', window.Kakao.isInitialized());
   return true;
 };
 
