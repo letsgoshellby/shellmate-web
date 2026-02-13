@@ -68,7 +68,7 @@ export function DashboardLayout({ children }) {
         { name: '칼럼 작성', href: '/expert/columns', icon: IoDocumentText },
         { name: '상담 관리', href: '/expert/consultations', icon: IoVideocam },
         { name: '채팅', href: '/expert/chat', icon: IoChatbubbles },
-        { name: '통계', href: '/expert/analytics', icon: IoBarChart },
+          // { name: '통계', href: '/expert/analytics', icon: IoBarChart },
       ];
     }
     
