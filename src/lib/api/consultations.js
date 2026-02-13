@@ -125,6 +125,12 @@ export class ConsultationsAPI {
     const response = await apiClient.get('/consultation/counseling-requests/', { params });
     return response.data;
   }
+
+  // 상담 신청 상세 조회
+  static async getCounselingRequestDetail(id) {
+    const response = await apiClient.get(`/consultation/counseling-requests/${id}/`);
+    return response.data;
+  }
   
   // 상담 통계 (전문가용)
   static async getConsultationStats(params = {}) {

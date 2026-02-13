@@ -197,13 +197,17 @@ export default function ExpertCounselLogPage({ params }) {
                 <div>
                   <span className="text-gray-600 block">내담자</span>
                   <span className="font-medium">
-                    {sessionInfo?.counseling_request?.client?.user?.name || '-'}
+                    {sessionInfo?.counseling_request?.client?.name ||
+                     sessionInfo?.counseling_request?.client?.user?.name ||
+                     sessionInfo?.client_name || '-'}
                   </span>
                 </div>
                 <div>
                   <span className="text-gray-600 block">전문가</span>
                   <span className="font-medium">
-                    {sessionInfo?.counseling_request?.expert?.user?.name || '-'}
+                    {sessionInfo?.counseling_request?.expert?.name ||
+                     sessionInfo?.counseling_request?.expert?.user?.name ||
+                     sessionInfo?.expert_name || '-'}
                   </span>
                 </div>
                 <div>

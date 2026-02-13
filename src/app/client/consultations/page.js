@@ -129,7 +129,20 @@ export default function ClientConsultationsPage() {
       const data = await ConsultationsAPI.getMyConsultations(params);
       const consultationList = Array.isArray(data) ? data : data.results || [];
 
-      setConsultations(consultationList);
+      // 각 상담에 대해 상세 정보 조회 (sessions 데이터 포함)
+      const detailedConsultations = await Promise.all(
+        consultationList.map(async (consultation) => {
+          try {
+            const detail = await ConsultationsAPI.getCounselingRequestDetail(consultation.id);
+            return detail;
+          } catch (error) {
+            console.error(`상담 ${consultation.id} 상세 조회 실패:`, error);
+            return consultation; // 실패 시 원본 데이터 사용
+          }
+        })
+      );
+
+      setConsultations(detailedConsultations);
     } catch (error) {
       console.error('상담 목록 로딩 실패:', error);
       toast.error('상담 목록을 불러오는데 실패했습니다');
@@ -313,7 +326,7 @@ export default function ClientConsultationsPage() {
                             {getStatusIcon(consultation.status)}
                             <span className="ml-1">{getStatusText(consultation)}</span>
                           </Badge>
-                          {consultation.status?.toUpperCase() === 'CONFIRMED' && isUpcoming(consultation.next_session?.scheduled_at) && (
+                          {consultation.status?.toUpperCase() === 'CONFIRMED' && isUpcoming(consultation.sessions?.[0]?.scheduled_at) && (
                             <Badge className="bg-green-100 text-green-800">
                               <Calendar className="mr-1 h-3 w-3" />
                               다가오는 상담
@@ -339,16 +352,16 @@ export default function ClientConsultationsPage() {
                             </div>
                           </div>
 
-                          {consultation.next_session?.scheduled_at && (
+                          {consultation.sessions?.[0]?.scheduled_at && (
                             <>
                               <div className="flex items-center space-x-2">
                                 <Calendar className="h-4 w-4 text-gray-400" />
-                                <span>{formatDate(consultation.next_session.scheduled_at)}</span>
+                                <span>{formatDate(consultation.sessions[0].scheduled_at)}</span>
                               </div>
 
                               <div className="flex items-center space-x-2">
                                 <Clock className="h-4 w-4 text-gray-400" />
-                                <span>{formatTime(consultation.next_session.scheduled_at)}</span>
+                                <span>{formatTime(consultation.sessions[0].scheduled_at)}</span>
                               </div>
                             </>
                           )}
@@ -407,10 +420,10 @@ export default function ClientConsultationsPage() {
                         {['PENDING', 'CONFIRMED'].includes(consultation.status?.toUpperCase()) && (
                           <>
                             {consultation.status?.toUpperCase() === 'CONFIRMED'
-                            && consultation.next_session?.id
-                            && consultation.next_session?.scheduled_at
-                            && isUpcoming(consultation.next_session.scheduled_at) && (
-                              <Link href={`/video-call/${consultation.next_session.id}`}>
+                            && consultation.sessions?.[0]?.id
+                            && consultation.sessions?.[0]?.scheduled_at
+                            && isUpcoming(consultation.sessions[0].scheduled_at) && (
+                              <Link href={`/video-call/${consultation.sessions[0].id}`}>
                                 <Button size="sm">
                                   <Video className="mr-1 h-4 w-4" />
                                   상담 참여
@@ -430,8 +443,8 @@ export default function ClientConsultationsPage() {
                         {/* 완료된 상담 (COMPLETED) - 상담 일지 확인 & 리뷰 작성 버튼 */}
                         {consultation.status?.toUpperCase() === 'COMPLETED' && (
                           <>
-                            {consultation.next_session?.id && (
-                              <Link href={`/client/consultations/${consultation.next_session.id}/log`}>
+                            {consultation.sessions?.[0]?.id && (
+                              <Link href={`/client/consultations/${consultation.sessions[0].id}/log`}>
                                 <Button size="sm" variant="outline">
                                   <FileText className="mr-1 h-4 w-4" />
                                   상담 일지
