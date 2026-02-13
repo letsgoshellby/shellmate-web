@@ -67,9 +67,10 @@ export default function ExpertProfilePage() {
         setEditData({
           name: data.name || '',
           phone_number: data.phone_number || '',
-          bio: data.bio || '',
-          experience_years: data.experience_years || '',
-          affiliation: data.affiliation || '',
+          introduction: data.expert_profile?.introduction || '',
+          experience_years: data.expert_profile?.experience_years || '',
+          institution: data.expert_profile?.institution || '',
+          workplace: data.expert_profile?.workplace || '',
         });
       }
     } catch (error) {
@@ -86,9 +87,10 @@ export default function ExpertProfilePage() {
     setEditData({
       name: profileData?.name || '',
       phone_number: profileData?.phone_number || '',
-      bio: profileData?.bio || '',
-      experience_years: profileData?.experience_years || '',
-      affiliation: profileData?.affiliation || '',
+      introduction: profileData?.expert_profile?.introduction || '',
+      experience_years: profileData?.expert_profile?.experience_years || '',
+      institution: profileData?.expert_profile?.institution || '',
+      workplace: profileData?.expert_profile?.workplace || '',
     });
   };
 
@@ -121,16 +123,13 @@ export default function ExpertProfilePage() {
     }
   };
 
-  const getSignupStatusBadge = (status) => {
+  const getVerificationStatusBadge = (status) => {
     const statusMap = {
-      'basic': { label: '기본 정보', variant: 'secondary' },
-      'profile_created': { label: '프로필 생성', variant: 'secondary' },
-      'pending_approval': { label: '심사 대기', variant: 'secondary' },
-      'approved': { label: '승인 완료', variant: 'default' },
-      'rejected': { label: '심사 반려', variant: 'destructive' },
-      'completed': { label: '완료', variant: 'default' },
+      'pending': { label: '심사대기', variant: 'secondary' },
+      'approved': { label: '승인완료', variant: 'default' },
+      'rejected': { label: '심사반려', variant: 'destructive' },
     };
-    
+
     const statusInfo = statusMap[status] || { label: status, variant: 'secondary' };
     return (
       <Badge variant={statusInfo.variant}>
@@ -204,7 +203,7 @@ export default function ExpertProfilePage() {
                     </Label>
                     <Input
                       id="email"
-                      value={profileData.email}
+                      value={profileData.email || ''}
                       disabled
                       className="bg-gray-50"
                     />
@@ -216,11 +215,11 @@ export default function ExpertProfilePage() {
                     {isEditing ? (
                       <Input
                         id="name"
-                        value={editData.name}
+                        value={editData.name || ''}
                         onChange={(e) => setEditData({ ...editData, name: e.target.value })}
                       />
                     ) : (
-                      <Input value={profileData.name} disabled className="bg-gray-50" />
+                      <Input value={profileData.name || ''} disabled className="bg-gray-50" />
                     )}
                   </div>
 
@@ -232,11 +231,11 @@ export default function ExpertProfilePage() {
                     {isEditing ? (
                       <Input
                         id="phone"
-                        value={editData.phone_number}
+                        value={editData.phone_number || ''}
                         onChange={(e) => setEditData({ ...editData, phone_number: e.target.value })}
                       />
                     ) : (
-                      <Input value={profileData.phone_number} disabled className="bg-gray-50" />
+                      <Input value={profileData.phone_number || ''} disabled className="bg-gray-50" />
                     )}
                   </div>
 
@@ -264,21 +263,21 @@ export default function ExpertProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="bio" className="flex items-center gap-2">
+                  <Label htmlFor="introduction" className="flex items-center gap-2">
                     <IoDocumentText className="h-4 w-4" />
                     자기소개
                   </Label>
                   {isEditing ? (
                     <Textarea
-                      id="bio"
-                      value={editData.bio}
-                      onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
+                      id="introduction"
+                      value={editData.introduction || ''}
+                      onChange={(e) => setEditData({ ...editData, introduction: e.target.value })}
                       placeholder="자신을 소개하는 글을 작성해주세요"
                       rows={4}
                     />
                   ) : (
                     <Textarea
-                      value={profileData.bio || '자기소개가 작성되지 않았습니다.'}
+                      value={profileData.expert_profile?.introduction || '자기소개가 작성되지 않았습니다.'}
                       disabled
                       className="bg-gray-50"
                       rows={4}
@@ -310,13 +309,13 @@ export default function ExpertProfilePage() {
                     {isEditing ? (
                       <Input
                         type="number"
-                        value={editData.experience_years}
+                        value={editData.experience_years || ''}
                         onChange={(e) => setEditData({ ...editData, experience_years: e.target.value })}
                         placeholder="경력 년수를 입력해주세요"
                       />
                     ) : (
                       <Input
-                        value={profileData.experience_years ? `${profileData.experience_years}년` : '미입력'}
+                        value={profileData.expert_profile?.experience_years ? `${profileData.expert_profile.experience_years}년` : '미입력'}
                         disabled
                         className="bg-gray-50"
                       />
@@ -330,13 +329,13 @@ export default function ExpertProfilePage() {
                     </Label>
                     {isEditing ? (
                       <Input
-                        value={editData.affiliation}
-                        onChange={(e) => setEditData({ ...editData, affiliation: e.target.value })}
+                        value={editData.institution || ''}
+                        onChange={(e) => setEditData({ ...editData, institution: e.target.value })}
                         placeholder="소속 기관을 입력해주세요"
                       />
                     ) : (
                       <Input
-                        value={profileData.affiliation || '미입력'}
+                        value={profileData.expert_profile?.institution || '미입력'}
                         disabled
                         className="bg-gray-50"
                       />
@@ -348,8 +347,8 @@ export default function ExpertProfilePage() {
                   <div className="space-y-2">
                     <Label>전문 분야</Label>
                     <div className="flex flex-wrap gap-2">
-                      {profileData.specialties && profileData.specialties.length > 0 ? (
-                        profileData.specialties.map((specialty, index) => (
+                      {profileData.expert_profile?.specialty_list && profileData.expert_profile.specialty_list.length > 0 ? (
+                        profileData.expert_profile.specialty_list.map((specialty, index) => (
                           <Badge key={index} variant="outline">
                             {specialty}
                           </Badge>
@@ -361,22 +360,16 @@ export default function ExpertProfilePage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>자격증</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {profileData.certifications && profileData.certifications.length > 0 ? (
-                        profileData.certifications.map((cert, index) => (
-                          <Badge key={index} variant="outline">
-                            {cert}
-                          </Badge>
-                        ))
-                      ) : (
-                        <Badge variant="secondary">미등록</Badge>
-                      )}
-                    </div>
+                    <Label>근무지</Label>
+                    <Input
+                      value={profileData.expert_profile?.workplace || '미입력'}
+                      disabled
+                      className="bg-gray-50"
+                    />
                   </div>
                 </div>
 
-                {profileData.signup_status === 'basic' && (
+                {!profileData.expert_profile && (
                   <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
                     <h4 className="font-medium text-amber-900 mb-2">전문가 정보 입력</h4>
                     <p className="text-sm text-amber-800 mb-3">
@@ -385,6 +378,63 @@ export default function ExpertProfilePage() {
                     <Button size="sm" onClick={() => router.push('/signup/expert/step1')}>
                       전문가 정보 입력하기
                     </Button>
+                  </div>
+                )}
+
+                {profileData.expert_profile && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>학력 증명서</Label>
+                        {profileData.expert_profile.education_certificate ? (
+                          <a
+                            href={profileData.expert_profile.education_certificate}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-blue-600 hover:underline"
+                          >
+                            증명서 확인
+                          </a>
+                        ) : (
+                          <p className="text-sm text-gray-500">미제출</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>자격증</Label>
+                        {profileData.expert_profile.license_certificate ? (
+                          <a
+                            href={profileData.expert_profile.license_certificate}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-blue-600 hover:underline"
+                          >
+                            자격증 확인
+                          </a>
+                        ) : (
+                          <p className="text-sm text-gray-500">미제출</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {profileData.expert_profile.additional_certificates_count > 0 && (
+                      <div className="space-y-2">
+                        <Label>추가 증명서 ({profileData.expert_profile.additional_certificates_count}개)</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {profileData.expert_profile.additional_certificates?.map((cert, index) => (
+                            <a
+                              key={index}
+                              href={cert}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-blue-600 hover:underline"
+                            >
+                              증명서 {index + 1}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -409,7 +459,7 @@ export default function ExpertProfilePage() {
                       <h3 className="font-medium">현재 상태</h3>
                       <p className="text-sm text-gray-600">전문가 승인 진행 상황</p>
                     </div>
-                    {getSignupStatusBadge(profileData.signup_status)}
+                    {getVerificationStatusBadge(profileData.expert_profile?.verification_status)}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -423,16 +473,15 @@ export default function ExpertProfilePage() {
                       <h4 className="font-medium mb-2">2단계: 전문가 정보</h4>
                       <p className="text-sm text-gray-600">경력, 자격증, 전문분야</p>
                       <Badge variant="outline" className="mt-2">
-                        {['profile_created', 'pending_approval', 'approved', 'completed'].includes(profileData.signup_status) ? '완료' : '미완료'}
+                        {profileData.expert_profile ? '완료' : '미완료'}
                       </Badge>
                     </div>
 
                     <div className="p-4 border rounded-lg">
-                      <h4 className="font-medium mb-2">3단계: 서류 심사</h4>
-                      <p className="text-sm text-gray-600">자격증명서, 경력증명서</p>
+                      <h4 className="font-medium mb-2">3단계: 서류 제출</h4>
+                      <p className="text-sm text-gray-600">학력증명서, 자격증</p>
                       <Badge variant="outline" className="mt-2">
-                        {['pending_approval', 'approved', 'completed'].includes(profileData.signup_status) ? '진행중/완료' : 
-                         profileData.signup_status === 'rejected' ? '반려' : '대기중'}
+                        {profileData.expert_profile?.education_certificate || profileData.expert_profile?.license_certificate ? '완료' : '미완료'}
                       </Badge>
                     </div>
 
@@ -440,13 +489,13 @@ export default function ExpertProfilePage() {
                       <h4 className="font-medium mb-2">4단계: 최종 승인</h4>
                       <p className="text-sm text-gray-600">관리자 검토 및 승인</p>
                       <Badge variant="outline" className="mt-2">
-                        {['approved', 'completed'].includes(profileData.signup_status) ? '완료' : 
-                         profileData.signup_status === 'rejected' ? '반려' : '대기중'}
+                        {profileData.expert_profile?.verification_status === 'approved' ? '완료' :
+                         profileData.expert_profile?.verification_status === 'rejected' ? '반려' : '대기중'}
                       </Badge>
                     </div>
                   </div>
 
-                  {profileData.signup_status === 'pending_approval' && (
+                  {profileData.expert_profile?.verification_status === 'pending' && (
                     <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                       <h4 className="font-medium text-blue-900 mb-2">심사 진행 중</h4>
                       <p className="text-sm text-blue-800">
@@ -456,11 +505,11 @@ export default function ExpertProfilePage() {
                     </div>
                   )}
 
-                  {profileData.signup_status === 'rejected' && (
+                  {profileData.expert_profile?.verification_status === 'rejected' && (
                     <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                       <h4 className="font-medium text-red-900 mb-2">심사 반려</h4>
                       <p className="text-sm text-red-800 mb-3">
-                        제출해주신 서류에 문제가 있어 심사가 반려되었습니다. 
+                        제출해주신 서류에 문제가 있어 심사가 반려되었습니다.
                         자세한 내용은 이메일을 확인해주세요.
                       </p>
                       <Button size="sm" variant="outline">
@@ -469,7 +518,7 @@ export default function ExpertProfilePage() {
                     </div>
                   )}
 
-                  {profileData.signup_status === 'approved' && (
+                  {profileData.expert_profile?.verification_status === 'approved' && (
                     <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                       <h4 className="font-medium text-green-900 mb-2">승인 완료</h4>
                       <p className="text-sm text-green-800">
