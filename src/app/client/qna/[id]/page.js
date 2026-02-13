@@ -409,7 +409,7 @@ export default function QuestionDetailPage() {
                       className={answer.is_liked ? 'text-blue-500' : ''}
                     >
                       <ThumbsUp className={`mr-1 h-4 w-4 ${answer.is_liked ? 'fill-current' : ''}`} />
-                      도움됨 {answer.likes_count}
+                      도움됨
                     </Button>
                     
                     {user?.id === question.author.id && !answer.is_accepted && !question.has_accepted_answer && (
