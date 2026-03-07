@@ -26,6 +26,7 @@ import {
   IoTime,
   IoDocumentText
 } from 'react-icons/io5';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { TokenStorage } from '@/lib/auth/tokenStorage';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -140,17 +141,20 @@ export default function ExpertProfilePage() {
 
   if (!profileData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>프로필 정보를 불러오는 중...</p>
+      <DashboardLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p>프로필 정보를 불러오는 중...</p>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <DashboardLayout>
+      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">전문가 프로필</h1>
@@ -533,5 +537,6 @@ export default function ExpertProfilePage() {
         </Tabs>
       </div>
     </div>
+    </DashboardLayout>
   );
 }
