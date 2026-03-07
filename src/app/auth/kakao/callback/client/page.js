@@ -4,11 +4,14 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthAPI } from '@/lib/api/auth';
 import { exchangeCodeForToken } from '@/lib/auth/kakaoAuth';
+import { TokenStorage } from '@/lib/auth/tokenStorage';
+import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export default function KakaoClientCallbackPage() {
   const router = useRouter();
+  const { setUser } = useAuth();
   const [status, setStatus] = useState('processing');
 
   useEffect(() => {
@@ -29,13 +32,8 @@ export default function KakaoClientCallbackPage() {
       if (!code) {
         throw new Error('인증 코드가 없습니다');
       }
-
-      console.log('카카오 인증 코드 획득:', code);
-
       // 인증 코드를 액세스 토큰으로 교환
       const accessToken = await exchangeCodeForToken(code, 'client');
-      console.log('카카오 액세스 토큰 획득 성공');
-
       // 백엔드로 액세스 토큰 전달
       try {
         // 액세스 토큰을 백엔드로 전송하여 처리
@@ -43,6 +41,14 @@ export default function KakaoClientCallbackPage() {
 
         // 기존 회원인 경우
         if (!response.is_new && response.access) {
+          // JWT 토큰 저장
+          TokenStorage.setTokens(response.access, response.refresh);
+
+          // AuthContext 업데이트
+          if (response.user) {
+            setUser(response.user);
+            localStorage.setItem('user_data', JSON.stringify(response.user));
+          }
           toast.success('로그인되었습니다');
           router.push('/client/dashboard');
           return;
