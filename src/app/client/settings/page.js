@@ -215,7 +215,7 @@ export default function ClientSettingsPage() {
                   className="w-full justify-between"
                   onClick={() => {
                     // TODO: 개인정보 처리방침 페이지로 리다이렉트
-                    window.open('/privacy-policy', '_blank');
+                    window.open('https://www.letsgoshellby.com/terms/client/privacy', '_blank');
                   }}
                 >
                   <span>개인정보 처리방침 보기</span>
@@ -236,7 +236,17 @@ export default function ClientSettingsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {!showPasswordChange ? (
+                {user?.provider !== 'email' ? (
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      {user?.provider === 'kakao' && '카카오톡 '}
+                      {user?.provider === 'apple' && '애플 '}
+                      소셜 로그인으로 가입한 계정은 비밀번호 변경이 불가능합니다.
+                      {user?.provider === 'kakao' && ' 카카오톡 계정 설정에서 비밀번호를 변경해주세요.'}
+                      {user?.provider === 'apple' && ' 애플 계정 설정에서 비밀번호를 변경해주세요.'}
+                    </p>
+                  </div>
+                ) : !showPasswordChange ? (
                   <Button
                     variant="outline"
                     onClick={() => setShowPasswordChange(true)}
