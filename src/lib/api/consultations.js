@@ -149,4 +149,15 @@ export class ConsultationsAPI {
     const response = await apiClient.post(`/consultations/${consultationId}/notes/`, { note });
     return response.data;
   }
+
+  /**
+   * 아이 정보 조회 (전문가용)
+   * GET /consultation/counseling-requests/{counseling_request_id}/child-info/
+   * @param {number} counselingRequestId - 상담 신청 ID
+   * @returns {Object} 아이 정보
+   */
+  static async getChildInfo(counselingRequestId) {
+    const response = await apiClient.get(`/consultation/counseling-requests/${counselingRequestId}/child-info/`);
+    return response.data;
+  }
 }

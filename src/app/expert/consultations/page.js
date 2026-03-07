@@ -16,7 +16,10 @@ import {
   XCircle,
   AlertCircle,
   MessageSquare,
-  FileText
+  FileText,
+  ChevronDown,
+  ChevronUp,
+  BookOpen
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
@@ -28,6 +31,8 @@ export default function ExpertConsultationsPage() {
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [selectedConsultationId, setSelectedConsultationId] = useState(null);
   const [cancellationReason, setCancellationReason] = useState('');
+  const [expandedChildInfo, setExpandedChildInfo] = useState({});
+  const [childInfoData, setChildInfoData] = useState({});
 
   useEffect(() => {
     loadConsultations();
@@ -42,11 +47,10 @@ export default function ExpertConsultationsPage() {
         params.status = 'PENDING';
       } else if (filter === 'upcoming') {
         params.status = 'CONFIRMED';
-      } else if (filter === 'completed') {
-        params.status = 'COMPLETED';
       } else if (filter === 'cancelled') {
         params.status = 'CANCELLED';
       }
+      // completed 필터는 COMPLETED와 WAITING_CURRICULUM 모두 포함
 
       const data = await ConsultationsAPI.getMyConsultations(params);
       const consultationList = Array.isArray(data) ? data : data.results || [];
@@ -64,7 +68,16 @@ export default function ExpertConsultationsPage() {
         })
       );
 
-      setConsultations(detailedConsultations);
+      // completed 필터인 경우 COMPLETED와 WAITING_CURRICULUM 상태만 필터링
+      let filteredConsultations = detailedConsultations;
+      if (filter === 'completed') {
+        filteredConsultations = detailedConsultations.filter(consultation => {
+          const status = consultation.status?.toUpperCase();
+          return status === 'COMPLETED' || status === 'WAITING_CURRICULUM';
+        });
+      }
+
+      setConsultations(filteredConsultations);
     } catch (error) {
       console.error('상담 목록 로딩 실패:', error);
       toast.error('상담 목록을 불러오는데 실패했습니다');
@@ -84,6 +97,102 @@ export default function ExpertConsultationsPage() {
     setCancelModalOpen(false);
     setSelectedConsultationId(null);
     setCancellationReason('');
+  };
+
+  const toggleChildInfo = async (consultationId) => {
+    // 이미 펼쳐져 있으면 닫기
+    if (expandedChildInfo[consultationId]) {
+      setExpandedChildInfo(prev => ({ ...prev, [consultationId]: false }));
+      return;
+    }
+
+    // 데이터가 없으면 API 호출
+    if (!childInfoData[consultationId]) {
+      try {
+        const data = await ConsultationsAPI.getChildInfo(consultationId);
+        setChildInfoData(prev => ({ ...prev, [consultationId]: data }));
+      } catch (error) {
+        console.error('아이 정보 조회 실패:', error);
+        if (error.response?.status === 404) {
+          toast.error('등록된 아이 정보가 없습니다');
+        } else {
+          toast.error('아이 정보를 불러오는데 실패했습니다');
+        }
+        return;
+      }
+    }
+
+    // 펼치기
+    setExpandedChildInfo(prev => ({ ...prev, [consultationId]: true }));
+  };
+
+  // 한글 매핑 함수들 (Dart 코드와 동일한 매핑)
+  const getGenderText = (gender) => {
+    switch (gender) {
+      case 'male': return '남';
+      case 'female': return '여';
+      default: return gender || '-';
+    }
+  };
+
+  const getChildOrderText = (order) => {
+    switch (order) {
+      case 'first': return '첫째';
+      case 'second': return '둘째';
+      case 'third_or_more': return '셋째 이상';
+      default: return order || '-';
+    }
+  };
+
+  const getLearningProblemText = (problems) => {
+    if (!problems || problems.length === 0) return '없음';
+    return problems.map(e => {
+      switch (e) {
+        case 'none': return '없음';
+        case 'reading': return '읽기';
+        case 'writing': return '쓰기';
+        case 'math': return '수학';
+        case 'other': return '기타';
+        default: return e;
+      }
+    }).join(', ');
+  };
+
+  const getSensoryProcessingText = (problems) => {
+    if (!problems || problems.length === 0) return '없음';
+    return problems.map(e => {
+      switch (e) {
+        case 'none': return '없음';
+        case 'sound': return '소리';
+        case 'touch': return '촉각';
+        case 'other': return '기타';
+        default: return e;
+      }
+    }).join(', ');
+  };
+
+  const getEmotionalAnxietyText = (problems) => {
+    if (!problems || problems.length === 0) return '없음';
+    return problems.map(e => {
+      switch (e) {
+        case 'obsessive_compulsive': return '강박';
+        case 'tic': return '틱';
+        case 'social_anxiety': return '사회불안';
+        case 'other': return '기타';
+        default: return e;
+      }
+    }).join(', ');
+  };
+
+  const formatBirthDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '-';
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   const handleApprove = async (consultationId) => {
@@ -143,6 +252,7 @@ export default function ExpertConsultationsPage() {
       case 'PENDING': return 'bg-yellow-100 text-yellow-800';
       case 'CONFIRMED': return 'bg-blue-100 text-blue-800';
       case 'COMPLETED': return 'bg-green-100 text-green-800';
+      case 'WAITING_CURRICULUM': return 'bg-yellow-100 text-yellow-800';
       case 'CANCELLED': return 'bg-red-100 text-red-800';
       case 'REJECTED': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
@@ -163,6 +273,23 @@ export default function ExpertConsultationsPage() {
       case 'REJECTED': return <XCircle className="h-4 w-4" />;
       default: return <AlertCircle className="h-4 w-4" />;
     }
+  };
+
+  // 세션 상태 관련 함수
+  const getSessionStatusColor = (status) => {
+    const upperStatus = status?.toUpperCase();
+    switch (upperStatus) {
+      case 'SCHEDULED': return 'bg-blue-100 text-blue-800';
+      case 'IN_PROGRESS': return 'bg-purple-100 text-purple-800';
+      case 'COMPLETED': return 'bg-green-100 text-green-800';
+      case 'NO_SHOW': return 'bg-orange-100 text-orange-800';
+      case 'CANCELLED': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getSessionStatusText = (session) => {
+    return session.status_display || session.status || '알 수 없음';
   };
 
   const isUpcoming = (scheduledAt) => {
@@ -263,7 +390,14 @@ export default function ExpertConsultationsPage() {
                         </h3>
 
                         <p className="text-gray-600 mb-4 text-sm">
-                          {consultation.completed_sessions > 0 ? `${consultation.completed_sessions}/${consultation.pricing?.total_sessions || 0} 회기 완료` : '상담 시작 전'}
+                          {consultation.sessions?.[0] ? (
+                            <span>세션 상태: <span className={`font-medium ${
+                              consultation.sessions[0].status?.toUpperCase() === 'COMPLETED' ? 'text-green-600' :
+                              consultation.sessions[0].status?.toUpperCase() === 'NO_SHOW' ? 'text-orange-600' :
+                              consultation.sessions[0].status?.toUpperCase() === 'CANCELLED' ? 'text-red-600' :
+                              'text-blue-600'
+                            }`}>{getSessionStatusText(consultation.sessions[0])}</span></span>
+                          ) : '상담 시작 전'}
                         </p>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -307,16 +441,95 @@ export default function ExpertConsultationsPage() {
                           <div className="bg-blue-50 rounded-lg p-4 mb-4">
                             <div className="flex items-center mb-2">
                               <MessageSquare className="h-4 w-4 text-blue-600 mr-2" />
-                              <span className="text-sm font-medium text-blue-900">내담자 요청사항:</span>
+                              <span className="text-sm font-medium text-blue-900">내담자 메모:</span>
                             </div>
                             <p className="text-sm text-blue-800">{consultation.client_notes}</p>
                           </div>
                         )}
+
+                        {/* 아이 정보 아코디언 */}
+                        <div className="border rounded-lg">
+                          <button
+                            onClick={() => toggleChildInfo(consultation.id)}
+                            className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+                          >
+                            <span className="text-sm font-medium text-gray-700">
+                              아이 정보
+                            </span>
+                            {expandedChildInfo[consultation.id] ? (
+                              <ChevronUp className="h-4 w-4 text-gray-500" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4 text-gray-500" />
+                            )}
+                          </button>
+
+                          {expandedChildInfo[consultation.id] && childInfoData[consultation.id] && (
+                            <div className="border-t p-4 bg-gray-50">
+                              {childInfoData[consultation.id].child_info ? (
+                                <div className="space-y-3">
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                      <span className="text-xs text-gray-500">성별</span>
+                                      <p className="text-sm font-medium">{getGenderText(childInfoData[consultation.id].child_info.gender)}</p>
+                                    </div>
+                                    <div>
+                                      <span className="text-xs text-gray-500">출생일</span>
+                                      <p className="text-sm font-medium">{formatBirthDate(childInfoData[consultation.id].child_info.birth_date)}</p>
+                                    </div>
+                                    <div>
+                                      <span className="text-xs text-gray-500">형재자매</span>
+                                      <p className="text-sm font-medium">{getChildOrderText(childInfoData[consultation.id].child_info.child_order)}</p>
+                                    </div>
+                                    <div>
+                                      <span className="text-xs text-gray-500">관련검사 실행 여부</span>
+                                      <p className="text-sm font-medium">{childInfoData[consultation.id].child_info.psychological_test_conducted ? '예' : '아니오'}</p>
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <span className="text-xs text-gray-500">학습 문제</span>
+                                    <p className="text-sm font-medium">{getLearningProblemText(childInfoData[consultation.id].child_info.learning_problem)}</p>
+                                    {childInfoData[consultation.id].child_info.learning_problem_detail && (
+                                      <p className="text-xs text-gray-600 mt-1">{childInfoData[consultation.id].child_info.learning_problem_detail}</p>
+                                    )}
+                                  </div>
+
+                                  <div>
+                                    <span className="text-xs text-gray-500">감각처리 문제</span>
+                                    <p className="text-sm font-medium">{getSensoryProcessingText(childInfoData[consultation.id].child_info.sensory_processing_problem)}</p>
+                                    {childInfoData[consultation.id].child_info.sensory_processing_detail && (
+                                      <p className="text-xs text-gray-600 mt-1">{childInfoData[consultation.id].child_info.sensory_processing_detail}</p>
+                                    )}
+                                  </div>
+
+                                  <div>
+                                    <span className="text-xs text-gray-500">정서/불안 문제</span>
+                                    <p className="text-sm font-medium">{getEmotionalAnxietyText(childInfoData[consultation.id].child_info.emotional_anxiety_problem)}</p>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                      <span className="text-xs text-gray-500">가족 유사 증상</span>
+                                      <p className="text-sm font-medium">{childInfoData[consultation.id].child_info.family_similar_symptoms ? '있음' : '없음'}</p>
+                                    </div>
+                                    <div>
+                                      <span className="text-xs text-gray-500">약물 복용</span>
+                                      <p className="text-sm font-medium">{childInfoData[consultation.id].child_info.medication_usage ? '예' : '아니오'}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-gray-500">등록된 아이 정보가 없습니다.</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       <div className="flex flex-col space-y-2 ml-4">
                         {/* 접수된 상담 (PENDING) - 승인/취소 버튼 */}
-                        {consultation.status?.toUpperCase() === 'PENDING' && (
+                        {consultation.status?.toUpperCase() === 'PENDING' &&
+                         consultation.sessions?.[0]?.status?.toUpperCase() !== 'NO_SHOW' && (
                           <>
                             <Button
                               size="sm"
@@ -361,12 +574,32 @@ export default function ExpertConsultationsPage() {
 
                         {/* 완료된 상담 (COMPLETED) - 상담 일지 작성 버튼 */}
                         {consultation.status?.toUpperCase() === 'COMPLETED' && (
-                          <Link href={`/expert/consultations/${consultation.id}/log`}>
-                            <Button size="sm" variant="outline">
-                              <FileText className="mr-1 h-4 w-4" />
-                              상담 일지 작성
-                            </Button>
-                          </Link>
+                          <>
+                            <Link href={`/expert/consultations/${consultation.id}/log`}>
+                              <Button size="sm" variant="outline">
+                                <FileText className="mr-1 h-4 w-4" />
+                                상담 일지 작성
+                              </Button>
+                            </Link>
+                          </>
+                        )}
+
+                        {/* 커리큘럼 대기 상태 (WAITING_CURRICULUM) - 상담 일지 작성 + 커리큘럼 작성 버튼 */}
+                        {consultation.status?.toUpperCase() === 'WAITING_CURRICULUM' && (
+                          <>
+                            <Link href={`/expert/consultations/${consultation.id}/log`}>
+                              <Button size="sm" variant="outline">
+                                <FileText className="mr-1 h-4 w-4" />
+                                상담 일지 작성
+                              </Button>
+                            </Link>
+                            <Link href={`/expert/consultations/${consultation.id}/curriculum`}>
+                              <Button size="sm" className="bg-primary text-white hover:bg-primary/90">
+                                <BookOpen className="mr-1 h-4 w-4" />
+                                커리큘럼 작성
+                              </Button>
+                            </Link>
+                          </>
                         )}
                       </div>
                     </div>
