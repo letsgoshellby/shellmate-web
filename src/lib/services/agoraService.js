@@ -9,8 +9,10 @@ class AgoraService {
     this.client = null;
     this.localAudioTrack = null;
     this.localVideoTrack = null;
+    this.screenTrack = null;
     this.remoteUsers = {};
     this.isJoined = false;
+    this.isScreenSharing = false;
   }
 
   /**
@@ -271,6 +273,91 @@ class AgoraService {
    */
   setOnRemoteUserLeft(callback) {
     this.onRemoteUserLeft = callback;
+  }
+
+  /**
+   * 화면 공유 시작
+   * @returns {boolean} 화면 공유 시작 성공 여부
+   */
+  async startScreenShare() {
+    try {
+      // 화면 공유 트랙 생성
+      this.screenTrack = await AgoraRTC.createScreenVideoTrack({}, 'auto');
+      console.log('✅ [AgoraService] 화면 공유 트랙 생성 완료');
+
+      // 기존 비디오 트랙 언퍼블리시
+      if (this.localVideoTrack) {
+        await this.client.unpublish([this.localVideoTrack]);
+      }
+
+      // 화면 공유 트랙 퍼블리시
+      await this.client.publish(this.screenTrack);
+      this.isScreenSharing = true;
+      console.log('✅ [AgoraService] 화면 공유 시작');
+
+      // 화면 공유 종료 이벤트 (사용자가 브라우저에서 중지 버튼을 누른 경우)
+      this.screenTrack.on('track-ended', () => {
+        console.log('🔴 [AgoraService] 화면 공유가 종료되었습니다');
+        this.stopScreenShare();
+      });
+
+      return true;
+    } catch (error) {
+      console.error('🔴 [AgoraService] 화면 공유 시작 실패:', error);
+      this.isScreenSharing = false;
+      throw error;
+    }
+  }
+
+  /**
+   * 화면 공유 중지
+   * @returns {boolean} 화면 공유 중지 성공 여부
+   */
+  async stopScreenShare() {
+    try {
+      if (this.screenTrack) {
+        // 화면 공유 트랙 언퍼블리시
+        await this.client.unpublish(this.screenTrack);
+
+        // 화면 공유 트랙 닫기
+        this.screenTrack.close();
+        this.screenTrack = null;
+      }
+
+      // 기존 비디오 트랙 다시 퍼블리시
+      if (this.localVideoTrack) {
+        await this.client.publish([this.localVideoTrack]);
+      }
+
+      this.isScreenSharing = false;
+      console.log('✅ [AgoraService] 화면 공유 중지');
+      return true;
+    } catch (error) {
+      console.error('🔴 [AgoraService] 화면 공유 중지 실패:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 화면 공유 토글
+   * @returns {boolean} 현재 화면 공유 상태 (true: 공유 중, false: 중지)
+   */
+  async toggleScreenShare() {
+    if (this.isScreenSharing) {
+      await this.stopScreenShare();
+      return false;
+    } else {
+      await this.startScreenShare();
+      return true;
+    }
+  }
+
+  /**
+   * 화면 공유 상태 확인
+   * @returns {boolean} 화면 공유 중 여부
+   */
+  isScreenSharingActive() {
+    return this.isScreenSharing;
   }
 }
 

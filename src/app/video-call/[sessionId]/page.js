@@ -12,7 +12,9 @@ import {
   VolumeX,
   PhoneOff,
   SwitchCamera,
-  Loader2
+  Loader2,
+  MonitorUp,
+  MonitorStop
 } from 'lucide-react';
 import { AgoraAPI } from '@/lib/api/agora';
 import { toast } from 'react-hot-toast';
@@ -31,6 +33,7 @@ export default function VideoCallPage({ params }) {
   const [isMuted, setIsMuted] = useState(false);
   const [isCameraOff, setIsCameraOff] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
   const [participantName, setParticipantName] = useState('상대방');
   const [sessionInfo, setSessionInfo] = useState('');
@@ -66,21 +69,21 @@ export default function VideoCallPage({ params }) {
   }, [isConnected]);
 
   const initializeCall = async () => {
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🎬 [VideoCallPage] 초기화 시작');
-    console.log('   sessionId:', sessionId);
+    // console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    // console.log('🎬 [VideoCallPage] 초기화 시작');
+    // console.log('   sessionId:', sessionId);
 
     try {
       // 이미 연결되어 있으면 종료
       if (agoraServiceRef.current) {
-        console.log('⚠️ [VideoCallPage] 기존 연결 종료 중...');
+        // console.log('⚠️ [VideoCallPage] 기존 연결 종료 중...');
         await agoraServiceRef.current.leaveChannel();
         agoraServiceRef.current = null;
       }
 
-      console.log('🔵 [VideoCallPage] 세션 정보 조회 중...');
+      // console.log('🔵 [VideoCallPage] 세션 정보 조회 중...');
       const sessionData = await AgoraAPI.getSession(sessionId);
-      console.log('✅ [VideoCallPage] 세션 정보:', sessionData);
+      // console.log('✅ [VideoCallPage] 세션 정보:', sessionData);
 
       // 상대방 이름 설정 (client는 expert 이름, expert는 client 이름)
       const counselingRequest = sessionData.counseling_request || {};
@@ -97,16 +100,16 @@ export default function VideoCallPage({ params }) {
       const sessionNumber = sessionData.session_number || 1;
       setSessionInfo(`${sessionNumber}회차`);
 
-      console.log('🔵 [VideoCallPage] Agora 화상방 정보 조회 중...');
+      // console.log('🔵 [VideoCallPage] Agora 화상방 정보 조회 중...');
       const videoRoomData = await AgoraAPI.getVideoRoom(sessionId);
-      console.log('✅ [VideoCallPage] 화상방 정보:', videoRoomData);
+      // console.log('✅ [VideoCallPage] 화상방 정보:', videoRoomData);
 
       // Agora 서비스 생성
       agoraServiceRef.current = new AgoraService();
 
       // 원격 사용자 입장 이벤트 핸들러
       agoraServiceRef.current.setOnRemoteUserJoined((user, mediaType) => {
-        console.log('✅ [VideoCallPage] 원격 사용자 입장:', user.uid, mediaType);
+        // console.log('✅ [VideoCallPage] 원격 사용자 입장:', user.uid, mediaType);
         setRemoteUid(user.uid);
 
         if (mediaType === 'video') {
@@ -124,7 +127,7 @@ export default function VideoCallPage({ params }) {
 
       // 원격 사용자 퇴장 이벤트 핸들러
       agoraServiceRef.current.setOnRemoteUserLeft((user, mediaType) => {
-        console.log('🔴 [VideoCallPage] 원격 사용자 퇴장:', user.uid, mediaType);
+        // console.log('🔴 [VideoCallPage] 원격 사용자 퇴장:', user.uid, mediaType);
         if (mediaType === 'left' || mediaType === 'video') {
           setRemoteUid(null);
           setIsRemoteVideoOn(false);
@@ -147,13 +150,13 @@ export default function VideoCallPage({ params }) {
       setIsConnected(true);
       toast.success('화상 상담에 연결되었습니다');
     } catch (error) {
-      console.error('🔴 [VideoCallPage] 초기화 실패:', error);
+      // console.error('🔴 [VideoCallPage] 초기화 실패:', error);
       toast.error('화상 상담 연결에 실패했습니다');
       setTimeout(() => {
         router.back();
       }, 2000);
     }
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    // console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   };
 
   const cleanup = async () => {
@@ -218,6 +221,23 @@ export default function VideoCallPage({ params }) {
     }
   };
 
+  const toggleScreenShare = async () => {
+    if (agoraServiceRef.current) {
+      try {
+        const isSharing = await agoraServiceRef.current.toggleScreenShare();
+        setIsScreenSharing(isSharing);
+        toast.success(isSharing ? '화면 공유가 시작되었습니다' : '화면 공유가 중지되었습니다');
+      } catch (error) {
+        console.error('화면 공유 토글 실패:', error);
+        // 사용자가 화면 공유를 취소한 경우는 에러로 표시하지 않음
+        if (error.name !== 'NotAllowedError') {
+          toast.error('화면 공유에 실패했습니다');
+        }
+        setIsScreenSharing(false);
+      }
+    }
+  };
+
   const leaveOnly = async () => {
     if (isEndingCall) return;
     setIsEndingCall(true);
@@ -243,7 +263,8 @@ export default function VideoCallPage({ params }) {
     setIsEndingCall(true);
 
     try {
-      console.log('🔵 [VideoCallPage] 상담 완료 처리 중...');
+      // console.log('🔵 [VideoCallPage] 상담 완료 처리 중...');
+      // console.log('🔵 [VideoCallPage] Session ID:', sessionId);
 
       // Agora SDK - 통화 종료
       if (agoraServiceRef.current) {
@@ -257,7 +278,19 @@ export default function VideoCallPage({ params }) {
       router.push('/expert/consultations');
     } catch (error) {
       console.error('🔴 상담 종료 실패:', error);
-      toast.error('상담 종료에 실패했습니다');
+      console.error('🔴 에러 상세:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        url: error.response?.config?.url,
+        data: error.response?.data,
+        message: error.message
+      });
+
+      if (error.response?.status === 404) {
+        toast.error('상담 세션을 찾을 수 없습니다');
+      } else {
+        toast.error('상담 종료에 실패했습니다');
+      }
       router.back();
     }
   };
@@ -367,6 +400,22 @@ export default function VideoCallPage({ params }) {
                 <VideoOff className="h-6 w-6 text-white" />
               ) : (
                 <Video className="h-6 w-6 text-black" />
+              )}
+            </button>
+
+            {/* 화면 공유 */}
+            <button
+              onClick={toggleScreenShare}
+              className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
+                isScreenSharing
+                  ? 'bg-blue-600 border-2 border-blue-500'
+                  : 'bg-white/90 border-2 border-white'
+              }`}
+            >
+              {isScreenSharing ? (
+                <MonitorStop className="h-6 w-6 text-white" />
+              ) : (
+                <MonitorUp className="h-6 w-6 text-black" />
               )}
             </button>
 
