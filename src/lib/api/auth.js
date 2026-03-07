@@ -5,7 +5,7 @@ export class AuthAPI {
   // 이메일 로그인
   static async login(credentials, rememberMe = false) {
     try {
-      console.log('🔵 [로그인] 요청 시작');
+      // console.log('🔵 [로그인] 요청 시작');
 
       const response = await apiClient.post('/auth/login/', credentials);
 
@@ -21,10 +21,10 @@ export class AuthAPI {
         user: userResponse.data,
       };
     } catch (error) {
-      console.log('🔴 [로그인] 에러 발생');
-      console.log('🔴 [로그인] 상태 코드:', error.response?.status);
-      console.log('🔴 [로그인] 에러 데이터:', error.response?.data);
-      console.log('🔴 [로그인] 에러 메시지:', error.message);
+      // console.log('🔴 [로그인] 에러 발생');
+      // console.log('🔴 [로그인] 상태 코드:', error.response?.status);
+      // console.log('🔴 [로그인] 에러 데이터:', error.response?.data);
+      // console.log('🔴 [로그인] 에러 메시지:', error.message);
       throw error;
     }
   }
@@ -107,8 +107,8 @@ export class AuthAPI {
   // 소셜 로그인 - Client
   static async clientSocialLogin(provider, accessToken, terms = {}) {
     try {
-      console.log('🔵 [소셜 로그인] Client 요청 시작');
-      console.log('🔵 [소셜 로그인] Provider:', provider);
+      // console.log('🔵 [소셜 로그인] Client 요청 시작');
+      // console.log('🔵 [소셜 로그인] Provider:', provider);
 
       const response = await apiClient.post('/auth/client/social-login/', {
         provider,
@@ -116,16 +116,16 @@ export class AuthAPI {
         ...terms,
       });
 
-      console.log('🔵 [소셜 로그인] 응답:', response.data);
+      // console.log('🔵 [소셜 로그인] 응답:', response.data);
 
       // 토큰이 있으면 저장 (기존 회원)
       if (response.data.access && response.data.refresh) {
         TokenStorage.setTokens(response.data.access, response.data.refresh, false);
-        console.log('✅ [소셜 로그인] 토큰 저장 완료');
+        // console.log('✅ [소셜 로그인] 토큰 저장 완료');
 
         // 사용자 정보 가져오기
         const userResponse = await apiClient.get('/user/me/');
-        console.log('✅ [소셜 로그인] 사용자 정보:', userResponse.data);
+        // console.log('✅ [소셜 로그인] 사용자 정보:', userResponse.data);
 
         return {
           ...response.data,
@@ -140,9 +140,9 @@ export class AuthAPI {
         isNewUser: true,
       };
     } catch (error) {
-      console.log('🔴 [소셜 로그인] 에러 발생');
-      console.log('🔴 [소셜 로그인] 상태 코드:', error.response?.status);
-      console.log('🔴 [소셜 로그인] 에러 데이터:', error.response?.data);
+      // console.log('🔴 [소셜 로그인] 에러 발생');
+      // console.log('🔴 [소셜 로그인] 상태 코드:', error.response?.status);
+      // console.log('🔴 [소셜 로그인] 에러 데이터:', error.response?.data);
       throw error;
     }
   }
@@ -150,8 +150,8 @@ export class AuthAPI {
   // 소셜 로그인 - Expert
   static async expertSocialLogin(provider, accessToken, terms = {}) {
     try {
-      console.log('🔵 [소셜 로그인] Expert 요청 시작');
-      console.log('🔵 [소셜 로그인] Provider:', provider);
+      // console.log('🔵 [소셜 로그인] Expert 요청 시작');
+      // console.log('🔵 [소셜 로그인] Provider:', provider);
 
       const response = await apiClient.post('/auth/expert/social-login/', {
         provider,
@@ -159,16 +159,16 @@ export class AuthAPI {
         ...terms,
       });
 
-      console.log('🔵 [소셜 로그인] 응답:', response.data);
+      // console.log('🔵 [소셜 로그인] 응답:', response.data);
 
       // 토큰이 있으면 저장 (기존 회원)
       if (response.data.access && response.data.refresh) {
         TokenStorage.setTokens(response.data.access, response.data.refresh, false);
-        console.log('✅ [소셜 로그인] 토큰 저장 완료');
+        // console.log('✅ [소셜 로그인] 토큰 저장 완료');
 
         // 사용자 정보 가져오기
         const userResponse = await apiClient.get('/user/me/');
-        console.log('✅ [소셜 로그인] 사용자 정보:', userResponse.data);
+        // console.log('✅ [소셜 로그인] 사용자 정보:', userResponse.data);
 
         return {
           ...response.data,
@@ -183,9 +183,9 @@ export class AuthAPI {
         isNewUser: true,
       };
     } catch (error) {
-      console.log('🔴 [소셜 로그인] 에러 발생');
-      console.log('🔴 [소셜 로그인] 상태 코드:', error.response?.status);
-      console.log('🔴 [소셜 로그인] 에러 데이터:', error.response?.data);
+      // console.log('🔴 [소셜 로그인] 에러 발생');
+      // console.log('🔴 [소셜 로그인] 상태 코드:', error.response?.status);
+      // console.log('🔴 [소셜 로그인] 에러 데이터:', error.response?.data);
       throw error;
     }
   }

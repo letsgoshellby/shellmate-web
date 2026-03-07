@@ -10,7 +10,7 @@ export function ScriptLoader() {
         src="https://cdn.portone.io/v2/browser-sdk.js"
         strategy="afterInteractive"
         onLoad={() => {
-          console.log('PortOne SDK loaded');
+          // console.log('PortOne SDK loaded');
         }}
       />
 
@@ -19,10 +19,10 @@ export function ScriptLoader() {
         src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
         strategy="afterInteractive"
         onLoad={() => {
-          console.log('Kakao SDK loaded successfully', !!window.Kakao);
+          // console.log('Kakao SDK loaded successfully', !!window.Kakao);
         }}
         onError={(e) => {
-          console.error('Kakao SDK failed to load', e);
+          // console.error('Kakao SDK failed to load', e);
         }}
       />
     </>

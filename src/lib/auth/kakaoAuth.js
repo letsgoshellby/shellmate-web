@@ -22,11 +22,11 @@ export const getKakaoAppKey = (role) => {
   }
 
   if (!appKey) {
-    console.error(`카카오 앱 키가 설정되지 않았습니다. Role: ${role}`);
-    console.error('환경 변수:', {
-      client: process.env.NEXT_PUBLIC_KAKAO_CLIENT_APP_KEY,
-      expert: process.env.NEXT_PUBLIC_KAKAO_EXPERT_APP_KEY,
-    });
+    // console.error(`카카오 앱 키가 설정되지 않았습니다. Role: ${role}`);
+    // console.error('환경 변수:', {
+    //   client: process.env.NEXT_PUBLIC_KAKAO_CLIENT_APP_KEY,
+    //   expert: process.env.NEXT_PUBLIC_KAKAO_EXPERT_APP_KEY,
+    // });
     throw new Error(`Kakao App Key not found for role: ${role}`);
   }
 
@@ -129,7 +129,7 @@ export const exchangeCodeForToken = async (code, role) => {
     const data = await response.json();
     return data.access_token;
   } catch (error) {
-    console.error('Token exchange error:', error);
+    // console.error('Token exchange error:', error);
     throw error;
   }
 };
@@ -164,7 +164,7 @@ export const loginWithKakao = async (role, onSuccess, onFailure) => {
       state: role, // 역할 정보를 state로 전달
     });
   } catch (err) {
-    console.error('Kakao login failed:', err);
+    // console.error('Kakao login failed:', err);
     onFailure(err);
   }
 };
