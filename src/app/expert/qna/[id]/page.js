@@ -248,14 +248,14 @@ export default function ExpertQuestionDetailPage() {
               </Badge>
             )}
           </div>
-
-          {/* 질문자 정보 카드 */}
-          <Card className="bg-blue-50 border-blue-200">
+            
+          {/* 질문자 정보 카드
+           <Card className="bg-blue-50 border-blue-200">
             <CardContent className="p-4">
               <h3 className="font-medium text-blue-900 mb-2">질문자 정보</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-blue-800">
                 <div>
-                  <span className="font-medium">질문자:</span> {question.author.name}
+                  <span className="font-medium">질문자:</span> {question.author?.nickname || question.author?.name || '익명'}
                 </div>
                 <div>
                   <span className="font-medium">아이 나이:</span> {question.author.children_info?.age || '미상'}세
@@ -265,7 +265,7 @@ export default function ExpertQuestionDetailPage() {
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* 질문 카드 */}
           <Card>
@@ -308,7 +308,7 @@ export default function ExpertQuestionDetailPage() {
                 <div className="flex items-center text-sm text-gray-500 space-x-4">
                   <div className="flex items-center">
                     <User className="mr-1 h-4 w-4" />
-                    {question.author.name}
+                    {question.author?.nickname || question.author?.name || '익명'}
                   </div>
                   <div className="flex items-center">
                     <Clock className="mr-1 h-4 w-4" />
@@ -337,24 +337,24 @@ export default function ExpertQuestionDetailPage() {
                 기존 답변 {answers.length}개
               </h3>
               
-              {answers.map((answer) => (
+              {answers.map((answer) => {
+                const authorName = answer.author?.nickname || answer.author?.name || '익명';
+                return (
                 <Card key={answer.id} className={answer.is_expert ? 'border-blue-200 bg-blue-50/30' : ''}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-medium">
-                          {answer.author.name.charAt(0)}
+                          {authorName.charAt(0)}
                         </div>
                         <div>
                           <div className="flex items-center space-x-2">
-                            <span className="font-medium">{answer.author.name}</span>
-                            {answer.is_expert ? (
+                            <span className="font-medium">{authorName}</span>
+                            {answer.is_expert && (
                               <Badge className="bg-blue-100 text-blue-800 text-xs">
                                 <Star className="mr-1 h-3 w-3" />
                                 전문가
                               </Badge>
-                            ) : (
-                              <Badge variant="outline" className="text-xs">학부모</Badge>
                             )}
                           </div>
                           <div className="text-sm text-gray-500">
@@ -376,7 +376,8 @@ export default function ExpertQuestionDetailPage() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              );
+              })}
             </div>
           )}
 
@@ -394,14 +395,14 @@ export default function ExpertQuestionDetailPage() {
             <CardContent>
               <div className="space-y-4">
                 <Textarea
-                  placeholder="전문가로서 구체적이고 실용적인 조언을 제공해주세요. 다음 내용을 포함하시면 좋습니다:
+                  placeholder={`전문가로서 구체적이고 실용적인 조언을 제공해주세요.
 
 1. 현재 상황에 대한 전문적 분석
 2. 구체적인 해결 방법이나 개선 방안
 3. 주의사항이나 고려할 점
 4. 필요시 추가 전문가 도움을 받을 시점
 
-학부모가 실제로 적용할 수 있는 구체적인 방법을 제시해주시기 바랍니다."
+등등`}
                   value={newAnswer}
                   onChange={(e) => setNewAnswer(e.target.value)}
                   rows={10}
