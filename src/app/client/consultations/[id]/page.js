@@ -7,20 +7,22 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  CalendarDays, 
-  Clock, 
-  User, 
-  Phone, 
-  Video, 
+import {
+  CalendarDays,
+  Clock,
+  User,
+  Phone,
+  Video,
   MessageCircle,
   Star,
   AlertCircle,
   CheckCircle,
-  XCircle
+  XCircle,
+  FileText,
+  BookOpen
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { consultationAPI } from '@/lib/api/consultation';
+import { ConsultationsAPI } from '@/lib/api/consultations';
 
 const statusConfig = {
   pending: { label: '예약 대기', color: 'bg-yellow-100 text-yellow-800', icon: AlertCircle },
@@ -45,7 +47,10 @@ export default function ConsultationDetailPage() {
   const fetchConsultationDetail = async () => {
     try {
       setLoading(true);
-      const data = await consultationAPI.getConsultationDetail(id);
+      const data = await ConsultationsAPI.getCounselingRequestDetail(id);
+      console.log('🔍 [DEBUG] consultation data:', data);
+      console.log('🔍 [DEBUG] consultation.status:', data.status);
+      console.log('🔍 [DEBUG] consultation.curriculum:', data.curriculum);
       setConsultation(data);
     } catch (err) {
       setError('상담 정보를 불러오는데 실패했습니다.');
@@ -56,9 +61,9 @@ export default function ConsultationDetailPage() {
 
   const handleCancelConsultation = async () => {
     if (!confirm('정말로 상담을 취소하시겠습니까?')) return;
-    
+
     try {
-      await consultationAPI.cancelConsultation(id);
+      await ConsultationsAPI.cancelConsultation(id);
       await fetchConsultationDetail();
     } catch (err) {
       toast.error('상담 취소에 실패했습니다.');
@@ -107,6 +112,8 @@ export default function ConsultationDetailPage() {
   const canCancel = ['pending', 'confirmed'].includes(consultation.status);
   const canJoin = consultation.status === 'confirmed' && new Date(consultation.scheduled_at) <= new Date();
   const canReview = consultation.status === 'completed' && !consultation.review;
+  const canViewLog = consultation.status === 'completed'; // 상담 완료 시 일지 조회 가능
+  const canViewCurriculum = consultation.status === 'IN_PROGRESS'; // 진행중일 때 커리큘럼 조회 가능
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -276,17 +283,39 @@ export default function ConsultationDetailPage() {
                   상담 참여하기
                 </Button>
               )}
-              
+
+              {canViewLog && (
+                <Button
+                  onClick={() => router.push(`/client/consultations/${id}/log`)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  상담일지 보기
+                </Button>
+              )}
+
+              {canViewCurriculum && (
+                <Button
+                  onClick={() => router.push(`/client/consultations/${id}/curriculum`)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  커리큘럼 보기
+                </Button>
+              )}
+
               {canReview && (
                 <Button onClick={handleWriteReview} variant="outline" className="flex-1">
                   <Star className="w-4 h-4 mr-2" />
                   리뷰 작성하기
                 </Button>
               )}
-              
+
               {canCancel && (
-                <Button 
-                  onClick={handleCancelConsultation} 
+                <Button
+                  onClick={handleCancelConsultation}
                   variant="destructive"
                   className="flex-1"
                 >
