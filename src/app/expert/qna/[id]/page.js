@@ -287,13 +287,15 @@ export default function ExpertQuestionDetailPage() {
                     )}
                   </div>
                   <CardTitle className="text-xl mb-4">{question.title}</CardTitle>
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {question.tags.map((tag, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
+                  {question.tags && question.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {question.tags.map((tag, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </CardHeader>
