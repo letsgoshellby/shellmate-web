@@ -201,9 +201,6 @@ export default function CurriculumPage() {
         total_sessions: sessionsForBackend.length,  // 추가 회차 수 (1회차 제외)
         sessions_info: sessionsForBackend
       };
-
-      // console.log('📤 [커리큘럼] 제출 데이터:', submitData);
-
       if (existingCurriculum) {
         // 수정
         await CurriculumAPI.updateCurriculum(existingCurriculum.id, submitData);
