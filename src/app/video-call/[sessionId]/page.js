@@ -38,6 +38,7 @@ export default function VideoCallPage({ params }) {
   const [participantName, setParticipantName] = useState('상대방');
   const [sessionInfo, setSessionInfo] = useState('');
   const [showEndCallModal, setShowEndCallModal] = useState(false);
+  const [userType, setUserType] = useState(null); // 'client' or 'expert'
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -88,13 +89,33 @@ export default function VideoCallPage({ params }) {
       // 상대방 이름 설정 (client는 expert 이름, expert는 client 이름)
       const counselingRequest = sessionData.counseling_request || {};
 
-      if (counselingRequest.expert?.user?.name) {
+      // 여러 경로에서 이름 정보 추출 시도
+      const expertName = counselingRequest.expert?.user?.name
+        || counselingRequest.expert?.name
+        || counselingRequest.expert_name;
+
+      const clientName = counselingRequest.client?.user?.name
+        || counselingRequest.client?.name
+        || counselingRequest.client_name;
+
+      if (expertName) {
         // Client 입장 - 전문가 이름 표시
-        setParticipantName(`${counselingRequest.expert.user.name} 전문가`);
-      } else if (counselingRequest.client?.user?.name) {
+        setParticipantName(`${expertName} 전문가`);
+        setUserType('client');
+      } else if (clientName) {
         // Expert 입장 - 내담자 이름 표시
-        setParticipantName(`${counselingRequest.client.user.name} 학부모`);
+        setParticipantName(`${clientName} 학부모`);
+        setUserType('expert');
       }
+
+      // 디버깅을 위한 로그 (개발 중에만 사용)
+      console.log('세션 데이터:', {
+        counselingRequest,
+        expertName,
+        clientName,
+        participantName: expertName || clientName || '상대방',
+        userType: expertName ? 'client' : 'expert'
+      });
 
       // 회차 정보 설정
       const sessionNumber = sessionData.session_number || 1;
@@ -251,10 +272,19 @@ export default function VideoCallPage({ params }) {
 
       await AgoraAPI.leaveVideoRoom(sessionId);
       toast.success('상담방에서 나갔습니다');
-      router.back();
+
+      // 사용자 타입에 따라 적절한 페이지로 이동
+      const redirectPath = userType === 'client'
+        ? '/client/consultations'
+        : '/expert/consultations';
+      router.push(redirectPath);
     } catch (error) {
       console.error('🔴 나가기 실패:', error);
-      router.back();
+      // 에러 발생 시에도 적절한 페이지로 이동
+      const redirectPath = userType === 'client'
+        ? '/client/consultations'
+        : '/expert/consultations';
+      router.push(redirectPath);
     }
   };
 
@@ -275,7 +305,12 @@ export default function VideoCallPage({ params }) {
       // TODO: 상담 완료 API 호출 (백엔드에 완료 상태 업데이트)
       await AgoraAPI.leaveVideoRoom(sessionId);
       toast.success('상담이 종료되었습니다');
-      router.push('/expert/consultations');
+
+      // 사용자 타입에 따라 적절한 페이지로 이동
+      const redirectPath = userType === 'client'
+        ? '/client/consultations'
+        : '/expert/consultations';
+      router.push(redirectPath);
     } catch (error) {
       console.error('🔴 상담 종료 실패:', error);
       console.error('🔴 에러 상세:', {
@@ -291,7 +326,12 @@ export default function VideoCallPage({ params }) {
       } else {
         toast.error('상담 종료에 실패했습니다');
       }
-      router.back();
+
+      // 에러 발생 시에도 적절한 페이지로 이동
+      const redirectPath = userType === 'client'
+        ? '/client/consultations'
+        : '/expert/consultations';
+      router.push(redirectPath);
     }
   };
 
