@@ -30,10 +30,13 @@ export default function ClientCounselLogPage({ params }) {
       setSessionInfo(session);
 
       // 상담 일지 조회 (PUBLISHED 상태만)
-      const logs = await CounselingLogAPI.getCounselingLogs({
+      const response = await CounselingLogAPI.getCounselingLogs({
         session_id: sessionId,
         status: 'PUBLISHED'
       });
+
+      // 페이지네이션된 응답에서 results 배열 추출
+      const logs = response?.results || response;
 
       if (logs && logs.length > 0) {
         setCounselingLog(logs[0]);
@@ -92,12 +95,16 @@ export default function ClientCounselLogPage({ params }) {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
                   <span className="text-gray-600 block">회차</span>
-                  <span className="font-medium">{sessionInfo?.session_number || '-'}회차</span>
+                  <span className="font-medium">
+                    {counselingLog?.session_number || sessionInfo?.session_number || '-'}회차
+                  </span>
                 </div>
                 <div>
                   <span className="text-gray-600 block">전문가</span>
                   <span className="font-medium">
-                    {sessionInfo?.counseling_request?.expert?.user?.name || '-'}
+                    {counselingLog?.counselor_name ||
+                     sessionInfo?.counseling_request?.expert?.user?.name ||
+                     '-'}
                   </span>
                 </div>
                 <div>
@@ -109,7 +116,7 @@ export default function ClientCounselLogPage({ params }) {
                 <div>
                   <span className="text-gray-600 block">상담일</span>
                   <span className="font-medium">
-                    {formatDate(sessionInfo?.scheduled_at)}
+                    {formatDate(counselingLog?.counseling_date || sessionInfo?.scheduled_at)}
                   </span>
                 </div>
               </div>
