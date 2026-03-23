@@ -288,7 +288,7 @@ export default function ExpertDetailPage({ params }) {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <h3 className="text-lg font-semibold">{pricing.session_type_display}</h3>
-                            {pricing.additional_sessions > 0 && (
+                            {(pricing?.additional_sessions || 0) > 0 && (
                               <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                                 +{pricing.additional_sessions}회 추가 제공
                               </Badge>
@@ -296,9 +296,9 @@ export default function ExpertDetailPage({ params }) {
                           </div>
                           <p className="text-sm text-gray-600 mb-2">
                             총 {pricing.total_sessions}회 상담
-                            {pricing.additional_sessions > 0 && (
+                            {(pricing?.additional_sessions || 0) > 0 && (
                               <span className="text-green-600">
-                                {' '}(기본 {pricing.total_sessions - pricing.additional_sessions}회 + 보너스 {pricing.additional_sessions}회)
+                                {' '}(기본 {pricing.total_sessions - (pricing?.additional_sessions || 0)}회 + 보너스 {pricing.additional_sessions}회)
                               </span>
                             )}
                           </p>
