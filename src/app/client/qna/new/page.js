@@ -20,7 +20,7 @@ import { toast } from 'react-hot-toast';
 
 const questionSchema = z.object({
   title: z.string().min(10, '제목은 10자 이상이어야 합니다').max(100, '제목은 100자를 초과할 수 없습니다'),
-  content: z.string().min(20, '내용은 20자 이상이어야 합니다').max(2000, '내용은 2000자를 초과할 수 없습니다'),
+  content: z.string().min(20, '내용은 20자 이상이어야 합니다').max(200, '내용은 200자를 초과할 수 없습니다'),
   category: z.string().min(1, '카테고리를 선택해주세요'),
 });
 
@@ -197,7 +197,7 @@ export default function NewQuestionPage() {
                       <p className="text-red-500">{errors.content.message}</p>
                     )}
                     <p className="text-gray-500 ml-auto">
-                      {watchedContent.length}/2000
+                      {watchedContent.length}/200
                     </p>
                   </div>
                 </div>
