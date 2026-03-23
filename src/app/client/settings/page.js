@@ -214,7 +214,7 @@ export default function ClientSettingsPage() {
                   variant="outline"
                   className="w-full justify-between"
                   onClick={() => {
-                    // TODO: 개인정보 처리방침 페이지로 리다이렉트
+                    // 개인정보 처리방침 페이지로 리다이렉트
                     window.open('https://www.letsgoshellby.com/terms/client/privacy', '_blank');
                   }}
                 >
