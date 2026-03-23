@@ -31,6 +31,29 @@ export default function ClientQnAPage() {
   const [sortBy, setSortBy] = useState('recent');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+
+  const handleLikeQuestion = async (questionId, e) => {
+    e.preventDefault(); // Link 클릭 방지
+    e.stopPropagation();
+
+    try {
+      const result = await QnAAPI.toggleSympathy(questionId);
+
+      // 목록의 해당 질문 업데이트
+      setQuestions(questions.map(q =>
+        q.id === questionId
+          ? {
+              ...q,
+              is_sympathized_by_user: result.is_sympathized,
+              sympathy_count: result.sympathy_count
+            }
+          : q
+      ));
+    } catch (error) {
+      console.error('공감 처리 실패:', error);
+      toast.error('공감 처리에 실패했습니다');
+    }
+  };
   
   // 임시 데이터 (실제로는 API에서 가져올 데이터)
   // const mockQuestions = [
@@ -316,7 +339,7 @@ export default function ClientQnAPage() {
                         <div className="flex items-center text-sm text-gray-500 space-x-4">
                           <div className="flex items-center">
                             <User className="mr-1 h-4 w-4" />
-                            {question.author?.name || question.author_nickname || '익명'}
+                            {question.author?.nickname || question.author?.name || question.author_nickname || '익명'}
                           </div>
                           <div className="flex items-center">
                             <Clock className="mr-1 h-4 w-4" />
@@ -326,10 +349,15 @@ export default function ClientQnAPage() {
                             <MessageSquare className="mr-1 h-4 w-4" />
                             답변 {question.answers_count}
                           </div>
-                          <div className="flex items-center">
-                            <Heart className="mr-1 h-4 w-4" />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => handleLikeQuestion(question.id, e)}
+                            className={`flex items-center h-auto p-0 hover:bg-transparent ${question.is_sympathized_by_user ? 'text-red-500' : 'text-gray-500'}`}
+                          >
+                            <Heart className={`mr-1 h-4 w-4 ${question.is_sympathized_by_user ? 'fill-current' : ''}`} />
                             {question.sympathy_count || 0}
-                          </div>
+                          </Button>
                         </div>
                       </div>
                     </div>

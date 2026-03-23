@@ -169,9 +169,10 @@ export default function QuestionDetailPage() {
     try {
       // 실제 API 호출 - toggleSympathy
       const result = await QnAAPI.toggleSympathy(question.id);
+
       setQuestion({
         ...question,
-        is_sympathized: result.sympathized,
+        is_sympathized_by_user: result.is_sympathized,
         sympathy_count: result.sympathy_count
       });
     } catch (error) {
@@ -332,7 +333,7 @@ export default function QuestionDetailPage() {
                 <div className="flex items-center text-sm text-gray-500 space-x-4">
                   <div className="flex items-center">
                     <User className="mr-1 h-4 w-4" />
-                    {question.author?.name || question.author_nickname || '익명'}
+                    {question.author?.nickname || question.author?.name || question.author_nickname || '익명'}
                   </div>
                   <div className="flex items-center">
                     <Clock className="mr-1 h-4 w-4" />
@@ -345,9 +346,9 @@ export default function QuestionDetailPage() {
                     variant="outline"
                     size="sm"
                     onClick={handleLikeQuestion}
-                    className={question.is_sympathized ? 'text-red-500' : ''}
+                    className={question.is_sympathized_by_user ? 'text-red-500' : ''}
                   >
-                    <Heart className={`mr-1 h-4 w-4 ${question.is_sympathized ? 'fill-current' : ''}`} />
+                    <Heart className={`mr-1 h-4 w-4 ${question.is_sympathized_by_user ? 'fill-current' : ''}`} />
                     {question.sympathy_count || 0}
                   </Button>
                   <div className="flex items-center text-sm text-gray-500">
