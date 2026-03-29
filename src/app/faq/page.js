@@ -1,0 +1,188 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { IoChevronDown, IoChevronUp, IoHelpCircle } from 'react-icons/io5';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+
+export const metadata = {
+  title: '자주 묻는 질문',
+  description: '셸메이트 서비스 이용, 화상 상담, 전문가 선택, 커뮤니티 이용 방법 등에 대한 자주 묻는 질문과 답변을 확인하세요. 직접 고객센터에 문의하지 않아도 궁금한 점을 빠르게 해결할 수 있습니다.',
+};
+
+export default function FAQPage() {
+  const [openIndex, setOpenIndex] = useState(null);
+
+  const toggleFAQ = (index) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
+
+  const faqCategories = [
+    {
+      category: '서비스 이용',
+      faqs: [
+        {
+          question: '셸메이트는 어떤 서비스인가요?',
+          answer: '셸메이트는 느린학습자 아이를 둔 학부모와 전문가를 연결하는 비대면 상담 플랫폼입니다. 화상 상담, Q&A 커뮤니티, 전문가 칼럼 등 다양한 서비스를 제공합니다.',
+        },
+        {
+          question: '회원가입은 어떻게 하나요?',
+          answer: '홈페이지 상단의 "회원가입" 버튼을 클릭하여 학부모 또는 전문가로 가입할 수 있습니다. 이메일 인증 후 간단한 정보를 입력하시면 가입이 완료됩니다.',
+        },
+        {
+          question: '서비스 이용료는 얼마인가요?',
+          answer: '커뮤니티 이용과 칼럼 열람은 무료입니다. 전문가와의 1:1 화상 상담은 전문가별로 상담료가 다르며, 각 전문가 프로필에서 확인하실 수 있습니다.',
+        },
+        {
+          question: '환불 정책이 어떻게 되나요?',
+          answer: '상담 예약 취소는 예약 시간 24시간 전까지 가능하며, 전액 환불됩니다. 24시간 이내 취소 시에는 50%만 환불되며, 예약 시간 이후에는 환불이 불가능합니다.',
+        },
+      ],
+    },
+    {
+      category: '화상 상담',
+      faqs: [
+        {
+          question: '화상 상담은 어떻게 진행되나요?',
+          answer: '전문가 프로필에서 원하는 시간을 선택하여 예약하시면, 예약 시간에 화상 상담 참가 버튼 클릭을 통해 입장하여 1:1 상담을 받으실 수 있습니다. 상담은 자체 구축된 화상 통화 기능을 통해 진행됩니다.',
+        },
+        {
+          question: '상담 시간은 얼마나 되나요?',
+          answer: '기본 상담 시간은 50분입니다.',
+        },
+        {
+          question: '화상 상담 시 필요한 준비물이 있나요?',
+          answer: '안정적인 인터넷 연결과 카메라, 마이크가 있는 PC 또는 모바일 기기가 필요합니다. 사전에 아이의 상황을 정리한 메모나 관련 자료가 있으면 더욱 효과적인 상담이 가능합니다.',
+        },
+        {
+          question: '상담 내용이 녹화되나요?',
+          answer: '상담 내용은 별도로 녹화되지 않으며, 개인정보 보호를 위해 철저히 보안이 유지됩니다. 다만, 상담 후 전문가가 작성한 상담 요약 노트를 제공받으실 수 있습니다.',
+        },
+      ],
+    },
+    {
+      category: '전문가',
+      faqs: [
+        {
+          question: '전문가는 어떻게 선정되나요?',
+          answer: '셸메이트의 모든 전문가는 관련 분야의 자격증과 경력을 검증받았습니다. 언어치료사, 특수교사, 임상심리사, 발달심리 전문가 등 다양한 분야의 전문가들이 활동하고 있습니다.',
+        },
+        {
+          question: '전문가를 어떻게 선택해야 하나요?',
+          answer: '전문가 프로필에서 전문 분야, 경력, 자격증, 다른 학부모들의 리뷰 등을 확인하실 수 있습니다. 우리 아이의 상황과 필요에 맞는 전문가를 선택하시면 됩니다.',
+        },
+      ],
+    },
+    {
+      category: '커뮤니티 & 칼럼',
+      faqs: [
+        {
+          question: '커뮤니티는 어떻게 이용하나요?',
+          answer: '회원가입 후 로그인하시면 커뮤니티에서 질문을 올리고 관련 전문가들과 소통하실 수 있습니다. 전문가들이 정기적으로 답변을 제공합니다.',
+        },
+        {
+          question: '칼럼은 누구나 볼 수 있나요?',
+          answer: '네, 칼럼은 회원가입 후 누구나 무료로 전체 열람하실 수 있습니다. 다양한 분야의 전문가들이 정기적으로 유익한 칼럼을 작성합니다.',
+        },
+        {
+          question: '커뮤니티에서 답변은 언제 받을 수 있나요?',
+          answer: '일반적으로 24-48시간 내에 답변을 받으실 수 있습니다. 긴급한 상담이 필요하신 경우 1:1 화상 상담을 이용하시기 바랍니다.',
+        },
+      ],
+    },
+    {
+      category: '기술 지원',
+      faqs: [
+        {
+          question: '화상 상담 연결이 안 되면 어떻게 하나요?',
+          answer: '먼저 카메라와 마이크 권한이 허용되어 있는지 확인해주세요. 문제가 지속되면 고객센터(1588-0000)로 연락주시기 바랍니다.',
+        },
+        {
+          question: '모바일에서도 이용할 수 있나요?',
+          answer: '네, 셸메이트는 PC와 모바일 모두에서 이용 가능합니다.',
+        },
+      ],
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <Header />
+
+      {/* 페이지 헤더 */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white border-b">
+        <div className="max-w-6xl mx-auto text-center">
+          <IoHelpCircle className="h-16 w-16 text-primary mx-auto mb-4" />
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">자주 묻는 질문</h1>
+          <p className="text-gray-600">셸메이트 서비스에 대해 궁금하신 점을 확인해보세요</p>
+        </div>
+      </section>
+
+      {/* FAQ 목록 */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto space-y-8">
+          {faqCategories.map((category, categoryIndex) => (
+            <div key={categoryIndex}>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">{category.category}</h2>
+              <div className="space-y-3">
+                {category.faqs.map((faq, faqIndex) => {
+                  const globalIndex = `${categoryIndex}-${faqIndex}`;
+                  const isOpen = openIndex === globalIndex;
+
+                  return (
+                    <Card key={faqIndex} className="overflow-hidden">
+                      <CardHeader
+                        className="cursor-pointer hover:bg-gray-50 transition-colors"
+                        onClick={() => toggleFAQ(globalIndex)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-lg font-semibold text-gray-900 pr-4">
+                            Q. {faq.question}
+                          </CardTitle>
+                          {isOpen ? (
+                            <IoChevronUp className="h-5 w-5 text-gray-500 shrink-0" />
+                          ) : (
+                            <IoChevronDown className="h-5 w-5 text-gray-500 shrink-0" />
+                          )}
+                        </div>
+                      </CardHeader>
+                      {isOpen && (
+                        <CardContent className="pt-4 border-t">
+                          <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                            {faq.answer}
+                          </p>
+                        </CardContent>
+                      )}
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA 섹션 */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-primary text-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl font-bold mb-4">
+            답변을 찾지 못하셨나요?
+          </h2>
+          <p className="text-lg mb-6 opacity-90">
+            고객센터로 문의해보세요.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-primary">
+              고객센터 문의
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+}
