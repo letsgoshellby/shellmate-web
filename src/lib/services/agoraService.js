@@ -30,7 +30,6 @@ class AgoraService {
       // 원격 사용자 입장 이벤트
       this.client.on('user-published', async (user, mediaType) => {
         await this.client.subscribe(user, mediaType);
-        console.log('🔵 [AgoraService] 원격 사용자 입장:', user.uid, mediaType);
 
         // 원격 사용자 정보 업데이트
         this.remoteUsers[user.uid] = user;
@@ -39,7 +38,6 @@ class AgoraService {
         if (mediaType === 'video' && user.videoTrack) {
           const trackLabel = user.videoTrack.getMediaStreamTrack()?.label || '';
           const isScreenShare = trackLabel.includes('screen') || trackLabel.includes('window');
-          console.log(`📺 [AgoraService] 비디오 트랙 타입: ${isScreenShare ? '화면공유' : '카메라'}`);
         }
 
         if (this.onRemoteUserJoined) {
@@ -49,7 +47,6 @@ class AgoraService {
 
       // 원격 사용자 퇴장 이벤트
       this.client.on('user-unpublished', (user, mediaType) => {
-        console.log('🔴 [AgoraService] 원격 사용자 퇴장:', user.uid, mediaType);
 
         if (this.onRemoteUserLeft) {
           this.onRemoteUserLeft(user, mediaType);
@@ -58,7 +55,6 @@ class AgoraService {
 
       // 원격 사용자 완전 퇴장 이벤트
       this.client.on('user-left', (user, reason) => {
-        console.log('🔴 [AgoraService] 사용자 나감:', user.uid, reason);
         delete this.remoteUsers[user.uid];
 
         if (this.onRemoteUserLeft) {
@@ -69,12 +65,10 @@ class AgoraService {
       // 채널 입장
       await this.client.join(appId, channel, token, uid);
       this.isJoined = true;
-      console.log('✅ [AgoraService] 채널 입장 성공:', channel);
 
       // 로컬 오디오/비디오 트랙 생성 및 발행
       await this.createLocalTracks();
       await this.client.publish([this.localAudioTrack, this.localVideoTrack]);
-      console.log('✅ [AgoraService] 로컬 트랙 발행 완료');
 
       return true;
     } catch (error) {
@@ -89,7 +83,6 @@ class AgoraService {
   async createLocalTracks() {
     try {
       [this.localAudioTrack, this.localVideoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
-      console.log('✅ [AgoraService] 로컬 트랙 생성 완료');
     } catch (error) {
       console.error('🔴 [AgoraService] 로컬 트랙 생성 실패:', error);
       throw error;
