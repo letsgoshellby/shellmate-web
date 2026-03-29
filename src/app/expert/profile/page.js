@@ -363,14 +363,14 @@ export default function ExpertProfilePage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <Label>근무지</Label>
                     <Input
                       value={profileData.expert_profile?.workplace || '미입력'}
                       disabled
                       className="bg-gray-50"
                     />
-                  </div>
+                  </div> */}
                 </div>
 
                 {!profileData.expert_profile && (
@@ -526,7 +526,7 @@ export default function ExpertProfilePage() {
                     <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                       <h4 className="font-medium text-green-900 mb-2">승인 완료</h4>
                       <p className="text-sm text-green-800">
-                        전문가 승인이 완료되었습니다! 이제 상담 서비스를 제공할 수 있습니다.
+                        전문가 승인이 완료되었습니다! 이제 자기소개 및 상담 과목 정보를 입력한 후, 상담 서비스를 제공할 수 있습니다.
                       </p>
                     </div>
                   )}
