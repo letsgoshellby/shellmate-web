@@ -448,7 +448,7 @@ export default function ExpertConsultationsPage() {
                         )}
 
                         {/* 아이 정보 아코디언 */}
-                        <div className="border rounded-lg">
+                        <div className="border rounded-lg mb-4">
                           <button
                             onClick={() => toggleChildInfo(consultation.id)}
                             className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
@@ -524,82 +524,105 @@ export default function ExpertConsultationsPage() {
                             </div>
                           )}
                         </div>
-                      </div>
 
-                      <div className="flex flex-col space-y-2 ml-4">
-                        {/* 접수된 상담 (PENDING) - 승인/취소 버튼 */}
-                        {consultation.status?.toUpperCase() === 'PENDING' &&
-                         consultation.sessions?.[0]?.status?.toUpperCase() !== 'NO_SHOW' && (
-                          <>
-                            <Button
-                              size="sm"
-                              onClick={() => handleApprove(consultation.id)}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              <CheckCircle className="mr-1 h-4 w-4" />
-                              승인
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => openCancelModal(consultation.id)}
-                            >
-                              취소
-                            </Button>
-                          </>
-                        )}
+                        {/* 세션별 카드 */}
+                        {consultation.sessions && consultation.sessions.length > 0 ? (
+                          <div className="space-y-3">
+                            <h4 className="text-sm font-semibold text-gray-700 mb-2">회차별 상담</h4>
+                            {consultation.sessions.map((session, index) => (
+                              <div key={session.id} className="border rounded-lg p-4 bg-gray-50">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <h5 className="font-medium text-gray-900">
+                                        {session.session_number || index + 1}회차 상담
+                                      </h5>
+                                      <Badge className={getSessionStatusColor(session.status)}>
+                                        {getSessionStatusText(session)}
+                                      </Badge>
+                                    </div>
 
-                        {/* 예정된 상담 (CONFIRMED) - 참여/취소 버튼 */}
-                        {consultation.status?.toUpperCase() === 'CONFIRMED' && (
-                          <>
-                            {consultation.next_session?.id
-                            && consultation.next_session?.scheduled_at
-                            && isUpcoming(consultation.next_session.scheduled_at) && (
-                              <Link href={`/video-call/${consultation.next_session.id}`}>
-                                <Button size="sm">
-                                  <Video className="mr-1 h-4 w-4" />
-                                  상담 참여
+                                    <div className="flex items-center space-x-4 text-sm text-gray-600">
+                                      <div className="flex items-center space-x-1">
+                                        <Calendar className="h-3 w-3" />
+                                        <span>{formatDate(session.scheduled_at)}</span>
+                                      </div>
+                                      <div className="flex items-center space-x-1">
+                                        <Clock className="h-3 w-3" />
+                                        <span>{formatTime(session.scheduled_at)}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex flex-col space-y-2 ml-4">
+                                    {/* 확정된 상담 - 상담 참여 버튼 */}
+                                    {session.status?.toUpperCase() === 'SCHEDULED' && isUpcoming(session.scheduled_at) && (
+                                      <Link href={`/video-call/${session.id}`}>
+                                        <Button size="sm">
+                                          <Video className="mr-1 h-4 w-4" />
+                                          상담 참여
+                                        </Button>
+                                      </Link>
+                                    )}
+
+                                    {/* 진행중 상담 - 상담일지 버튼 */}
+                                    {session.status?.toUpperCase() === 'IN_PROGRESS' && (
+                                      <Link href={`/expert/consultations/${consultation.id}/log?session=${session.id}`}>
+                                        <Button size="sm" variant="outline">
+                                          <FileText className="mr-1 h-4 w-4" />
+                                          상담일지
+                                        </Button>
+                                      </Link>
+                                    )}
+
+                                    {/* 완료된 세션 - 상담일지 버튼 */}
+                                    {session.status?.toUpperCase() === 'COMPLETED' && (
+                                      <>
+                                        <Link href={`/expert/consultations/${consultation.id}/log?session=${session.id}`}>
+                                          <Button size="sm" variant="outline">
+                                            <FileText className="mr-1 h-4 w-4" />
+                                            상담일지
+                                          </Button>
+                                        </Link>
+                                        {/* 1회차 완료 시에만 커리큘럼 버튼 표시 */}
+                                        {session.session_number === 1 && (
+                                          <Link href={`/expert/consultations/${consultation.id}/curriculum`}>
+                                            <Button size="sm" className="bg-primary text-white hover:bg-primary/90">
+                                              <BookOpen className="mr-1 h-4 w-4" />
+                                              커리큘럼
+                                            </Button>
+                                          </Link>
+                                        )}
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col space-y-2">
+                            {/* 접수된 상담 (PENDING) - 승인/취소 버튼 */}
+                            {consultation.status?.toUpperCase() === 'PENDING' && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleApprove(consultation.id)}
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
+                                  <CheckCircle className="mr-1 h-4 w-4" />
+                                  승인
                                 </Button>
-                              </Link>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => openCancelModal(consultation.id)}
+                                >
+                                  취소
+                                </Button>
+                              </>
                             )}
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => openCancelModal(consultation.id)}
-                            >
-                              취소
-                            </Button>
-                          </>
-                        )}
-
-                        {/* 완료된 상담 (COMPLETED) - 상담 일지 작성 버튼 */}
-                        {consultation.status?.toUpperCase() === 'COMPLETED' && (
-                          <>
-                            <Link href={`/expert/consultations/${consultation.id}/log`}>
-                              <Button size="sm" variant="outline">
-                                <FileText className="mr-1 h-4 w-4" />
-                                상담 일지 작성
-                              </Button>
-                            </Link>
-                          </>
-                        )}
-
-                        {/* 커리큘럼 대기 상태 (WAITING_CURRICULUM) - 상담 일지 작성 + 커리큘럼 작성 버튼 */}
-                        {consultation.status?.toUpperCase() === 'WAITING_CURRICULUM' && (
-                          <>
-                            <Link href={`/expert/consultations/${consultation.id}/log`}>
-                              <Button size="sm" variant="outline">
-                                <FileText className="mr-1 h-4 w-4" />
-                                상담 일지 작성
-                              </Button>
-                            </Link>
-                            <Link href={`/expert/consultations/${consultation.id}/curriculum`}>
-                              <Button size="sm" className="bg-primary text-white hover:bg-primary/90">
-                                <BookOpen className="mr-1 h-4 w-4" />
-                                커리큘럼 작성
-                              </Button>
-                            </Link>
-                          </>
+                          </div>
                         )}
                       </div>
                     </div>

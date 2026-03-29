@@ -203,7 +203,32 @@ export default function BookConsultationPage() {
       const data = await ConsultationsAPI.getExpertAvailableSlots(expertId, date);
       const slots = data.available_time_ranges || [];
 
-      setAvailableSlots(slots);
+      // 오늘 날짜인 경우, 현재 시간 이후의 시간만 필터링
+      const selectedDate = new Date(date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      selectedDate.setHours(0, 0, 0, 0);
+
+      if (selectedDate.getTime() === today.getTime()) {
+        // 오늘인 경우, 현재 시간 이후의 슬롯만 필터링
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+
+        const filteredSlots = slots.filter(slot => {
+          const startTime = typeof slot === 'string' ? slot : slot.start_time;
+          const [hour, minute] = startTime.split(':').map(Number);
+
+          // 시작 시간이 현재 시간보다 이후인 경우만 포함
+          if (hour > currentHour) return true;
+          if (hour === currentHour && minute > currentMinute) return true;
+          return false;
+        });
+
+        setAvailableSlots(filteredSlots);
+      } else {
+        setAvailableSlots(slots);
+      }
 
     } catch (error) {
       console.error('가능 시간 로딩 실패:', error);

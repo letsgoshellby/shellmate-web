@@ -32,7 +32,15 @@ class AgoraService {
         await this.client.subscribe(user, mediaType);
         console.log('🔵 [AgoraService] 원격 사용자 입장:', user.uid, mediaType);
 
+        // 원격 사용자 정보 업데이트
         this.remoteUsers[user.uid] = user;
+
+        // 화면공유 트랙인지 확인 (비디오 트랙이지만 화면공유일 수 있음)
+        if (mediaType === 'video' && user.videoTrack) {
+          const trackLabel = user.videoTrack.getMediaStreamTrack()?.label || '';
+          const isScreenShare = trackLabel.includes('screen') || trackLabel.includes('window');
+          console.log(`📺 [AgoraService] 비디오 트랙 타입: ${isScreenShare ? '화면공유' : '카메라'}`);
+        }
 
         if (this.onRemoteUserJoined) {
           this.onRemoteUserJoined(user, mediaType);

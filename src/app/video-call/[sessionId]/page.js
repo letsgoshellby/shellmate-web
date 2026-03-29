@@ -34,11 +34,13 @@ export default function VideoCallPage({ params }) {
   const [isCameraOff, setIsCameraOff] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [isRemoteScreenSharing, setIsRemoteScreenSharing] = useState(false);
   const [callDuration, setCallDuration] = useState(0);
   const [participantName, setParticipantName] = useState('상대방');
   const [sessionInfo, setSessionInfo] = useState('');
   const [showEndCallModal, setShowEndCallModal] = useState(false);
   const [userType, setUserType] = useState(null); // 'client' or 'expert'
+  const [scheduledStartTime, setScheduledStartTime] = useState(null); // 예약된 상담 시작 시간
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -121,6 +123,19 @@ export default function VideoCallPage({ params }) {
       const sessionNumber = sessionData.session_number || 1;
       setSessionInfo(`${sessionNumber}회차`);
 
+      // 예약된 상담 시작 시간 설정
+      // 백엔드에서 오는 필드명에 따라 scheduled_time, scheduled_at, start_time 등을 시도
+      const scheduledTime = sessionData.scheduled_time
+        || sessionData.scheduled_at
+        || counselingRequest.scheduled_time
+        || counselingRequest.scheduled_at;
+
+      if (scheduledTime) {
+        // ISO 8601 형식의 날짜/시간 문자열을 Date 객체로 변환
+        setScheduledStartTime(new Date(scheduledTime));
+        console.log('예약된 상담 시작 시간:', scheduledTime);
+      }
+
       // console.log('🔵 [VideoCallPage] Agora 화상방 정보 조회 중...');
       const videoRoomData = await AgoraAPI.getVideoRoom(sessionId);
       // console.log('✅ [VideoCallPage] 화상방 정보:', videoRoomData);
@@ -130,28 +145,50 @@ export default function VideoCallPage({ params }) {
 
       // 원격 사용자 입장 이벤트 핸들러
       agoraServiceRef.current.setOnRemoteUserJoined((user, mediaType) => {
-        // console.log('✅ [VideoCallPage] 원격 사용자 입장:', user.uid, mediaType);
+        console.log('✅ [VideoCallPage] 원격 사용자 입장:', user.uid, mediaType);
         setRemoteUid(user.uid);
 
         if (mediaType === 'video') {
+          // 화면공유 트랙인지 확인
+          const trackLabel = user.videoTrack?.getMediaStreamTrack()?.label || '';
+          const isScreenShare = trackLabel.includes('screen') || trackLabel.includes('window');
+
+          console.log('📺 비디오 트랙 정보:', {
+            label: trackLabel,
+            isScreenShare,
+            hasVideoTrack: !!user.videoTrack
+          });
+
           setIsRemoteVideoOn(true);
-          // 원격 비디오 재생
+          setIsRemoteScreenSharing(isScreenShare);
+
+          // 원격 비디오/화면공유 재생
           setTimeout(() => {
-            if (remoteVideoRef.current) {
-              agoraServiceRef.current.playRemoteVideo(user.uid, remoteVideoRef.current);
+            if (remoteVideoRef.current && user.videoTrack) {
+              user.videoTrack.play(remoteVideoRef.current);
+              console.log('✅ 원격 비디오 재생 완료:', user.uid);
             }
           }, 100);
         } else if (mediaType === 'audio') {
-          agoraServiceRef.current.playRemoteVideo(user.uid, null, 'audio');
+          if (user.audioTrack) {
+            user.audioTrack.play();
+            console.log('✅ 원격 오디오 재생 완료:', user.uid);
+          }
         }
       });
 
       // 원격 사용자 퇴장 이벤트 핸들러
       agoraServiceRef.current.setOnRemoteUserLeft((user, mediaType) => {
-        // console.log('🔴 [VideoCallPage] 원격 사용자 퇴장:', user.uid, mediaType);
-        if (mediaType === 'left' || mediaType === 'video') {
+        console.log('🔴 [VideoCallPage] 원격 사용자 퇴장:', user.uid, mediaType);
+        if (mediaType === 'left') {
+          // 완전히 퇴장
           setRemoteUid(null);
           setIsRemoteVideoOn(false);
+          setIsRemoteScreenSharing(false);
+        } else if (mediaType === 'video') {
+          // 비디오만 중지 (오디오는 유지)
+          setIsRemoteVideoOn(false);
+          setIsRemoteScreenSharing(false);
         }
       });
 
@@ -193,9 +230,28 @@ export default function VideoCallPage({ params }) {
   };
 
   const startDurationTimer = () => {
-    durationIntervalRef.current = setInterval(() => {
-      setCallDuration(prev => prev + 1);
-    }, 1000);
+    // 예약된 시작 시간이 있으면, 그 시간 기준으로 경과 시간 계산
+    if (scheduledStartTime) {
+      const now = new Date();
+      const elapsedSeconds = Math.max(0, Math.floor((now - scheduledStartTime) / 1000));
+
+      console.log('타이머 시작 - 예약 시간:', scheduledStartTime);
+      console.log('타이머 시작 - 현재 시간:', now);
+      console.log('타이머 시작 - 초기 경과 시간:', elapsedSeconds, '초');
+
+      // 초기 경과 시간 설정
+      setCallDuration(elapsedSeconds);
+
+      // 1초마다 증가
+      durationIntervalRef.current = setInterval(() => {
+        setCallDuration(prev => prev + 1);
+      }, 1000);
+    } else {
+      // 예약 시간 정보가 없으면 입장 시점부터 카운트 (기존 방식)
+      durationIntervalRef.current = setInterval(() => {
+        setCallDuration(prev => prev + 1);
+      }, 1000);
+    }
   };
 
   const formatDuration = (seconds) => {
@@ -247,6 +303,21 @@ export default function VideoCallPage({ params }) {
       try {
         const isSharing = await agoraServiceRef.current.toggleScreenShare();
         setIsScreenSharing(isSharing);
+
+        // 화면공유 시작 시 로컬 비디오를 화면공유 트랙으로 교체
+        if (isSharing && localVideoRef.current) {
+          const screenTrack = agoraServiceRef.current.screenTrack;
+          if (screenTrack) {
+            // 배열 형태인지 단일 트랙인지 확인
+            const track = Array.isArray(screenTrack) ? screenTrack[0] : screenTrack;
+            track.play(localVideoRef.current);
+            console.log('✅ 로컬 화면공유 재생');
+          }
+        } else if (!isSharing && localVideoRef.current) {
+          // 화면공유 종료 시 다시 카메라 트랙으로 교체
+          agoraServiceRef.current.playLocalVideo(localVideoRef.current);
+        }
+
         toast.success(isSharing ? '화면 공유가 시작되었습니다' : '화면 공유가 중지되었습니다');
       } catch (error) {
         console.error('화면 공유 토글 실패:', error);
