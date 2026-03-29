@@ -1,6 +1,3 @@
-'use client';
-
-import { useState } from 'react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,8 +23,6 @@ export const metadata = {
 };
 
 export default function ConsultationFieldsPage() {
-  const [activeField, setActiveField] = useState('learning');
-
   const consultationFields = [
     {
       id: 'learning',
@@ -122,7 +117,7 @@ export default function ConsultationFieldsPage() {
       {/* 상담 분야 탭 */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <Tabs value={activeField} onValueChange={setActiveField} className="w-full">
+          <Tabs defaultValue="learning" className="w-full">
             <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-5 mb-12 h-auto p-1 bg-white shadow-sm rounded-lg border">
               {consultationFields.map((field) => {
                 const IconComponent = field.icon;
