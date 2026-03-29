@@ -4,8 +4,12 @@ import { Toaster } from "react-hot-toast";
 import { ScriptLoader } from "@/components/ScriptLoader";
 
 export const metadata = {
-  title: "셸메이트 - 느린학습자 상담 플랫폼",
-  description: "느린학습자 아이의 학부모와 전문가를 연결하는 비대면 상담 서비스, 셸메이트",
+  title: "셸메이트 - 느린아이 비대면 상담 플랫폼",
+  description: "느린 아이를 둔 학부모와 전문가를 연결하는 비대면 코칭 서비스. 검증된 전문가와의 1:1 화상 코칭, 전문가에게 직접 답변받는 커뮤니티, 전문성 있는 칼럼을 통해 아이의 성장을 지원하는 셸메이트입니다.",
+  metadataBase: new URL('https://shellmate.letsgoshellby.com'),
+  alternates: {
+    canonical: '/',
+  },
 };
 
 export default function RootLayout({ children }) {
