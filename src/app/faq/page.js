@@ -3,8 +3,14 @@ import { Footer } from '@/components/layout/Footer';
 import { FAQClient } from './FAQClient';
 
 export const metadata = {
-  title: '자주 묻는 질문',
+  title: '자주 묻는 질문 - 셸메이트',
   description: '셸메이트 서비스 이용, 화상 상담, 전문가 선택, 커뮤니티 이용 방법 등에 대한 자주 묻는 질문과 답변을 확인하세요. 직접 고객센터에 문의하지 않아도 궁금한 점을 빠르게 해결할 수 있습니다.',
+  openGraph: {
+    title: '자주 묻는 질문 - 셸메이트',
+    description: '셸메이트 서비스 이용, 화상 상담, 전문가 선택, 커뮤니티 이용 방법 등에 대한 자주 묻는 질문과 답변을 확인하세요.',
+    url: 'https://shellmate.letsgoshellby.com/faq',
+    type: 'website',
+  },
 };
 
 export default function FAQPage() {

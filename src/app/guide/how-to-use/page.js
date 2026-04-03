@@ -17,6 +17,12 @@ import { Footer } from '@/components/layout/Footer';
 export const metadata = {
   title: '이용 방법 - 셸메이트',
   description: '셸메이트에서 전문가 상담을 신청하는 것부터 완료하기까지 크게 4단계의 서비스 이용 방법을 안내합니다. 회원가입부터 전문가 선택, 상담 예약, 화상 상담, 마무리까지 비대면으로 간단하게 시작할 수 있습니다.',
+  openGraph: {
+    title: '이용 방법 - 셸메이트',
+    description: '회원가입부터 전문가 선택, 상담 예약, 화상 상담까지 4단계로 이루어진 체계적인 상담을 경험해보세요',
+    url: 'https://shellmate.letsgoshellby.com/guide/how-to-use',
+    type: 'website',
+  },
 };
 
 export default function HowToUsePage() {

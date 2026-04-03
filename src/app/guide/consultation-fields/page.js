@@ -20,6 +20,12 @@ import { Footer } from '@/components/layout/Footer';
 export const metadata = {
   title: '상담 분야 안내 - 셸메이트',
   description: '학습/발달 지원, 아동 기본 생활 및 양육 상담, 정서 행동 및 사회성 상담, 진로/자립 지도 등 느린학습자 아동과 그 가족을 위한 4가지 전문 상담 분야를 안내합니다. 우리 아이에게 맞는 상담을 찾아보세요.',
+  openGraph: {
+    title: '상담 분야 안내 - 셸메이트',
+    description: '학습 지원, 행동 개선, 정서 상담, 가족 상담, 진로 지도 등 느린학습자 아동과 그 가족을 위한 전문 상담 분야를 안내합니다.',
+    url: 'https://shellmate.letsgoshellby.com/guide/consultation-fields',
+    type: 'website',
+  },
 };
 
 export default function ConsultationFieldsPage() {
