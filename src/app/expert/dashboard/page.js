@@ -10,7 +10,9 @@ import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { ConsultationsAPI } from '@/lib/api/consultations';
 import { ReviewAPI } from '@/lib/api/review';
+import { AuthAPI } from '@/lib/api/auth';
 import { useAuth } from '@/contexts/AuthContext';
+import { OnboardingModal } from '@/components/expert/OnboardingModal';
 
 export default function ExpertDashboard() {
   const { user } = useAuth();
@@ -18,11 +20,52 @@ export default function ExpertDashboard() {
   const [loadingConsultations, setLoadingConsultations] = useState(true);
   const [recentReviews, setRecentReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
 
   useEffect(() => {
     loadTodayConsultations();
     loadRecentReviews();
   }, [user]);
+
+  useEffect(() => {
+    checkOnboardingStatus();
+  }, [user]);
+
+  const checkOnboardingStatus = async () => {
+    if (!user) return;
+
+    // localStorage에서 온보딩 완료 여부 확인
+    const onboardingCompleted = localStorage.getItem('expert_onboarding_completed');
+    if (onboardingCompleted === 'true') {
+      return; // 이미 완료됨
+    }
+
+    try {
+      // 1. user/me에서 자기소개 작성 여부 확인
+      const userData = await AuthAPI.getCurrentUser();
+      const expertProfile = userData.expert_profile || {};
+
+      const hasIntroduction = expertProfile.introduction && expertProfile.introduction.trim() !== '';
+      const hasEducation = Array.isArray(expertProfile.education) && expertProfile.education.length > 0;
+      const hasCareer = Array.isArray(expertProfile.career) && expertProfile.career.length > 0;
+      const profileCompleted = hasIntroduction && hasEducation && hasCareer;
+
+      // 2. 가격 설정 여부 확인
+      const pricings = await ConsultationsAPI.getMyPricing();
+      const hasPricing = Array.isArray(pricings) && pricings.length > 0;
+
+      // 3. 둘 다 완료되었으면 localStorage에 저장
+      if (profileCompleted && hasPricing) {
+        localStorage.setItem('expert_onboarding_completed', 'true');
+        return;
+      }
+
+      // 4. 완료되지 않았으면 팝업 표시
+      setShowOnboardingModal(true);
+    } catch (error) {
+      console.error('온보딩 상태 확인 실패:', error);
+    }
+  };
 
   const loadTodayConsultations = async () => {
     try {
@@ -124,9 +167,15 @@ export default function ExpertDashboard() {
       </div>
     );
   };
+
   return (
     <AuthGuard requiredRole="expert">
       <DashboardLayout>
+        {/* 온보딩 모달 */}
+        {showOnboardingModal && (
+          <OnboardingModal onClose={() => setShowOnboardingModal(false)} />
+        )}
+
         <div className="space-y-6">
           {/* 환영 메시지 */}
           <div className="bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-lg p-6">
