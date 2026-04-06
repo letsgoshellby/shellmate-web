@@ -11,33 +11,42 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'react-hot-toast';
-import { 
-  IoPerson, 
-  IoMail, 
-  IoCall, 
-  IoCalendar, 
-  IoSchool, 
-  IoSettings, 
-  IoCreate, 
-  IoSave, 
-  IoClose, 
+import {
+  IoPerson,
+  IoMail,
+  IoCall,
+  IoCalendar,
+  IoSchool,
+  IoSettings,
+  IoCreate,
+  IoSave,
+  IoClose,
   IoTrophy,
   IoBusiness,
   IoTime,
-  IoDocumentText
+  IoDocumentText,
+  IoPricetag,
+  IoCard,
+  IoImage,
+  IoAdd,
+  IoTrash
 } from 'react-icons/io5';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { TokenStorage } from '@/lib/auth/tokenStorage';
+import { ConsultationsAPI } from '@/lib/api/consultations';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ExpertProfilePage() {
-  const { user, isAuthenticated, isExpert } = useAuth();
+  const { user, isAuthenticated, isExpert, refreshUser } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [editData, setEditData] = useState({});
+  const [pricings, setPricings] = useState([]);
+  const [education, setEducation] = useState([]);
+  const [career, setCareer] = useState([]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -72,8 +81,24 @@ export default function ExpertProfilePage() {
           experience_years: data.expert_profile?.experience_years || '',
           institution: data.expert_profile?.institution || '',
           workplace: data.expert_profile?.workplace || '',
+          bank_name: data.expert_profile?.bank_name || '',
+          account_number: data.expert_profile?.account_number || '',
         });
+
+        // 학력, 경력 정보 설정 (빈 배열일 경우 기본값 1개 제공)
+        const educationData = Array.isArray(data.expert_profile?.education) && data.expert_profile.education.length > 0
+          ? data.expert_profile.education
+          : [''];
+        const careerData = Array.isArray(data.expert_profile?.career) && data.expert_profile.career.length > 0
+          ? data.expert_profile.career
+          : [''];
+        setEducation(educationData);
+        setCareer(careerData);
       }
+
+      // 가격 설정 정보 가져오기
+      const pricingData = await ConsultationsAPI.getMyPricing();
+      setPricings(Array.isArray(pricingData) ? pricingData : []);
     } catch (error) {
       toast.error('프로필 정보를 불러오는데 실패했습니다');
     }
@@ -92,25 +117,56 @@ export default function ExpertProfilePage() {
       experience_years: profileData?.expert_profile?.experience_years || '',
       institution: profileData?.expert_profile?.institution || '',
       workplace: profileData?.expert_profile?.workplace || '',
+      bank_name: profileData?.expert_profile?.bank_name || '',
+      account_number: profileData?.expert_profile?.account_number || '',
     });
+
+    // 학력, 경력 정보 원복
+    const educationData = Array.isArray(profileData?.expert_profile?.education) && profileData.expert_profile.education.length > 0
+      ? profileData.expert_profile.education
+      : [''];
+    const careerData = Array.isArray(profileData?.expert_profile?.career) && profileData.expert_profile.career.length > 0
+      ? profileData.expert_profile.career
+      : [''];
+    setEducation(educationData);
+    setCareer(careerData);
   };
 
   const handleSave = async () => {
     setLoading(true);
     try {
       const token = TokenStorage.getAccessToken();
+
+      // 빈 문자열 제거
+      const filteredEducation = education.filter(item => item.trim() !== '');
+      const filteredCareer = career.filter(item => item.trim() !== '');
+
+      const requestData = {
+        ...editData,
+        education: filteredEducation,
+        career: filteredCareer,
+      };
+
+
       const response = await fetch(`${API_BASE_URL}/user/me/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(editData),
+        body: JSON.stringify(requestData),
       });
 
       if (response.ok) {
-        const updatedData = await response.json();
+        const responseData = await response.json();
+
+        // 응답 데이터에서 user 객체 추출
+        const updatedData = responseData.user || responseData;
         setProfileData(updatedData);
+
+        // AuthContext의 사용자 정보도 업데이트 (새로고침 시 로그인 유지를 위해)
+        await refreshUser();
+
         setIsEditing(false);
         toast.success('프로필이 업데이트되었습니다');
       } else {
@@ -118,6 +174,7 @@ export default function ExpertProfilePage() {
         toast.error('프로필 업데이트에 실패했습니다');
       }
     } catch (error) {
+      console.error('❌ 네트워크 에러:', error);
       toast.error('네트워크 오류가 발생했습니다');
     } finally {
       setLoading(false);
@@ -137,6 +194,38 @@ export default function ExpertProfilePage() {
         {statusInfo.label}
       </Badge>
     );
+  };
+
+  const handleAddEducation = () => {
+    setEducation([...education, '']);
+  };
+
+  const handleRemoveEducation = (index) => {
+    if (education.length > 1) {
+      setEducation(education.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleEducationChange = (index, value) => {
+    const newEducation = [...education];
+    newEducation[index] = value;
+    setEducation(newEducation);
+  };
+
+  const handleAddCareer = () => {
+    setCareer([...career, '']);
+  };
+
+  const handleRemoveCareer = (index) => {
+    if (career.length > 1) {
+      setCareer(career.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleCareerChange = (index, value) => {
+    const newCareer = [...career];
+    newCareer[index] = value;
+    setCareer(newCareer);
   };
 
   if (!profileData) {
@@ -162,9 +251,10 @@ export default function ExpertProfilePage() {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile">기본 정보</TabsTrigger>
             <TabsTrigger value="professional">전문가 정보</TabsTrigger>
+            <TabsTrigger value="pricing">가격 설정</TabsTrigger>
             <TabsTrigger value="status">승인 현황</TabsTrigger>
           </TabsList>
 
@@ -266,6 +356,135 @@ export default function ExpertProfilePage() {
                   </div>
                 </div>
 
+                {/* 학력 */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="flex items-center gap-2">
+                      <IoSchool className="h-4 w-4" />
+                      학력
+                    </Label>
+                    {isEditing && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleAddEducation}
+                        className="h-8"
+                      >
+                        <IoAdd className="h-4 w-4 mr-1" />
+                        추가
+                      </Button>
+                    )}
+                  </div>
+                  {isEditing ? (
+                    <div className="space-y-2">
+                      {education.map((edu, index) => (
+                        <div key={index} className="flex gap-2">
+                          <Input
+                            value={edu}
+                            onChange={(e) => handleEducationChange(index, e.target.value)}
+                            placeholder="예: 서울대학교 교육학 학사 (2015-2019)"
+                            className="flex-1"
+                          />
+                          {education.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleRemoveEducation(index)}
+                              className="h-10 w-10 p-0"
+                            >
+                              <IoTrash className="h-4 w-4 text-red-500" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                      <p className="text-xs text-gray-500">
+                        학교명, 전공, 학위, 기간 등을 입력해주세요
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {education.filter(edu => edu.trim() !== '').length > 0 ? (
+                        education.filter(edu => edu.trim() !== '').map((edu, index) => (
+                          <div key={index} className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                            <p className="text-sm text-gray-900">{edu}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-gray-500 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                          학력 정보가 작성되지 않았습니다.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* 경력 */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="flex items-center gap-2">
+                      <IoBusiness className="h-4 w-4" />
+                      경력
+                    </Label>
+                    {isEditing && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleAddCareer}
+                        className="h-8"
+                      >
+                        <IoAdd className="h-4 w-4 mr-1" />
+                        추가
+                      </Button>
+                    )}
+                  </div>
+                  {isEditing ? (
+                    <div className="space-y-2">
+                      {career.map((car, index) => (
+                        <div key={index} className="flex gap-2">
+                          <Input
+                            value={car}
+                            onChange={(e) => handleCareerChange(index, e.target.value)}
+                            placeholder="예: ABC 아동발달센터 언어치료사 (2019-2023)"
+                            className="flex-1"
+                          />
+                          {career.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleRemoveCareer(index)}
+                              className="h-10 w-10 p-0"
+                            >
+                              <IoTrash className="h-4 w-4 text-red-500" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                      <p className="text-xs text-gray-500">
+                        기관명, 직책, 주요 업무, 기간 등을 입력해주세요
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {career.filter(car => car.trim() !== '').length > 0 ? (
+                        career.filter(car => car.trim() !== '').map((car, index) => (
+                          <div key={index} className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                            <p className="text-sm text-gray-900">{car}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-gray-500 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                          경력 정보가 작성되지 않았습니다.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* 자기소개 */}
                 <div className="space-y-2">
                   <Label htmlFor="introduction" className="flex items-center gap-2">
                     <IoDocumentText className="h-4 w-4" />
@@ -287,6 +506,98 @@ export default function ExpertProfilePage() {
                       rows={4}
                     />
                   )}
+                </div>
+
+                {/* 계좌 정보 */}
+                <div className="border-t pt-6 mt-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <IoCard className="h-5 w-5" />
+                    계좌 정보
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="bank_name" className="flex items-center gap-2">
+                        <IoCard className="h-4 w-4" />
+                        은행명
+                      </Label>
+                      {isEditing ? (
+                        <Input
+                          id="bank_name"
+                          value={editData.bank_name || ''}
+                          onChange={(e) => setEditData({ ...editData, bank_name: e.target.value })}
+                          placeholder="은행명을 입력해주세요 (예: 국민은행)"
+                        />
+                      ) : (
+                        <Input
+                          value={profileData.expert_profile?.bank_name || '미입력'}
+                          disabled
+                          className="bg-gray-50"
+                        />
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="account_number" className="flex items-center gap-2">
+                        <IoCard className="h-4 w-4" />
+                        계좌번호
+                      </Label>
+                      {isEditing ? (
+                        <Input
+                          id="account_number"
+                          value={editData.account_number || ''}
+                          onChange={(e) => setEditData({ ...editData, account_number: e.target.value })}
+                          placeholder="계좌번호를 입력해주세요 (하이픈 없이)"
+                        />
+                      ) : (
+                        <Input
+                          value={profileData.expert_profile?.account_number || '미입력'}
+                          disabled
+                          className="bg-gray-50"
+                        />
+                      )}
+                    </div>
+
+                    <div className="space-y-2 md:col-span-2">
+                      <Label className="flex items-center gap-2">
+                        <IoImage className="h-4 w-4" />
+                        통장 사본
+                      </Label>
+                      {profileData.expert_profile?.bankbook_image ? (
+                        <div className="space-y-2">
+                          <a
+                            href={profileData.expert_profile.bankbook_image}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center text-sm text-blue-600 hover:underline"
+                          >
+                            <IoImage className="h-4 w-4 mr-1" />
+                            통장 사본 확인하기
+                          </a>
+                          {/* {isEditing && (
+                            <p className="text-xs text-gray-500">
+                              통장 사본을 변경하려면 회원가입 페이지에서 재등록해주세요.
+                            </p>
+                          )} */}
+                        </div>
+                      ) : (
+                        <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                          <p className="text-sm text-gray-500">통장 사본이 등록되지 않았습니다.</p>
+                          {/* {isEditing && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              통장 사본은 회원가입 페이지에서 등록해주세요.
+                            </p>
+                          )} */}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      <strong>안내:</strong> 상담료 정산을 위해 정확한 계좌 정보를 입력해주세요.
+                      입력하신 계좌로 매월 정산금이 입금됩니다.
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -439,6 +750,99 @@ export default function ExpertProfilePage() {
                         </div>
                       </div>
                     )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="pricing">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <IoPricetag className="h-5 w-5" />
+                    상담 가격 설정
+                  </CardTitle>
+                  <CardDescription>
+                    설정된 상담 유형별 가격을 확인할 수 있습니다
+                  </CardDescription>
+                </div>
+                <Button onClick={() => router.push('/signup/expert/pricing')}>
+                  가격 수정하러 가기
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {pricings.length > 0 ? (
+                  <div className="space-y-6">
+                    {/* 가격 정보 안내 */}
+                    {/* <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-start gap-2">
+                        <IoPricetag className="h-5 w-5 text-blue-600 mt-0.5" />
+                        <div>
+                          <h4 className="font-semibold text-sm text-blue-900 mb-1">가격 안내</h4>
+                          <p className="text-xs text-blue-800">
+                            1토큰 = 1,000원입니다. 설정된 가격은 내담자에게 표시됩니다.
+                          </p>
+                        </div>
+                      </div>
+                    </div> */}
+
+                    {/* 가격 목록 */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {pricings.map((pricing) => {
+                        const getSessionLabel = (type) => {
+                          const labels = {
+                            SINGLE: '체험형 - 1회',
+                            SINGLE_PLUS_3: '집중형 - 4회',
+                            SINGLE_PLUS_7: '집중형 - 8회',
+                            SINGLE_PLUS_11: '집중형 - 12회',
+                          };
+                          return labels[type] || type;
+                        };
+
+                        return (
+                          <div
+                            key={pricing.id}
+                            className="p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow"
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-semibold text-gray-900">
+                                {getSessionLabel(pricing.session_type)}
+                              </h4>
+                              {pricing.is_active ? (
+                                <Badge variant="default" className="bg-green-500">활성</Badge>
+                              ) : (
+                                <Badge variant="secondary">비활성</Badge>
+                              )}
+                            </div>
+                            <div className="space-y-1">
+                              <div className="flex items-baseline gap-2">
+                                <span className="text-2xl font-bold text-primary">
+                                  {(pricing.tokens_required * 1000).toLocaleString()}
+                                </span>
+                                <span className="text-gray-600">원</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* 가격 수정 안내 */}
+                  </div>
+                ) : (
+                  <div className="p-8 text-center bg-gray-50 rounded-lg border border-gray-200">
+                    <IoPricetag className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      설정된 가격이 없습니다
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      상담을 시작하려면 먼저 가격을 설정해주세요
+                    </p>
+                    <Button onClick={() => router.push('/signup/expert/pricing')}>
+                      가격 설정하러 가기
+                    </Button>
                   </div>
                 )}
               </CardContent>
