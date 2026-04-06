@@ -59,76 +59,6 @@ export default function BookConsultationPage() {
     resolver: zodResolver(bookingSchema),
   });
 
-  // 임시 전문가 데이터
-  const mockExperts = [
-    {
-      id: 1,
-      name: '김전문가',
-      title: '아동발달 전문가',
-      specialties: ['집중력', 'ADHD', '학습장애'],
-      experience_years: 10,
-      rating: 4.8,
-      reviews_count: 127,
-      profile_image: null,
-      introduction: '10년간 아동발달 분야에서 활동해온 전문가입니다. 특히 집중력 문제와 ADHD 아동들을 많이 도와왔습니다.',
-      certifications: ['아동발달전문가', '임상심리사 1급'],
-    },
-    {
-      id: 2,
-      name: '이언어치료사',
-      title: '언어치료사',
-      specialties: ['언어발달', '언어치료', '의사소통'],
-      experience_years: 8,
-      rating: 4.9,
-      reviews_count: 89,
-      profile_image: null,
-      introduction: '언어발달 지연 아동들을 위한 맞춤형 치료를 제공합니다. 부모 상담과 가정에서의 언어 자극 방법도 함께 안내드립니다.',
-      certifications: ['언어치료사 1급', '특수교육전문가'],
-    },
-    {
-      id: 3,
-      name: '박놀이치료사',
-      title: '놀이치료사',
-      specialties: ['놀이치료', '사회성', '정서발달'],
-      experience_years: 12,
-      rating: 4.7,
-      reviews_count: 156,
-      profile_image: null,
-      introduction: '놀이를 통한 아동의 정서 발달과 사회성 향상을 도와드립니다. 부모님과 함께하는 놀이 방법도 제안드립니다.',
-      certifications: ['놀이치료사', '상담심리사 2급'],
-    }
-  ];
-
-  // 임시 가격 데이터
-  const mockPricingOptions = [
-    {
-      id: 1,
-      session_type: 'SINGLE',
-      session_type_display: '1회 상담',
-      total_sessions: 1,
-      additional_sessions: 0,
-      tokens_required: 10,
-      is_active: true,
-    },
-    {
-      id: 2,
-      session_type: 'PACKAGE_4',
-      session_type_display: '4회 패키지',
-      total_sessions: 4,
-      additional_sessions: 0,
-      tokens_required: 36,
-      is_active: true,
-    },
-    {
-      id: 3,
-      session_type: 'PACKAGE_8',
-      session_type_display: '8회 패키지',
-      total_sessions: 8,
-      additional_sessions: 1,
-      tokens_required: 68,
-      is_active: true,
-    }
-  ];
 
 
   useEffect(() => {
@@ -157,15 +87,14 @@ export default function BookConsultationPage() {
         workplace: expert.workplace,
       }));
 
-      setExperts(mappedExperts.length > 0 ? mappedExperts : mockExperts);
-
-      // 임시로 목 데이터 사용
-      // setExperts(mockExperts);
+      if (mappedExperts.length === 0) {
+        toast.error('등록된 전문가가 없습니다');
+      }
+      setExperts(mappedExperts);
     } catch (error) {
       console.error('전문가 목록 로딩 실패:', error);
       toast.error('전문가 목록을 불러오는데 실패했습니다');
-      // API 실패 시 목 데이터 사용
-      setExperts(mockExperts);
+      setExperts([]);
     } finally {
       setExpertsLoading(false);
     }
@@ -178,19 +107,15 @@ export default function BookConsultationPage() {
       const data = await ConsultationsAPI.getExpertPricing(expertId);
       const pricingList = Array.isArray(data) ? data : [];
 
-      if (pricingList.length > 0) {
-        setPricingOptions(pricingList.filter((p) => p.is_active));
-      } else {
-        // API 응답이 비어있으면 목 데이터 사용
-        setPricingOptions(mockPricingOptions);
+      const activePricing = pricingList.filter((p) => p.is_active);
+      if (activePricing.length === 0) {
+        toast.error('해당 전문가의 가격 정보가 없습니다');
       }
-
-      // 임시로 목 데이터 사용
-      // setPricingOptions(mockPricingOptions);
+      setPricingOptions(activePricing);
     } catch (error) {
       console.error('가격 정보 로딩 실패:', error);
-      // API 실패 시 목 데이터 사용
-      setPricingOptions(mockPricingOptions);
+      toast.error('가격 정보를 불러오는데 실패했습니다');
+      setPricingOptions([]);
     } finally {
       setPricingLoading(false);
     }
