@@ -92,6 +92,56 @@ export class ConsultationsAPI {
   }
 
   /**
+   * 내 가격 설정 조회
+   * GET /consultation/my-pricing/
+   * @returns {Array} 내 가격 설정 목록
+   */
+  static async getMyPricing() {
+    const response = await apiClient.get('/consultation/my-pricing/');
+    return response.data;
+  }
+
+  /**
+   * 새로운 가격 설정 추가
+   * POST /consultation/my-pricing/
+   * @param {Object} data - 가격 설정 데이터
+   * @param {string} data.session_type - 세션 타입
+   * @param {number} data.tokens_required - 필요한 토큰 수
+   * @param {boolean} data.is_active - 활성화 여부
+   * @returns {Object} 생성된 가격 설정 정보
+   */
+  static async createMyPricing(data) {
+    const response = await apiClient.post('/consultation/my-pricing/', data);
+    return response.data;
+  }
+
+  /**
+   * 기존 가격 설정 수정
+   * PUT /consultation/my-pricing/{pricing_id}/
+   * @param {number} pricingId - 가격 설정 ID
+   * @param {Object} data - 수정할 가격 설정 데이터
+   * @param {string} data.session_type - 세션 타입
+   * @param {number} data.tokens_required - 필요한 토큰 수
+   * @param {boolean} data.is_active - 활성화 여부
+   * @returns {Object} 수정된 가격 설정 정보
+   */
+  static async updateMyPricing(pricingId, data) {
+    const response = await apiClient.put(`/consultation/my-pricing/${pricingId}/`, data);
+    return response.data;
+  }
+
+  /**
+   * 가격 설정 삭제
+   * DELETE /consultation/my-pricing/{pricing_id}/
+   * @param {number} pricingId - 가격 설정 ID
+   * @returns {void}
+   */
+  static async deleteMyPricing(pricingId) {
+    const response = await apiClient.delete(`/consultation/my-pricing/${pricingId}/`);
+    return response.data;
+  }
+
+  /**
    * 전문가 가능 시간 조회 (내담자용)
    * GET /consultation/experts/{expert_id}/available-slots/
    * @param {number} expertId - 전문가 ID
