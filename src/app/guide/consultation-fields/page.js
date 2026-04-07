@@ -33,7 +33,7 @@ export default function ConsultationFieldsPage() {
     {
       id: 'learning',
       icon: BookOpen,
-      title: '학습 지원',
+      title: '학습 및 발달 지원',
       subtitle: '배움의 즐거움 찾기',
       description: '개별 학습 속도에 맞춘 맞춤형 학습 방법과 전략을 제공합니다',
       services: [
@@ -48,7 +48,7 @@ export default function ConsultationFieldsPage() {
     {
       id: 'behavior',
       icon: Brain,
-      title: '행동 개선',
+      title: '기본 생활 및 양육 상담',
       subtitle: '긍정적인 변화 만들기',
       description: '일상생활에서의 어려운 행동들을 이해하고 개선할 수 있도록 도와드립니다',
       services: [
@@ -63,7 +63,7 @@ export default function ConsultationFieldsPage() {
     {
       id: 'emotional',
       icon: Heart,
-      title: '정서 상담',
+      title: '정서 행동 및 사회성 상담',
       subtitle: '마음 건강 돌보기',
       description: '아이와 가족의 정서적 어려움을 함께 나누고 해결책을 찾아갑니다',
       services: [
@@ -76,24 +76,9 @@ export default function ConsultationFieldsPage() {
       expectedResults: ['정서적 안정감 확보', '자존감과 자신감 향상', '건강한 사회적 관계 형성']
     },
     {
-      id: 'family',
-      icon: Users,
-      title: '가족 상담',
-      subtitle: '함께 성장하기',
-      description: '가족 전체가 함께 성장할 수 있는 소통 방법과 양육 전략을 제공합니다',
-      services: [
-        '건강한 가족 대화법과 소통 기술 습득',
-        '부모의 양육 스트레스 관리',
-        '가족 구성원 간의 조화로운 관계 형성',
-        '우리 가족에게 맞는 양육 방침 수립'
-      ],
-      targetAudience: ['양육에 어려움을 겪는 부모', '가족 갈등이 있는 가정', '형제자매 간 문제가 있는 가족'],
-      expectedResults: ['가족 간 소통 개선', '양육 스트레스 감소', '조화로운 가족 관계 형성']
-    },
-    {
       id: 'career',
       icon: GraduationCap,
-      title: '진로 지도',
+      title: '진로 및 자립 지도',
       subtitle: '미래 설계하기',
       description: '아이의 특성과 흥미를 바탕으로 적합한 진로를 함께 탐색해봅니다',
       services: [
@@ -124,7 +109,7 @@ export default function ConsultationFieldsPage() {
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <Tabs defaultValue="learning" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-5 mb-12 h-auto p-1 bg-white shadow-sm rounded-lg border">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mb-12 h-auto p-1 bg-white shadow-sm rounded-lg border">
               {consultationFields.map((field) => {
                 const IconComponent = field.icon;
                 return (
@@ -224,11 +209,11 @@ export default function ConsultationFieldsPage() {
                                   <ArrowRight className="w-4 h-4 ml-2" />
                                 </Button>
                               </Link>
-                              <Link href="/community">
+                              {/* <Link href="/community">
                                 <Button variant="outline" className="w-full sm:w-auto bg-transparent border-white text-white hover:bg-white/20">
                                   커뮤니티에서 물어보기
                                 </Button>
-                              </Link>
+                              </Link> */}
                             </div>
                           </div>
                         </CardContent>
@@ -239,42 +224,6 @@ export default function ConsultationFieldsPage() {
               );
             })}
           </Tabs>
-        </div>
-      </section>
-
-      {/* 추가 안내 */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-6xl mx-auto text-center">
-          <Card className="bg-white border-gray-200 shadow-lg">
-            <CardContent className="p-8 lg:p-12">
-              <div className="max-w-3xl mx-auto space-y-6">
-                <Heart className="w-16 h-16 text-primary mx-auto" />
-
-                <h3 className="text-2xl lg:text-3xl font-bold text-gray-900">
-                  어떤 상담이 필요할지 모르겠다면?
-                </h3>
-
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  괜찮아요! 셸메이트의 전문가들이 먼저 상담을 통해<br className="hidden sm:block" />
-                  가장 적합한 상담 분야를 찾아드릴게요.
-                </p>
-
-                <div className="pt-4">
-                  <Link href="/signup">
-                    <Button size="lg" className="bg-primary hover:bg-primary/90 text-white shadow-lg">
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      종합 상담 신청하기
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </Link>
-                </div>
-
-                <p className="text-sm text-gray-500">
-                  첫 15분 상담으로 어떤 도움이 필요한지 함께 파악해봐요
-                </p>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </section>
 
