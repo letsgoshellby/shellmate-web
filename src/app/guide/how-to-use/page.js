@@ -84,7 +84,7 @@ export default function HowToUsePage() {
   const features = [
     {
       icon: Clock,
-      title: '24시간 예약 가능',
+      title: '자유로운 상담 시간 선택',
       description: '내가 원하는 시간에 맞춰서 예약할 수 있어요'
     },
     {
@@ -213,20 +213,17 @@ export default function HowToUsePage() {
                   <Link href="/signup">
                     <Button size="lg" variant="secondary" className="w-full sm:w-auto">
                       <UserPlus className="w-4 h-4 mr-2" />
-                      무료 회원가입
+                      회원가입
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
                   </Link>
-                  <Link href="/community">
+                  {/* <Link href="/community">
                     <Button size="lg" variant="outline" className="w-full sm:w-auto bg-transparent border-white text-white hover:bg-white/20">
                       커뮤니티 둘러보기
                     </Button>
-                  </Link>
+                  </Link> */}
                 </div>
 
-                <p className="text-sm opacity-80 pt-4">
-                  회원가입은 무료이며 언제든 이용하실 수 있습니다
-                </p>
               </div>
             </CardContent>
           </Card>
