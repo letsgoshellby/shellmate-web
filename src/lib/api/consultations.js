@@ -35,7 +35,9 @@ export class ConsultationsAPI {
   
   // 상담 승인 (전문가용)
   static async approveConsultation(id) {
-    const response = await apiClient.post(`/consultations/${id}/approve/`);
+    const response = await apiClient.post(`/consultation/counseling-requests/${id}/confirm/`, {
+      message: '상담 신청이 확정되었습니다.'
+    });
     return response.data;
   }
   
@@ -208,6 +210,32 @@ export class ConsultationsAPI {
    */
   static async getChildInfo(counselingRequestId) {
     const response = await apiClient.get(`/consultation/counseling-requests/${counselingRequestId}/child-info/`);
+    return response.data;
+  }
+
+  /**
+   * 전문가 가용 시간 조회
+   * GET /consultation/my-availability/
+   * @param {string} date - 조회할 날짜 (YYYY-MM-DD)
+   * @returns {Object} { slots: Array }
+   */
+  static async getMyAvailability(date) {
+    const response = await apiClient.get('/consultation/my-availability/', {
+      params: { date }
+    });
+    return response.data;
+  }
+
+  /**
+   * 전문가 가용 시간 설정
+   * POST /consultation/my-availability/
+   * @param {Object} data - 가용 시간 데이터
+   * @param {string} data.date - 날짜 (YYYY-MM-DD)
+   * @param {Array<number>} data.available_slots - 가용 시간 슬롯 배열
+   * @returns {Object} { slots: Array }
+   */
+  static async setMyAvailability(data) {
+    const response = await apiClient.post('/consultation/my-availability/', data);
     return response.data;
   }
 }

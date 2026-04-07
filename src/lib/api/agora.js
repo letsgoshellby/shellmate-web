@@ -58,4 +58,38 @@ export class AgoraAPI {
     const response = await apiClient.post(`/consultation/sessions/${sessionId}/video-room/refresh-token/`);
     return response.data;
   }
+
+/**
+   * 상담 세션 시작 (전문가 전용)
+   * POST /consultation/sessions/{sessionId}/start/
+   * 설명: 이 API를 호출해야 VideoRoom이 생성되고 녹화가 시작됩니다.
+   * @param {number} sessionId - 세션 ID
+   * @returns {Object} 시작 처리 결과
+   */
+  static async startSession(sessionId) {
+    const response = await apiClient.post(`/consultation/sessions/${sessionId}/start/`);
+    return response.data;
+  }
+
+  /**
+   * 일회성 상담 완료 처리
+   * POST /consultation/sessions/{sessionId}/complete-initial/
+   * @param {number} sessionId - 세션 ID
+   * @returns {Object} 완료 처리 결과
+   */
+  static async completeInitialSession(sessionId) {
+    const response = await apiClient.post(`/consultation/sessions/${sessionId}/complete-initial/`);
+    return response.data;
+  }
+
+  /**
+   * 세션 완료 처리 (일반)
+   * POST /consultation/sessions/{sessionId}/complete/
+   * @param {number} sessionId - 세션 ID
+   * @returns {Object} 완료 처리 결과
+   */
+  static async completeSession(sessionId) {
+    const response = await apiClient.post(`/consultation/sessions/${sessionId}/complete/`);
+    return response.data;
+  }
 }
