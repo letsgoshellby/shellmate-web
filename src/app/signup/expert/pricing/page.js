@@ -27,6 +27,13 @@ const PRICE_RANGES = {
   },
 };
 
+const SESSION_COUNTS = {
+  SINGLE: 1,
+  SINGLE_PLUS_3: 4,
+  SINGLE_PLUS_7: 8,
+  SINGLE_PLUS_11: 12,
+};
+
 const SESSION_TYPE_OPTIONS = [
   { value: 'SINGLE', label: '체험형 - 1회' },
   { value: 'SINGLE_PLUS_3', label: '집중형 - 4회' },
@@ -153,9 +160,12 @@ export default function ExpertPricingPage() {
         }
       }
 
-      // 각 가격 설정 생성/수정
-      for (const item of validPricings) {
-        const tokens = wonToTokens(item.price);
+    // 생성 및 수정 처리
+    for (const item of validPricings) {
+      // [수정 포인트] 1회당 가격 * 세션 횟수 = 총액
+      const sessionCount = SESSION_COUNTS[item.session_type] || 1;
+      const totalPrice = item.price * sessionCount;
+      const tokens = wonToTokens(totalPrice); // 총액을 토큰으로 변환
 
         if (item.id) {
           // 기존 항목 수정
