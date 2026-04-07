@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
+import { AdminChat } from '@/components/chat/AdminChat';
 
 export default function ClientChatDetailPage() {
   const params = useParams();
@@ -181,6 +182,39 @@ export default function ClientChatDetailPage() {
     return message.sender === user?.name || message.sender === user?.email;
   };
 
+  const isAdminChatMessage = (message) => {
+    // 상담 예약 관련 메시지만 AdminChat으로 표시
+    const adminChatTypes = [
+      'RESERVATION_REQUEST',
+      'SCHEDULE_CONFIRM',
+      'SESSION_REMINDER',
+      'SESSION_COMPLETE',
+      'SCHEDULE_CHANGE',
+      'PAYMENT_NOTICE',
+      'COUNSELING_LOG_COMPLETE',
+      'CURRICULUM',
+      'reservation_request',
+      'reservation_accept',
+      'reservation_imminent',
+      'reservation_complete',
+      'counseling_log_complete'
+    ];
+// 1. 명시된 관리자 채팅 타입이거나
+  if (adminChatTypes.includes(message.message_type)) return true;
+
+  // 2. SYSTEM 메시지 중 특정 문구가 포함된 경우 카드로 표시
+  if (message.message_type === 'SYSTEM' &&
+     (message.content?.includes('커리큘럼'))) {
+    return true;
+  }
+
+  return false;
+};
+  const isSimpleSystemMessage = (message) => {
+    // 채팅방 개설 등 간단한 시스템 메시지 (중앙 회색 배경)
+    return message.message_type === 'SYSTEM' && !isAdminChatMessage(message);
+  };
+
   const shouldShowDate = (currentMsg, prevMsg) => {
     if (!prevMsg) return true;
     const currentDate = new Date(currentMsg.sent_at).toDateString();
@@ -263,89 +297,114 @@ export default function ClientChatDetailPage() {
                     </div>
                   )}
 
-                  {/* 메시지 */}
-                  <div
-                    className={`flex gap-2 group ${isMyMessage(message) ? 'justify-end' : 'justify-start'}`}
-                  >
+                  {isAdminChatMessage(message) ? (
+                    // 상담 예약 관련 시스템 메시지 - AdminChat 컴포넌트
+                    <div className="flex justify-center">
+                      <AdminChat
+                        messageType={message.message_type}
+                        metadata={message.metadata || {}}
+                        sessionId={message.session_id}
+                        participantName={chatRoom?.expert?.name}
+                        sessionNumber={message.session_number}
+                        chatRoomId={chatRoomId}
+                        counselorName={chatRoom?.expert?.name}
+                        counselingDate={message.counseling_date}
+                        counselingLogId={message.counseling_log_id}
+                        imageUrl={message.image_url}
+                      />
+                    </div>
+                  ) : isSimpleSystemMessage(message) ? (
+                    // 간단한 시스템 메시지 (채팅방 개설 등) - 중앙 회색 배경
+                    <div className="flex items-center justify-center my-2">
+                      <span className="bg-gray-200 text-gray-600 text-xs px-4 py-2 rounded-lg whitespace-pre-wrap text-center">
+                        {message.content}
+                      </span>
+                    </div>
+                  ) : (
+                    /* 메시지 */
                     <div
-                      className={`max-w-[70%] ${
-                        isMyMessage(message) ? 'order-2' : 'order-1'
-                      }`}
+                      className={`flex gap-2 group ${isMyMessage(message) ? 'justify-end' : 'justify-start'}`}
                     >
-                      {/* 삭제된 메시지 */}
-                      {message.is_deleted ? (
-                        <div className="bg-gray-200 text-gray-500 px-4 py-2 rounded-lg italic">
-                          삭제된 메시지입니다
-                        </div>
-                      ) : (
-                        <>
-                          {/* 이미지 메시지 */}
-                          {message.message_type === 'IMAGE' && message.image_url && (
-                            <img
-                              src={message.image_url}
-                              alt="전송된 이미지"
-                              className="max-w-full rounded-lg mb-1"
-                            />
-                          )}
-
-                          {/* 텍스트 메시지 */}
-                          {message.content && (
-                            <div
-                              className={`px-4 py-2 rounded-lg ${
-                                isMyMessage(message)
-                                  ? 'bg-primary text-white rounded-br-none'
-                                  : 'bg-white text-gray-900 rounded-bl-none shadow-sm'
-                              }`}
-                            >
-                              <p className="whitespace-pre-wrap break-words">
-                                {message.content}
-                              </p>
-                            </div>
-                          )}
-                        </>
-                      )}
-
-                      {/* 시간 및 읽음 표시 */}
                       <div
-                        className={`flex items-center gap-1 mt-1 text-xs text-gray-500 ${
-                          isMyMessage(message) ? 'justify-end' : 'justify-start'
+                        className={`max-w-[70%] ${
+                          isMyMessage(message) ? 'order-2' : 'order-1'
                         }`}
                       >
-                        <span>{formatTime(message.sent_at)}</span>
-                        {isMyMessage(message) && (
-                          message.is_read ? (
-                            <CheckCheck className="h-3 w-3 text-blue-500" />
-                          ) : (
-                            <Check className="h-3 w-3" />
-                          )
-                        )}
-                      </div>
-                    </div>
+                        {/* 삭제된 메시지 */}
+                        {message.is_deleted ? (
+                          <div className="bg-gray-200 text-gray-500 px-4 py-2 rounded-lg italic">
+                            삭제된 메시지입니다
+                          </div>
+                        ) : (
+                          <>
+                            {/* 이미지 메시지 */}
+                            {message.message_type === 'IMAGE' && message.image_url && (
+                              <img
+                                src={message.image_url}
+                                alt="전송된 이미지"
+                                className="max-w-full rounded-lg mb-1"
+                              />
+                            )}
 
-                    {/* 메시지 옵션 (내가 보낸 메시지만) */}
-                    {isMyMessage(message) && !message.is_deleted && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            className="text-red-600 cursor-pointer"
-                            onClick={() => handleDeleteMessage(message.id)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            삭제
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </div>
+                            {/* 텍스트 메시지 */}
+                            {message.content && (
+                              <div
+                                className={`px-4 py-2 rounded-lg ${
+                                  isMyMessage(message)
+                                    ? 'bg-primary text-white rounded-br-none'
+                                    : 'bg-white text-gray-900 rounded-bl-none shadow-sm'
+                                }`}
+                              >
+                                <p className="whitespace-pre-wrap break-words">
+                                  {message.content}
+                                </p>
+                              </div>
+                            )}
+                          </>
+                        )}
+
+                        {/* 시간 및 읽음 표시 */}
+                        <div
+                          className={`flex items-center gap-1 mt-1 text-xs text-gray-500 ${
+                            isMyMessage(message) ? 'justify-end' : 'justify-start'
+                          }`}
+                        >
+                          <span>{formatTime(message.sent_at)}</span>
+                          {isMyMessage(message) && (
+                            message.is_read ? (
+                              <CheckCheck className="h-3 w-3 text-blue-500" />
+                            ) : (
+                              <Check className="h-3 w-3" />
+                            )
+                          )}
+                        </div>
+                      </div>
+
+                      {/* 메시지 옵션 (내가 보낸 메시지만) */}
+                      {isMyMessage(message) && !message.is_deleted && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              className="text-red-600 cursor-pointer"
+                              onClick={() => handleDeleteMessage(message.id)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              삭제
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))
             )}
