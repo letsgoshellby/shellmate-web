@@ -19,7 +19,8 @@ import {
   FileText,
   ChevronDown,
   ChevronUp,
-  BookOpen
+  BookOpen,
+  Settings
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
@@ -324,6 +325,16 @@ export default function ExpertConsultationsPage() {
             <p className="text-gray-600">내담자의 상담 신청을 확인하고 관리하세요</p>
           </div>
 
+          {/* 일정 관리 버튼 */}
+          <div className="flex justify-end">
+            <Link href="/expert/consultations/availability">
+              <Button>
+                <Calendar className="mr-2 h-4 w-4" />
+                상담 일정 관리
+              </Button>
+            </Link>
+          </div>
+
           {/* 필터 탭 */}
           <Card>
             <CardContent className="p-6">
@@ -526,7 +537,7 @@ export default function ExpertConsultationsPage() {
                         </div>
 
                         {/* 세션별 카드 */}
-                        {consultation.sessions && consultation.sessions.length > 0 ? (
+                        {consultation.sessions && consultation.sessions.length > 0 && (
                           <div className="space-y-3">
                             <h4 className="text-sm font-semibold text-gray-700 mb-2">회차별 상담</h4>
                             {consultation.sessions.map((session, index) => (
@@ -555,14 +566,36 @@ export default function ExpertConsultationsPage() {
                                   </div>
 
                                   <div className="flex flex-col space-y-2 ml-4">
-                                    {/* 확정된 상담 - 상담 참여 버튼 */}
-                                    {session.status?.toUpperCase() === 'SCHEDULED' && isUpcoming(session.scheduled_at) && (
-                                      <Link href={`/video-call/${session.id}`}>
-                                        <Button size="sm">
+                                    {/* 확정된 상담 - 상담 참여 버튼 (PENDING 상태가 아닐 때만 표시) */}
+                                    {consultation.status?.toUpperCase() !== 'PENDING' && session.status?.toUpperCase() === 'SCHEDULED' && isUpcoming(session.scheduled_at) && (
+                                      <Link href={`/video-call/${session.id}`} className="w-24">
+                                        <Button size="sm" className="w-full">
                                           <Video className="mr-1 h-4 w-4" />
                                           상담 참여
                                         </Button>
                                       </Link>
+                                    )}
+
+                                    {/* 접수된 상담 (PENDING) - 승인/취소 버튼 */}
+                                    {consultation.status?.toUpperCase() === 'PENDING' && (
+                                      <>
+                                        <Button
+                                          size="sm"
+                                          onClick={() => handleApprove(consultation.id)}
+                                          className="bg-green-600 hover:bg-green-700 w-24"
+                                        >
+                                          <CheckCircle className="mr-1 h-4 w-4" />
+                                          승인
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => openCancelModal(consultation.id)}
+                                          className="w-24"
+                                        >
+                                          취소
+                                        </Button>
+                                      </>
                                     )}
 
                                     {/* 진행중 상담 - 상담일지 버튼 */}
@@ -584,8 +617,8 @@ export default function ExpertConsultationsPage() {
                                             상담일지
                                           </Button>
                                         </Link>
-                                        {/* 1회차 완료 시에만 커리큘럼 버튼 표시 */}
-                                        {session.session_number === 1 && (
+                                        {/* 1회차 완료 시에만 커리큘럼 버튼 표시 (다회성 상담만) */}
+                                        {session.session_number === 1 && consultation.session_type !== 'SINGLE' && (
                                           <Link href={`/expert/consultations/${consultation.id}/curriculum`}>
                                             <Button size="sm" className="bg-primary text-white hover:bg-primary/90">
                                               <BookOpen className="mr-1 h-4 w-4" />
@@ -599,29 +632,6 @@ export default function ExpertConsultationsPage() {
                                 </div>
                               </div>
                             ))}
-                          </div>
-                        ) : (
-                          <div className="flex flex-col space-y-2">
-                            {/* 접수된 상담 (PENDING) - 승인/취소 버튼 */}
-                            {consultation.status?.toUpperCase() === 'PENDING' && (
-                              <>
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleApprove(consultation.id)}
-                                  className="bg-green-600 hover:bg-green-700"
-                                >
-                                  <CheckCircle className="mr-1 h-4 w-4" />
-                                  승인
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => openCancelModal(consultation.id)}
-                                >
-                                  취소
-                                </Button>
-                              </>
-                            )}
                           </div>
                         )}
                       </div>
