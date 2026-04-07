@@ -13,6 +13,8 @@ class AgoraService {
     this.remoteUsers = {};
     this.isJoined = false;
     this.isScreenSharing = false;
+    this.dataChannel = null;
+    this.onScreenShareStatusChanged = null; // 화면공유 상태 변경 콜백
   }
 
   /**
@@ -62,9 +64,45 @@ class AgoraService {
         }
       });
 
+      // Data Stream 메시지 수신 이벤트
+      this.client.on('stream-message', (uid, data) => {
+        try {
+          const decoder = new TextDecoder();
+          const message = decoder.decode(data);
+          console.log('📨 [AgoraService] 수신 메시지:', message, 'from:', uid);
+
+          if (message === 'SCREEN_SHARE_START') {
+            console.log('✅ 원격 사용자 화면공유 시작:', uid);
+            if (this.onScreenShareStatusChanged) {
+              this.onScreenShareStatusChanged(uid, true);
+            }
+          } else if (message === 'SCREEN_SHARE_STOP') {
+            console.log('✅ 원격 사용자 화면공유 중지:', uid);
+            if (this.onScreenShareStatusChanged) {
+              this.onScreenShareStatusChanged(uid, false);
+            }
+          }
+        } catch (error) {
+          console.error('🔴 [AgoraService] 메시지 파싱 실패:', error);
+        }
+      });
+
       // 채널 입장
       await this.client.join(appId, channel, token, uid);
       this.isJoined = true;
+
+      // Data Channel 생성 (화면공유 알림용)
+      // NOTE: Agora SDK v4.0+에서는 createDataStream이 제거됨
+      // TODO: RTM (Real-Time Messaging)으로 대체 필요
+      try {
+        // this.dataChannel = await this.client.createDataStream({
+        //   syncWithAudio: false,
+        //   ordered: true,
+        // });
+        console.log('⚠️ [AgoraService] Data Channel 기능 비활성화 (SDK v4.0+ 미지원)');
+      } catch (error) {
+        console.error('🔴 [AgoraService] Data Channel 생성 실패:', error);
+      }
 
       // 로컬 오디오/비디오 트랙 생성 및 발행
       await this.createLocalTracks();
@@ -294,6 +332,9 @@ class AgoraService {
       // 화면 공유 트랙 퍼블리시
       await this.client.publish(this.screenTrack);
       this.isScreenSharing = true;
+
+      // 화면공유 시작 메시지 전송
+      await this.sendDataStreamMessage('SCREEN_SHARE_START');
       console.log('✅ [AgoraService] 화면 공유 시작');
 
       // 화면 공유 종료 이벤트 (사용자가 브라우저에서 중지 버튼을 누른 경우)
@@ -331,11 +372,58 @@ class AgoraService {
       }
 
       this.isScreenSharing = false;
+
+      // 화면공유 중지 메시지 전송
+      await this.sendDataStreamMessage('SCREEN_SHARE_STOP');
       console.log('✅ [AgoraService] 화면 공유 중지');
       return true;
     } catch (error) {
       console.error('🔴 [AgoraService] 화면 공유 중지 실패:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Data Stream으로 메시지 전송
+   * @param {string} message - 전송할 메시지
+   */
+  async sendDataStreamMessage(message) {
+    if (!this.dataChannel || !this.isJoined) {
+      console.warn('⚠️ [AgoraService] Data Channel이 준비되지 않았습니다');
+      return;
+    }
+
+    try {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(message);
+      await this.client.sendStreamMessage(this.dataChannel, data);
+      console.log('📤 [AgoraService] 메시지 전송:', message);
+    } catch (error) {
+      console.error('🔴 [AgoraService] 메시지 전송 실패:', error);
+    }
+  }
+
+  /**
+   * 화면공유 상태 변경 콜백 등록
+   * @param {Function} callback - (uid, isSharing) => void
+   */
+  setOnScreenShareStatusChanged(callback) {
+    this.onScreenShareStatusChanged = callback;
+  }
+
+  /**
+   * 토큰 갱신
+   * @param {string} newToken - 새로운 Agora 토큰
+   */
+  async renewToken(newToken) {
+    if (this.client && this.isJoined) {
+      try {
+        await this.client.renewToken(newToken);
+        console.log('✅ [AgoraService] 토큰 갱신 완료');
+      } catch (error) {
+        console.error('🔴 [AgoraService] 토큰 갱신 실패:', error);
+        throw error;
+      }
     }
   }
 
