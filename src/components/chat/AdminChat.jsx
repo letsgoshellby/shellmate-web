@@ -28,7 +28,8 @@ export function AdminChat({
   counselingDate,
   counselingLogId,
   onCounselingLogPublished,
-  imageUrl
+  imageUrl,
+  userType
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -50,13 +51,14 @@ export function AdminChat({
         return '일정이 변경되었습니다';
       case 'PAYMENT_NOTICE':
         return '결제 안내';
-      case 'SYSTEM':
-        return '시스템 안내';
       case 'counseling_log_complete':
       case 'COUNSELING_LOG_COMPLETE':
         return '상담 일지가 작성되었습니다';
       case 'CURRICULUM':
         return '커리큘럼이 작성되었습니다';
+      case 'SYSTEM':
+        // SYSTEM 메시지 중 커리큘럼 작성 요청인지 확인
+        return '커리큘럼 작성 요청';
       default:
         return '상담 안내';
     }
@@ -80,20 +82,21 @@ export function AdminChat({
         return '일정 변경 사항을 확인해주세요.';
       case 'PAYMENT_NOTICE':
         return '결제 관련 안내사항입니다.';
-      case 'SYSTEM':
-        return metadata.content || '';
       case 'counseling_log_complete':
       case 'COUNSELING_LOG_COMPLETE':
         return `${sessionNumber || ''}회차 상담 일지가 작성 완료되었습니다.\n아래 버튼을 눌러 상담 일지를 확인하세요.`;
       case 'CURRICULUM':
         return '1회차 상담이 완료되었습니다.\n추가 회차 진행을 위해 커리큘럼(상담일지)을 작성해 주세요.';
+      case 'SYSTEM':
+        // SYSTEM 메시지 중 커리큘럼 작성 요청
+        return '📝 1회차 상담이 완료되었습니다.\n추가 회차 진행을 위해 커리큘럼 및 상담일지를 작성해 주세요.';
       default:
         return '상담 안내';
     }
   };
 
   const shouldShowButton = () => {
-    return ['reservation_imminent', 'SESSION_REMINDER', 'reservation_complete', 'SESSION_COMPLETE', 'counseling_log_complete', 'COUNSELING_LOG_COMPLETE'].includes(messageType);
+    return ['reservation_imminent', 'SESSION_REMINDER', 'reservation_complete', 'SESSION_COMPLETE', 'counseling_log_complete', 'COUNSELING_LOG_COMPLETE', 'SYSTEM'].includes(messageType);
   };
 
   const getButtonText = () => {
@@ -104,6 +107,9 @@ export function AdminChat({
       case 'counseling_log_complete':
       case 'COUNSELING_LOG_COMPLETE':
         return '상담 일지 확인';
+      case 'reservation_imminent':
+      case 'SESSION_REMINDER':
+        return '상담방 입장';
       default:
         return '상담 하러가기';
     }
@@ -227,30 +233,64 @@ export function AdminChat({
           </div>
         )}
 
-        {/* 버튼 */}
+        {/* 버튼 영역 */}
         {shouldShowButton() && (
           <div className="mb-4">
-            {messageType === 'counseling_log_complete' || messageType === 'COUNSELING_LOG_COMPLETE' ? (
-              counselingLogId ? (
+            {messageType === 'SYSTEM' && userType !== 'client' ? (
+              // 1. SYSTEM 메시지 (커리큘럼 작성 요청)
+              chatRoomId && (
+                <div className="space-y-2">
+                  <Link href={`/expert/consultations/${chatRoomId}/curriculum`}>
+                    <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-5 rounded-xl">
+                      <FileText className="mr-2 h-4 w-4" />
+                      커리큘럼 작성하기
+                    </Button>
+                  </Link>
+                </div>
+              )
+            ) : (messageType === 'reservation_imminent' || messageType === 'SESSION_REMINDER') ? (
+              // 2. 상담 임박 - 화상 상담 시작하기 + 상담방 입장 (두 개의 버튼)
+              <div className="space-y-2">
+                {sessionId && (
+                  <Link href={`/video-call/${sessionId}`}>
+                    <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-5 rounded-xl shadow-sm">
+                      <Video className="mr-2 h-4 w-4" />
+                      화상 상담 시작하기
+                    </Button>
+                  </Link>
+                )}
+                {chatRoomId && (
+                  <Link href={`/expert/chat/${chatRoomId}`}>
+                    <Button variant="outline" className="w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 font-medium py-5 rounded-xl">
+                      상담방 입장
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            ) : (messageType === 'counseling_log_complete' || messageType === 'COUNSELING_LOG_COMPLETE') ? (
+              // 3. 일지 완료 시
+              counselingLogId && (
                 <Link href={`/expert/consultations/${counselingLogId}/log?session=${sessionId}`}>
-                  <Button className="w-full bg-primary hover:bg-primary/90 text-white">
+                  <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-5 rounded-xl">
                     <FileText className="mr-2 h-4 w-4" />
                     {getButtonText()}
                   </Button>
                 </Link>
-              ) : null
-            ) : messageType === 'reservation_complete' || messageType === 'SESSION_COMPLETE' ? (
-              sessionId ? (
+              )
+            ) : (messageType === 'reservation_complete' || messageType === 'SESSION_COMPLETE') ? (
+              // 4. 상담 완료(일지 작성 대기) 시
+              sessionId && (
                 <Link href={`/expert/consultations/${sessionId}/log?session=${sessionId}`}>
-                  <Button className="w-full bg-primary hover:bg-primary/90 text-white">
-                    <FileText className="mr-2 h-4 w-4" />
+                  <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-5 rounded-xl">
+                    <PenSquare className="mr-2 h-4 w-4" />
                     {getButtonText()}
                   </Button>
                 </Link>
-              ) : null
+              )
             ) : sessionId ? (
+              // 5. 그 외 일반적인 입장 케이스
               <Link href={`/video-call/${sessionId}`}>
-                <Button className="w-full bg-primary hover:bg-primary/90 text-white">
+                <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-5 rounded-xl">
                   <Video className="mr-2 h-4 w-4" />
                   {getButtonText()}
                 </Button>
@@ -259,39 +299,41 @@ export function AdminChat({
           </div>
         )}
 
-        {/* 구분선 */}
-        <div className="border-t border-gray-200 mb-4"></div>
+        {/* 구분선 - SYSTEM 메시지가 아닐 때만 표시 */}
+        {messageType !== 'SYSTEM' && <div className="border-t border-gray-200 mb-4"></div>}
 
-        {/* 상담 플로우 스텝 */}
-        <div className="flex items-center justify-between">
-          <Step
-            icon={<ClipboardList className="h-5 w-5" />}
-            label="상담예약"
-            isActive={isStepActive(0)}
-            isCompleted={isStepCompleted(0)}
-          />
-          <StepDivider isCompleted={isStepCompleted(0)} />
-          <Step
-            icon={<CheckCircle className="h-5 w-5" />}
-            label="예약확정"
-            isActive={isStepActive(1)}
-            isCompleted={isStepCompleted(1)}
-          />
-          <StepDivider isCompleted={isStepCompleted(1)} />
-          <Step
-            icon={<Video className="h-5 w-5" />}
-            label="상담"
-            isActive={isStepActive(2)}
-            isCompleted={isStepCompleted(2)}
-          />
-          <StepDivider isCompleted={isStepCompleted(2)} />
-          <Step
-            icon={<PenSquare className="h-5 w-5" />}
-            label="일지작성"
-            isActive={isStepActive(3)}
-            isCompleted={isStepCompleted(3)}
-          />
-        </div>
+        {/* 상담 플로우 스텝 - SYSTEM 메시지가 아닐 때만 표시 */}
+        {messageType !== 'SYSTEM' && (
+          <div className="flex items-center justify-between">
+            <Step
+              icon={<ClipboardList className="h-5 w-5" />}
+              label="상담예약"
+              isActive={isStepActive(0)}
+              isCompleted={isStepCompleted(0)}
+            />
+            <StepDivider isCompleted={isStepCompleted(0)} />
+            <Step
+              icon={<CheckCircle className="h-5 w-5" />}
+              label="예약확정"
+              isActive={isStepActive(1)}
+              isCompleted={isStepCompleted(1)}
+            />
+            <StepDivider isCompleted={isStepCompleted(1)} />
+            <Step
+              icon={<Video className="h-5 w-5" />}
+              label="상담"
+              isActive={isStepActive(2)}
+              isCompleted={isStepCompleted(2)}
+            />
+            <StepDivider isCompleted={isStepCompleted(2)} />
+            <Step
+              icon={<PenSquare className="h-5 w-5" />}
+              label="일지작성"
+              isActive={isStepActive(3)}
+              isCompleted={isStepCompleted(3)}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

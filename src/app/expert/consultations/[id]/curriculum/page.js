@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -13,6 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'react-hot-toast';
 import { CurriculumAPI } from '@/lib/api/curriculum';
 import { ConsultationsAPI } from '@/lib/api/consultations';
+import { ChatAPI } from '@/lib/api/chat';
+import { toPng } from 'html-to-image';
 import {
   FileText,
   Plus,
@@ -28,6 +30,7 @@ export default function CurriculumPage() {
   const params = useParams();
   const router = useRouter();
   const consultationId = params.id;
+  const curriculumFormRef = useRef(null);
 
   const [loading, setLoading] = useState(false);
   const [consultation, setConsultation] = useState(null);
@@ -147,6 +150,62 @@ export default function CurriculumPage() {
     });
   };
 
+  const findChatRoomId = async () => {
+    try {
+      // 채팅방 목록 조회
+      const chatRooms = await ChatAPI.getChatRooms();
+      console.log('📋 채팅방 목록:', chatRooms);
+
+      // 현재 상담과 연결된 채팅방 찾기
+      const chatRoom = Array.isArray(chatRooms)
+        ? chatRooms.find(room => room.counseling_request_id === parseInt(consultationId) || room.counseling_request === parseInt(consultationId))
+        : chatRooms?.results?.find(room => room.counseling_request_id === parseInt(consultationId) || room.counseling_request === parseInt(consultationId));
+
+      console.log('💬 찾은 채팅방:', chatRoom);
+      return chatRoom?.id;
+    } catch (error) {
+      console.error('채팅방 ID 찾기 실패:', error);
+      return null;
+    }
+  };
+
+  const captureAndSendCurriculum = async (chatRoomId) => {
+    if (!curriculumFormRef.current) {
+      console.error('커리큘럼 폼 참조를 찾을 수 없습니다');
+      return;
+    }
+
+    try {
+      // 커리큘럼을 이미지로 캡처
+      const dataUrl = await toPng(curriculumFormRef.current, {
+        quality: 0.95,
+        pixelRatio: 2,
+        backgroundColor: '#ffffff'
+      });
+
+      // Data URL을 Blob으로 변환
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+
+      // Blob을 File 객체로 변환
+      const file = new File([blob], 'curriculum.png', { type: 'image/png' });
+
+      // 채팅 메시지로 전송
+      await ChatAPI.sendMessage(chatRoomId, {
+        message_type: 'CURRICULUM',
+        image: file,
+        content: `${curriculumData.title} - 커리큘럼이 작성되었습니다.`
+      });
+
+      console.log('커리큘럼 이미지가 채팅으로 전송되었습니다');
+      toast.success('커리큘럼이 채팅방에 전송되었습니다');
+    } catch (error) {
+      console.error('커리큘럼 이미지 캡처/전송 실패:', error);
+      // 이미지 전송 실패는 경고만 표시하고 계속 진행
+      toast.error('커리큘럼 이미지를 채팅으로 전송하는데 실패했습니다');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -201,6 +260,7 @@ export default function CurriculumPage() {
         total_sessions: sessionsForBackend.length,  // 추가 회차 수 (1회차 제외)
         sessions_info: sessionsForBackend
       };
+
       if (existingCurriculum) {
         // 수정
         await CurriculumAPI.updateCurriculum(existingCurriculum.id, submitData);
@@ -209,6 +269,24 @@ export default function CurriculumPage() {
         // 생성
         await CurriculumAPI.createCurriculum(submitData);
         toast.success('커리큘럼이 생성되었습니다');
+      }
+
+      // 커리큘럼 저장 성공 후 이미지 캡처 및 채팅 전송
+      let chatRoomId = consultation?.chat_room_id || consultation?.chatRoomId || consultation?.chat_room;
+
+      // consultation 객체에 채팅방 ID가 없으면 채팅방 목록에서 찾기
+      if (!chatRoomId) {
+        console.log('📋 Consultation 객체에 채팅방 ID가 없어 채팅방 목록에서 검색합니다...');
+        chatRoomId = await findChatRoomId();
+      }
+
+      console.log('💬 최종 채팅방 ID:', chatRoomId);
+
+      if (chatRoomId) {
+        await captureAndSendCurriculum(chatRoomId);
+      } else {
+        console.warn('채팅방 ID를 찾을 수 없어 커리큘럼 이미지를 전송하지 못했습니다');
+        toast.error('채팅방을 찾을 수 없어 이미지를 전송하지 못했습니다');
       }
 
       router.push('/expert/consultations');
@@ -263,6 +341,8 @@ export default function CurriculumPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* 커리큘럼 캡처 영역 */}
+            <div ref={curriculumFormRef}>
             {/* 기본 정보 */}
             <Card>
               <CardHeader>
@@ -407,6 +487,7 @@ export default function CurriculumPage() {
                 </Button>
               </CardContent>
             </Card>
+            </div>
 
             {/* 저장 버튼 */}
             <div className="flex justify-end gap-3">

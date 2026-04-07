@@ -194,7 +194,18 @@ export default function ExpertChatDetailPage() {
       'reservation_complete',
       'counseling_log_complete'
     ];
-    return adminChatTypes.includes(message.message_type);
+
+    // message_type이 adminChatTypes에 포함되면 true
+    if (adminChatTypes.includes(message.message_type)) {
+      return true;
+    }
+
+    // SYSTEM 메시지 중 커리큘럼 작성 요청은 AdminChat으로 표시
+    if (message.message_type === 'SYSTEM' && message.content?.includes('커리큘럼')) {
+      return true;
+    }
+
+    return false;
   };
 
   const isSimpleSystemMessage = (message) => {
@@ -297,6 +308,7 @@ export default function ExpertChatDetailPage() {
                         counselingDate={message.counseling_date}
                         counselingLogId={message.counseling_log_id}
                         imageUrl={message.image_url}
+                        userType="expert"
                       />
                     </div>
                   ) : isSimpleSystemMessage(message) ? (

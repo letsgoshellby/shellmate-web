@@ -311,6 +311,7 @@ export default function ClientChatDetailPage() {
                         counselingDate={message.counseling_date}
                         counselingLogId={message.counseling_log_id}
                         imageUrl={message.image_url}
+                        userType="client"
                       />
                     </div>
                   ) : isSimpleSystemMessage(message) ? (
