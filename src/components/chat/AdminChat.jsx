@@ -27,7 +27,8 @@ export function AdminChat({
   counselorName,
   counselingDate,
   counselingLogId,
-  onCounselingLogPublished
+  onCounselingLogPublished,
+  imageUrl
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -54,6 +55,8 @@ export function AdminChat({
       case 'counseling_log_complete':
       case 'COUNSELING_LOG_COMPLETE':
         return '상담 일지가 작성되었습니다';
+      case 'CURRICULUM':
+        return '커리큘럼이 작성되었습니다';
       default:
         return '상담 안내';
     }
@@ -82,6 +85,8 @@ export function AdminChat({
       case 'counseling_log_complete':
       case 'COUNSELING_LOG_COMPLETE':
         return `${sessionNumber || ''}회차 상담 일지가 작성 완료되었습니다.\n아래 버튼을 눌러 상담 일지를 확인하세요.`;
+      case 'CURRICULUM':
+        return '1회차 상담이 완료되었습니다.\n추가 회차 진행을 위해 커리큘럼(상담일지)을 작성해 주세요.';
       default:
         return '상담 안내';
     }
@@ -121,6 +126,8 @@ export function AdminChat({
       case 'counseling_log_complete':
       case 'COUNSELING_LOG_COMPLETE':
         return step === 3;
+      case 'CURRICULUM':
+        return step === 3;
       default:
         return false;
     }
@@ -142,6 +149,8 @@ export function AdminChat({
         return step < 3;
       case 'counseling_log_complete':
       case 'COUNSELING_LOG_COMPLETE':
+        return step <= 3;
+      case 'CURRICULUM':
         return step <= 3;
       default:
         return false;
@@ -176,6 +185,17 @@ export function AdminChat({
         <p className="text-sm text-gray-700 leading-relaxed mb-4 whitespace-pre-line">
           {getContent()}
         </p>
+
+        {/* 커리큘럼 이미지 */}
+        {messageType === 'CURRICULUM' && imageUrl && (
+          <div className="mb-4">
+            <img
+              src={imageUrl}
+              alt="커리큘럼"
+              className="w-full rounded-lg border border-gray-200"
+            />
+          </div>
+        )}
 
         {/* 메타데이터 정보 */}
         {metadata && Object.keys(metadata).length > 0 && (

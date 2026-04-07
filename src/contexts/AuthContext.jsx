@@ -101,6 +101,7 @@ export function AuthProvider({ children }) {
       setUser(null);
       TokenStorage.clearTokens();
       localStorage.removeItem('user_data');
+      localStorage.removeItem('expertSignupComplete');
     }
   };
   

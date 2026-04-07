@@ -19,6 +19,7 @@ export function AuthGuard({
         const isSignupPage = window.location.pathname.startsWith('/signup/expert');
 
         if (!isSignupPage) {
+          if (localStorage.getItem('expertSignupComplete') === 'true') return;
           setCheckingSignupStatus(true);
 
           try {
@@ -46,26 +47,28 @@ export function AuthGuard({
             // current_step: 진행이 끝난 마지막 단계 (완료된 단계)
             const currentPath = window.location.pathname;
 
-            if (currentStep === 1) {
+            if (currentStep === '1') {
               const targetPath = '/signup/expert/step2';
               if (currentPath !== targetPath) {
                 console.log('⚠️ [AuthGuard] Step 1까지 완료 - step2 페이지로 리다이렉트');
                 router.replace(targetPath);
               }
-            } else if (currentStep === 2) {
+            } else if (currentStep === '2') {
               console.log('⚠️ [AuthGuard] Step 2까지 완료 - 심사 대기 중');
               // 심사 대기 중이므로 추가 단계 진행 안 함
-            } else if (currentStep === 3) {
+            } else if (currentStep === '3') {
               const targetPath = '/signup/expert/bank-account';
+              console.log('현재 경로:', currentPath, '| 목표 경로:', targetPath, '| 같음:', currentPath === targetPath);
               if (currentPath !== targetPath) {
                 console.log('⚠️ [AuthGuard] Step 3까지 완료 - bank-account 페이지로 리다이렉트');
                 console.log('   현재 경로:', currentPath);
                 console.log('   목표 경로:', targetPath);
                 router.replace(targetPath);
               }
-            } else if (currentStep === 4) {
+            } else if (currentStep === '4') {
               console.log('✅ [AuthGuard] Step 4까지 완료 - 회원가입 완료, 대시보드 접근 허용');
               // 회원가입 완료, 대시보드 접근 허용
+              localStorage.setItem('expertSignupComplete', 'true');
             }
 
           } catch (error) {
