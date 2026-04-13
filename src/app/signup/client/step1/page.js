@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -51,14 +52,17 @@ const step1Schema = z.object({
     required_error: '학습 문제를 선택해주세요',
     invalid_type_error: '학습 문제를 선택해주세요',
   }),
+  learning_problem_other: z.string().optional(),
   sensory_processing_problem: z.enum(['none', 'sound', 'touch', 'other'], {
     required_error: '감각 처리 문제를 선택해주세요',
     invalid_type_error: '감각 처리 문제를 선택해주세요',
   }),
+  sensory_processing_problem_other: z.string().optional(),
   emotional_anxiety_problem: z.enum(['none', 'obsessive_compulsive', 'tic', 'social_anxiety', 'other'], {
     required_error: '정서 및 불안 문제를 선택해주세요',
     invalid_type_error: '정서 및 불안 문제를 선택해주세요',
   }),
+  emotional_anxiety_problem_other: z.string().optional(),
   family_similar_symptoms: z.boolean({
     required_error: '가족 유사 증상 여부를 선택해주세요',
     invalid_type_error: '가족 유사 증상 여부를 선택해주세요',
@@ -178,10 +182,10 @@ export default function ClientSignupStep1Page() {
 
             <form onSubmit={handleSubmit(handleStep1Submit)} className="space-y-6">
               {/* 기본 정보 섹션 */}
-              <div className="space-y-4">
+              <div className="space-y-8">
                 <h3 className="font-semibold text-lg border-b pb-2">기본 정보</h3>
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <Label htmlFor="birth_date">생년월일 *</Label>
                   <Input
                     id="birth_date"
@@ -201,7 +205,7 @@ export default function ClientSignupStep1Page() {
                   )}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <Label>성별 *</Label>
                   <RadioGroup
                     value={watchGender}
@@ -222,7 +226,7 @@ export default function ClientSignupStep1Page() {
                   )}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <Label>몇째 아이인가요? *</Label>
                   <RadioGroup
                     value={watchChildOrder}
@@ -249,10 +253,10 @@ export default function ClientSignupStep1Page() {
               </div>
 
               {/* 세부 정보 섹션 */}
-              <div className="space-y-4">
+              <div className="space-y-8">
                 <h3 className="font-semibold text-lg border-b pb-2">세부 정보</h3>
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <Label>웩슬러 검사 등 관련 검사를 시행한 적이 있나요? *</Label>
                   <RadioGroup
                     value={watchPsychologicalTestConducted === true ? 'yes' : watchPsychologicalTestConducted === false ? 'no' : undefined}
@@ -270,7 +274,7 @@ export default function ClientSignupStep1Page() {
                   </RadioGroup>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <Label>학습 문제 *</Label>
                   <RadioGroup
                     value={watchLearningProblem}
@@ -301,9 +305,16 @@ export default function ClientSignupStep1Page() {
                   {errors.learning_problem && (
                     <p className="text-sm text-red-500">{errors.learning_problem.message}</p>
                   )}
+                  {watchLearningProblem === 'other' && (
+                    <Textarea
+                      placeholder="기타 학습 문제를 입력해주세요"
+                      {...register('learning_problem_other')}
+                      rows={3}
+                    />
+                  )}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <Label>감각 처리 문제 *</Label>
                   <RadioGroup
                     value={watchSensoryProcessingProblem}
@@ -330,9 +341,16 @@ export default function ClientSignupStep1Page() {
                   {errors.sensory_processing_problem && (
                     <p className="text-sm text-red-500">{errors.sensory_processing_problem.message}</p>
                   )}
+                  {watchSensoryProcessingProblem === 'other' && (
+                    <Textarea
+                      placeholder="기타 감각 처리 문제를 입력해주세요"
+                      {...register('sensory_processing_problem_other')}
+                      rows={3}
+                    />
+                  )}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <Label>정서 및 불안 문제 *</Label>
                   <RadioGroup
                     value={watchEmotionalAnxietyProblem}
@@ -363,9 +381,16 @@ export default function ClientSignupStep1Page() {
                   {errors.emotional_anxiety_problem && (
                     <p className="text-sm text-red-500">{errors.emotional_anxiety_problem.message}</p>
                   )}
+                  {watchEmotionalAnxietyProblem === 'other' && (
+                    <Textarea
+                      placeholder="기타 정서 및 불안 문제를 입력해주세요"
+                      {...register('emotional_anxiety_problem_other')}
+                      rows={3}
+                    />
+                  )}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <Label>가족 중 유사한 증상을 경험한 분이 있나요? *</Label>
                   <RadioGroup
                     value={watchFamilySimilarSymptoms === true ? 'yes' : watchFamilySimilarSymptoms === false ? 'no' : undefined}
@@ -383,7 +408,7 @@ export default function ClientSignupStep1Page() {
                   </RadioGroup>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <Label>현재 복용 중인 약물이 있나요? *</Label>
                   <RadioGroup
                     value={watchMedicationUsage === true ? 'yes' : watchMedicationUsage === false ? 'no' : undefined}

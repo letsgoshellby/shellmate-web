@@ -123,8 +123,8 @@ export default function ClientSignupStep2Page() {
           <CardContent>
             <SignupProgress currentStep={2} />
 
-            <form onSubmit={handleSubmit(handleStep2Submit)} className="space-y-6">
-              <div className="space-y-2">
+            <form onSubmit={handleSubmit(handleStep2Submit)} className="space-y-8">
+              <div className="space-y-4">
                 <Label>공식 진단 여부 * (복수 선택 가능)</Label>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="flex items-center space-x-2">
@@ -173,7 +173,7 @@ export default function ClientSignupStep2Page() {
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <Label>현재 치료/상담 여부 *</Label>
                 <RadioGroup
                   value={watchTreatmentStatus}
@@ -211,7 +211,7 @@ export default function ClientSignupStep2Page() {
               </div>
 
               {watchTreatmentStatus && watchTreatmentStatus !== 'none' && (
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <Label htmlFor="treatment_year">진단/평가 시행 연도</Label>
                   <select
                     id="treatment_year"
@@ -228,7 +228,7 @@ export default function ClientSignupStep2Page() {
                 </div>
               )}
 
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <Label htmlFor="medical_records">병원 또는 학교 기록 (최대 300자)</Label>
                 <Textarea
                   id="medical_records"
