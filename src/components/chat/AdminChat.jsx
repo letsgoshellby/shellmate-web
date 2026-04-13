@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -32,6 +32,7 @@ export function AdminChat({
   userType
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const getTitle = () => {
     switch (messageType) {
@@ -96,7 +97,7 @@ export function AdminChat({
   };
 
   const shouldShowButton = () => {
-    return ['reservation_imminent', 'SESSION_REMINDER', 'reservation_complete', 'SESSION_COMPLETE', 'counseling_log_complete', 'COUNSELING_LOG_COMPLETE', 'SYSTEM'].includes(messageType);
+    return ['reservation_imminent', 'SESSION_REMINDER', 'reservation_complete', 'SESSION_COMPLETE', 'counseling_log_complete', 'COUNSELING_LOG_COMPLETE', 'SYSTEM', 'CURRICULUM'].includes(messageType);
   };
 
   const getButtonText = () => {
@@ -198,8 +199,30 @@ export function AdminChat({
             <img
               src={imageUrl}
               alt="커리큘럼"
-              className="w-full rounded-lg border border-gray-200"
+              className="w-full rounded-lg border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => setSelectedImage(imageUrl)}
             />
+          </div>
+        )}
+
+        {/* 이미지 확대 모달 */}
+        {selectedImage && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
+            onClick={() => setSelectedImage(null)}
+          >
+            <img
+              src={selectedImage}
+              alt="원본 이미지"
+              className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button
+              className="absolute top-4 right-4 text-white bg-black/50 rounded-full w-9 h-9 flex items-center justify-center hover:bg-black/70"
+              onClick={() => setSelectedImage(null)}
+            >
+              ✕
+            </button>
           </div>
         )}
 
@@ -236,7 +259,15 @@ export function AdminChat({
         {/* 버튼 영역 */}
         {shouldShowButton() && (
           <div className="mb-4">
-            {messageType === 'SYSTEM' && userType !== 'client' ? (
+            {(messageType === 'CURRICULUM') && userType === 'client' ? (
+              // 커리큘럼 완료 메시지 - 내담자에게 다음 상담 예약 버튼
+              <Link href="/client/consultations/book">
+                <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-5 rounded-xl">
+                  <Calendar className="mr-2 h-4 w-4" />
+                  다음 상담 예약하기
+                </Button>
+              </Link>
+            ) : messageType === 'SYSTEM' && userType !== 'client' ? (
               // 1. SYSTEM 메시지 (커리큘럼 작성 요청)
               chatRoomId && (
                 <div className="space-y-2">
