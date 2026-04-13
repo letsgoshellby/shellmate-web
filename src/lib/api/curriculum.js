@@ -20,16 +20,16 @@ export class CurriculumAPI {
     return response.data;
   }
 
-  /**
-   * 커리큘럼 목록 조회
-   * GET /consultation/curriculums/
-   * @param {Object} params - 조회 파라미터
-   * @returns {Array} 커리큘럼 목록
-   */
-  static async getCurriculums(params = {}) {
-    const response = await apiClient.get('/consultation/curriculums/', { params });
-    return response.data;
-  }
+  // /**
+  //  * 커리큘럼 목록 조회
+  //  * GET /consultation/curriculums/
+  //  * @param {Object} params - 조회 파라미터
+  //  * @returns {Array} 커리큘럼 목록
+  //  */
+  // static async getCurriculums(params = {}) {
+  //   const response = await apiClient.get('/consultation/curriculums/', { params });
+  //   return response.data;
+  // }
 
   /**
    * 커리큘럼 상세 조회
@@ -44,35 +44,35 @@ export class CurriculumAPI {
 
   /**
    * 상담 신청에 대한 커리큘럼 조회
-   * GET /consultation/curriculums/by-request/{counseling_request_id}/
+   * GET /consultation/curriculums/{counseling_request_id}/
    * @param {number} counselingRequestId - 상담 신청 ID
    * @returns {Object} 커리큘럼 정보
    */
   static async getCurriculumByRequest(counselingRequestId) {
-    const response = await apiClient.get(`/consultation/curriculums/by-request/${counselingRequestId}/`);
+    const response = await apiClient.get(`/consultation/curriculums/${counselingRequestId}/`);
     return response.data;
   }
 
-  /**
-   * 커리큘럼 수정
-   * PATCH /consultation/curriculums/{id}/
-   * @param {number} id - 커리큘럼 ID
-   * @param {Object} data - 수정할 데이터
-   * @returns {Object} 수정된 커리큘럼 정보
-   */
-  static async updateCurriculum(id, data) {
-    const response = await apiClient.patch(`/consultation/curriculums/${id}/`, data);
-    return response.data;
-  }
+  // /**
+  //  * 커리큘럼 수정
+  //  * PATCH /consultation/curriculums/{id}/
+  //  * @param {number} id - 커리큘럼 ID
+  //  * @param {Object} data - 수정할 데이터
+  //  * @returns {Object} 수정된 커리큘럼 정보
+  //  */
+  // static async updateCurriculum(id, data) {
+  //   const response = await apiClient.patch(`/consultation/curriculums/${id}/`, data);
+  //   return response.data;
+  // }
 
-  /**
-   * 커리큘럼 삭제
-   * DELETE /consultation/curriculums/{id}/
-   * @param {number} id - 커리큘럼 ID
-   * @returns {void}
-   */
-  static async deleteCurriculum(id) {
-    const response = await apiClient.delete(`/consultation/curriculums/${id}/`);
-    return response.data;
-  }
+  // /**
+  //  * 커리큘럼 삭제
+  //  * DELETE /consultation/curriculums/{id}/
+  //  * @param {number} id - 커리큘럼 ID
+  //  * @returns {void}
+  //  */
+  // static async deleteCurriculum(id) {
+  //   const response = await apiClient.delete(`/consultation/curriculums/${id}/`);
+  //   return response.data;
+  // }
 }
