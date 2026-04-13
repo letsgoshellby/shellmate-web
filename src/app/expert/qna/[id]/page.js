@@ -338,7 +338,7 @@ export default function ExpertQuestionDetailPage() {
               </h3>
               
               {answers.map((answer) => {
-                const authorName = answer.author?.nickname || answer.author?.name || '익명';
+                const authorName = answer.expert?.name || '익명';
                 return (
                 <Card key={answer.id} className={answer.is_expert ? 'border-blue-200 bg-blue-50/30' : ''}>
                   <CardContent className="p-6">
