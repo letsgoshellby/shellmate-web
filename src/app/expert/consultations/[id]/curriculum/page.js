@@ -317,6 +317,91 @@ export default function CurriculumPage() {
     );
   }
 
+  // 읽기 전용 뷰 (이미 제출된 커리큘럼)
+  if (existingCurriculum) {
+    return (
+      <AuthGuard requiredRole="expert">
+        <DashboardLayout>
+          <div className="space-y-6">
+            <div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/expert/consultations')}
+                className="mb-2"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                상담 목록으로
+              </Button>
+              <h1 className="text-2xl font-bold text-gray-900">커리큘럼</h1>
+              <p className="text-gray-600">
+                {consultation?.client?.name || '내담자'}님의 커리큘럼
+              </p>
+            </div>
+
+            {/* 기본 정보 */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  {existingCurriculum.title}
+                </CardTitle>
+                {existingCurriculum.description && (
+                  <CardDescription className="text-sm text-gray-700 whitespace-pre-wrap">
+                    {existingCurriculum.description}
+                  </CardDescription>
+                )}
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Calendar className="h-4 w-4" />
+                  <span>총 {existingCurriculum.total_sessions}회차 커리큘럼</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 세션별 정보 */}
+            <div className="space-y-4">
+              {(existingCurriculum.sessions_info || []).map((session, index) => (
+                <Card key={index}>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <span className="bg-primary text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                        {session.session_number}
+                      </span>
+                      {session.session_number}회차 — {session.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {session.description && (
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                        {session.description}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      {session.duration_minutes && (
+                        <span>소요 시간: {session.duration_minutes}분</span>
+                      )}
+                      {session.tags && (
+                        <div className="flex flex-wrap gap-1">
+                          {(Array.isArray(session.tags) ? session.tags : session.tags.split(',')).map((tag, i) => (
+                            <span key={i} className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">
+                              {tag.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </DashboardLayout>
+      </AuthGuard>
+    );
+  }
+
   return (
     <AuthGuard requiredRole="expert">
       <DashboardLayout>
