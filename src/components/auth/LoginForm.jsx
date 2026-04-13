@@ -55,10 +55,9 @@ export function LoginForm() {
 
       toast.success('로그인되었습니다');
     } catch (error) {
-      if (error.response?.status === 401) {
-        setError('password', {
-          message: '이메일 또는 비밀번호가 올바르지 않습니다',
-        });
+      const status = error.response?.status;
+      if (status === 401 || status === 400) {
+        toast.error('이메일 또는 비밀번호를 다시 확인해주세요.');
       } else {
         toast.error('로그인 중 오류가 발생했습니다');
       }

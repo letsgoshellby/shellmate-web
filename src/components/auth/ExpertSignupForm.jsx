@@ -57,6 +57,16 @@ export function ExpertSignupForm() {
   const watchPrivacyPolicy = watch('privacy_policy');
   const watchPersonalInfoAndThirdParty = watch('personal_info_and_third_party');
   const watchMarketingConsent = watch('marketing_consent');
+
+  const isAllChecked = watchServiceTerms && watchPrivacyPolicy && watchPersonalInfoAndThirdParty && watchMarketingConsent;
+
+  const handleAllCheck = (checked) => {
+    const value = !!checked;
+    setValue('service_terms', value);
+    setValue('privacy_policy', value);
+    setValue('personal_info_and_third_party', value);
+    setValue('marketing_consent', value);
+  };
   
   const handleSignup = async (data) => {
     setLoading(true);
@@ -72,24 +82,19 @@ export function ExpertSignupForm() {
       const responseData = await response.json();
 
       if (!response.ok) {
-        // 이메일 중복 에러 처리
-        if (responseData.email) {
+        if (responseData.phone_number) {
+          const msg = Array.isArray(responseData.phone_number) ? responseData.phone_number[0] : responseData.phone_number;
+          toast.error(msg);
+        } else if (responseData.email) {
           const emailError = Array.isArray(responseData.email) ? responseData.email[0] : responseData.email;
           if (emailError.includes('이미') || emailError.includes('exist') || emailError.includes('already')) {
             toast.error('이미 가입된 이메일입니다.');
           } else {
             toast.error(emailError);
           }
-          return;
-        }
-        if (responseData.errors) {
+        } else if (responseData.errors) {
           Object.entries(responseData.errors).forEach(([key, value]) => {
-            const errorMsg = Array.isArray(value) ? value[0] : value;
-            if (key === 'email' && (errorMsg.includes('이미') || errorMsg.includes('exist') || errorMsg.includes('already'))) {
-              toast.error('이미 가입된 이메일입니다.');
-            } else {
-              toast.error(errorMsg);
-            }
+            toast.error(Array.isArray(value) ? value[0] : value);
           });
         } else {
           toast.error(responseData.detail || '회원가입 중 오류가 발생했습니다');
@@ -219,7 +224,7 @@ export function ExpertSignupForm() {
             )}
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-2 pb-3">
             <Label htmlFor="phone_number">전화번호 *</Label>
             <Input
               id="phone_number"
@@ -240,8 +245,19 @@ export function ExpertSignupForm() {
           </div>
           
           <div className="space-y-3 pt-4 border-t">
-            <div className="flex items-center space-x-2">
-              <Checkbox 
+            <div className="flex items-center space-x-2 pb-5 pt-2 mb-1 border-b">
+              <Checkbox
+                id="all_agree"
+                checked={!!isAllChecked}
+                onCheckedChange={handleAllCheck}
+              />
+              <Label htmlFor="all_agree" className="text-sm font-bold cursor-pointer">
+                전체 동의하기
+              </Label>
+            </div>
+
+            <div className="flex items-center space-x-2 pt-3">
+              <Checkbox
                 id="service_terms"
                 checked={watchServiceTerms}
                 onCheckedChange={(checked) => setValue('service_terms', checked)}
@@ -295,7 +311,7 @@ export function ExpertSignupForm() {
 
           </div>
           
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg mb-10">
             <p className="text-sm text-amber-800">
               전문가 회원가입은 추가 정보 입력 및 자격 심사가 필요합니다.
               심사는 보통 1-3일 소요됩니다.

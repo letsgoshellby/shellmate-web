@@ -61,6 +61,17 @@ export function ClientSignupForm() {
   const watchDetailedPrivacyConsent = watch('detailed_privacy_consent');
   const watchSensitiveInfoAndThirdParty = watch('sensitive_info_and_third_party');
   const watchMarketingConsent = watch('marketing_consent');
+
+  const isAllChecked = watchServiceTerms && watchPrivacyPolicy && watchDetailedPrivacyConsent && watchSensitiveInfoAndThirdParty && watchMarketingConsent;
+
+  const handleAllCheck = (checked) => {
+    const value = !!checked;
+    setValue('service_terms', value);
+    setValue('privacy_policy', value);
+    setValue('detailed_privacy_consent', value);
+    setValue('sensitive_info_and_third_party', value);
+    setValue('marketing_consent', value);
+  };
   
   const handleSignup = async (data) => {
     setLoading(true);
@@ -76,7 +87,17 @@ export function ClientSignupForm() {
       const responseData = await response.json();
 
       if (!response.ok) {
-        if (responseData.detail) {
+        if (responseData.phone_number) {
+          const msg = Array.isArray(responseData.phone_number) ? responseData.phone_number[0] : responseData.phone_number;
+          toast.error(msg);
+        } else if (responseData.email) {
+          const emailError = Array.isArray(responseData.email) ? responseData.email[0] : responseData.email;
+          if (emailError.includes('이미') || emailError.includes('exist') || emailError.includes('already')) {
+            toast.error('이미 가입된 이메일입니다.');
+          } else {
+            toast.error(emailError);
+          }
+        } else if (responseData.detail) {
           toast.error(responseData.detail);
         } else {
           toast.error('회원가입 중 오류가 발생했습니다');
@@ -220,7 +241,7 @@ export function ClientSignupForm() {
             )}
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-2 pb-3">
             <Label htmlFor="phone_number">전화번호 *</Label>
             <Input
               id="phone_number"
@@ -241,8 +262,19 @@ export function ClientSignupForm() {
           </div>
           
           <div className="space-y-3 pt-4 border-t">
-            <div className="flex items-center space-x-2">
-              <Checkbox 
+            <div className="flex items-center space-x-2 pt-2 pb-5 mb-1 border-b">
+              <Checkbox
+                id="all_agree"
+                checked={!!isAllChecked}
+                onCheckedChange={handleAllCheck}
+              />
+              <Label htmlFor="all_agree" className="text-sm font-bold cursor-pointer">
+                전체 동의하기
+              </Label>
+            </div>
+
+            <div className="flex items-center space-x-2 pt-3">
+              <Checkbox
                 id="service_terms"
                 checked={watchServiceTerms}
                 onCheckedChange={(checked) => setValue('service_terms', checked)}
@@ -297,7 +329,7 @@ export function ClientSignupForm() {
               <p className="text-sm text-red-500 ml-6">{errors.sensitive_info_and_third_party.message}</p>
             )}
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 pb-5">
               <Checkbox 
                 id="marketing_consent"
                 checked={watchMarketingConsent}
