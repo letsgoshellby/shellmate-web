@@ -41,6 +41,7 @@ export default function ClientChatDetailPage() {
   const [sending, setSending] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [loadingMore, setLoadingMore] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -254,6 +255,27 @@ export default function ClientChatDetailPage() {
   return (
     <AuthGuard requiredRole="client">
       <DashboardLayout>
+        {/* 이미지 확대 모달 */}
+        {selectedImage && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
+            onClick={() => setSelectedImage(null)}
+          >
+            <img
+              src={selectedImage}
+              alt="원본 이미지"
+              className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button
+              className="absolute top-4 right-4 text-white bg-black/50 rounded-full w-9 h-9 flex items-center justify-center hover:bg-black/70"
+              onClick={() => setSelectedImage(null)}
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         <div className="flex flex-col h-[calc(100vh-8rem)]">
           {/* 채팅방 헤더 */}
           <Card className="rounded-b-none">
@@ -286,8 +308,11 @@ export default function ClientChatDetailPage() {
                 <p>대화를 시작해보세요!</p>
               </div>
             ) : (
-              messages.map((message, index) => (
-                <div key={message.id}>
+              messages.map((message, index) => {
+                // 커리큘럼 작성 요청 메시지는 client에게 노출 안 함
+                if (message.message_type === 'SYSTEM' && message.content?.includes('커리큘럼')) return null;
+
+                return (<div key={message.id}>
                   {/* 날짜 구분선 */}
                   {shouldShowDate(message, messages[index - 1]) && (
                     <div className="flex items-center justify-center my-4">
@@ -343,7 +368,8 @@ export default function ClientChatDetailPage() {
                               <img
                                 src={message.image_url}
                                 alt="전송된 이미지"
-                                className="max-w-full rounded-lg mb-1"
+                                className="max-w-full rounded-lg mb-1 cursor-pointer hover:opacity-90 transition-opacity"
+                                onClick={() => setSelectedImage(message.image_url)}
                               />
                             )}
 
@@ -407,7 +433,8 @@ export default function ClientChatDetailPage() {
                     </div>
                   )}
                 </div>
-              ))
+                );
+              })
             )}
             <div ref={messagesEndRef} />
           </div>
