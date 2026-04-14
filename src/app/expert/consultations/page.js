@@ -441,11 +441,11 @@ export default function ExpertConsultationsPage() {
                             </span>
                           </div>
 
-                          <div className="flex items-center space-x-2">
+                          {/* <div className="flex items-center space-x-2">
                             <span className="text-sm font-medium text-gray-700">
                               상담 금액: {consultation.paid_amount?.toLocaleString() || 0} 에그
                             </span>
-                          </div>
+                          </div> */}
                         </div>
 
                         {consultation.client_notes && (
