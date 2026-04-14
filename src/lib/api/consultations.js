@@ -196,6 +196,20 @@ export class ConsultationsAPI {
     return response.data;
   }
   
+  /**
+   * 커리큘럼 기반 추가 세션 예약
+   * PATCH /consultation/counseling-requests/{counseling_request_id}/sessions/schedule/
+   * @param {number} counselingRequestId - 상담 신청 ID
+   * @param {Array} sessions - [{ session_number: 2, scheduled_at: "..." }, ...]
+   */
+  static async scheduleAdditionalSessions(counselingRequestId, sessions) {
+    const response = await apiClient.patch(
+      `/consultation/counseling-requests/${counselingRequestId}/sessions/schedule/`,
+      { sessions }
+    );
+    return response.data;
+  }
+
   // 상담 메모 추가 (전문가용)
   static async addConsultationNote(consultationId, note) {
     const response = await apiClient.post(`/consultations/${consultationId}/notes/`, { note });
