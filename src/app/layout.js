@@ -17,7 +17,7 @@ export const metadata = {
     siteName: '셸메이트',
     images: [
       {
-        url: '/shellmate_logo.png',
+        url: '/og-image.png',
         alt: '셸메이트 로고',
       },
     ],
@@ -28,7 +28,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: "셸메이트 - 느린아이 비대면 상담 플랫폼",
     description: "느린 아이를 둔 학부모와 전문가를 연결하는 비대면 코칭 서비스",
-    images: ['/shellmate_logo.png'],
+    images: ['/og-image.png'],
   },
 };
 
@@ -37,6 +37,18 @@ export default function RootLayout({ children }) {
     <html lang="ko">
       <head>
         <link rel="stylesheet" as="style" crossOrigin="" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "셸메이트",
+              "url": "https://shellmate.letsgoshellby.com",
+              "description": "느린 아이를 둔 학부모와 전문가를 연결하는 비대면 코칭 서비스",
+            }),
+          }}
+        />
       </head>
       <body className="antialiased font-sans">
         <ScriptLoader />
