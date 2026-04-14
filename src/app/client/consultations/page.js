@@ -19,7 +19,7 @@ import {
   Star,
   MessageSquare,
   FileText,
-  Edit
+  BookOpen
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
@@ -32,81 +32,6 @@ export default function ClientConsultationsPage() {
   const [selectedConsultationId, setSelectedConsultationId] = useState(null);
   const [cancellationReason, setCancellationReason] = useState('');
   
-  // // 임시 데이터
-  // const mockConsultations = [
-  //   {
-  //     id: 1,
-  //     expert: {
-  //       id: 2,
-  //       name: '김전문가',
-  //       title: '아동발달 전문가',
-  //       profile_image: null,
-  //       specialties: ['집중력', 'ADHD', '학습장애'],
-  //       rating: 4.8,
-  //       experience_years: 10
-  //     },
-  //     scheduled_date: '2024-01-20',
-  //     scheduled_time: '14:00',
-  //     duration: 60,
-  //     status: 'confirmed', // pending, confirmed, completed, cancelled
-  //     topic: '6세 아이 집중력 문제 상담',
-  //     description: '우리 아이가 집중을 잘 못해서 학습에 어려움이 있습니다. 전문가의 조언을 듣고 싶습니다.',
-  //     meeting_url: 'https://meet.example.com/room123',
-  //     created_at: '2024-01-15T10:30:00Z',
-  //     price: 50000,
-  //     rating: null,
-  //     feedback: null,
-  //     expert_notes: null
-  //   },
-  //   {
-  //     id: 2,
-  //     expert: {
-  //       id: 3,
-  //       name: '이언어치료사',
-  //       title: '언어치료사',
-  //       profile_image: null,
-  //       specialties: ['언어발달', '언어치료', '의사소통'],
-  //       rating: 4.9,
-  //       experience_years: 8
-  //     },
-  //     scheduled_date: '2024-01-18',
-  //     scheduled_time: '10:00',
-  //     duration: 60,
-  //     status: 'completed',
-  //     topic: '5세 아이 언어발달 지연 상담',
-  //     description: '또래에 비해 언어 발달이 늦는 것 같아 걱정입니다.',
-  //     meeting_url: null,
-  //     created_at: '2024-01-10T14:20:00Z',
-  //     price: 60000,
-  //     rating: 5,
-  //     feedback: '매우 도움이 되었습니다. 구체적인 방법을 알려주셔서 감사해요.',
-  //     expert_notes: '언어 자극 활동 권장, 3개월 후 재상담 예정'
-  //   },
-  //   {
-  //     id: 3,
-  //     expert: {
-  //       id: 4,
-  //       name: '박놀이치료사',
-  //       title: '놀이치료사',
-  //       profile_image: null,
-  //       specialties: ['놀이치료', '사회성', '정서발달'],
-  //       rating: 4.7,
-  //       experience_years: 12
-  //     },
-  //     scheduled_date: '2024-01-25',
-  //     scheduled_time: '16:00',
-  //     duration: 60,
-  //     status: 'pending',
-  //     topic: '사회성 발달 상담',
-  //     description: '또래 친구들과 어울리기 어려워하는 아이를 위한 상담',
-  //     meeting_url: null,
-  //     created_at: '2024-01-16T09:15:00Z',
-  //     price: 55000,
-  //     rating: null,
-  //     feedback: null,
-  //     expert_notes: null
-  //   }
-  // ];
 
   useEffect(() => {
     loadConsultations();
@@ -236,10 +161,23 @@ export default function ClientConsultationsPage() {
     if (!scheduledAt) return false;
     const scheduledTime = new Date(scheduledAt).getTime();
     const now = Date.now();
-    const fifteenMinutesAfter = scheduledTime + (15 * 60 * 1000); // 시작 시간 + 15분
-
-    // 시작 시간 15분 후까지 참여 가능
+    const fifteenMinutesAfter = scheduledTime + (15 * 60 * 1000);
     return now <= fifteenMinutesAfter;
+  };
+
+  const getSessionStatusColor = (status) => {
+    switch (status?.toUpperCase()) {
+      case 'SCHEDULED': return 'bg-blue-100 text-blue-800';
+      case 'IN_PROGRESS': return 'bg-purple-100 text-purple-800';
+      case 'COMPLETED': return 'bg-green-100 text-green-800';
+      case 'NO_SHOW': return 'bg-orange-100 text-orange-800';
+      case 'CANCELLED': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getSessionStatusText = (session) => {
+    return session.status_display || session.status || '알 수 없음';
   };
 
   if (loading) {
@@ -319,150 +257,120 @@ export default function ClientConsultationsPage() {
               consultations.map((consultation) => (
                 <Card key={consultation.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-3">
+                    {/* 상단: 상태 + 전문가 정보 */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
                           <Badge className={getStatusColor(consultation.status)}>
                             {getStatusIcon(consultation.status)}
                             <span className="ml-1">{getStatusText(consultation)}</span>
                           </Badge>
-                          {consultation.status?.toUpperCase() === 'CONFIRMED' && isUpcoming(consultation.sessions?.[0]?.scheduled_at) && (
-                            <Badge className="bg-green-100 text-green-800">
-                              <Calendar className="mr-1 h-3 w-3" />
-                              다가오는 상담
-                            </Badge>
-                          )}
                         </div>
-
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900">
                           {consultation.session_type_display || '상담'}
-                          {consultation.curriculum_title && ` - ${consultation.curriculum_title}`}
                         </h3>
-
-                        <p className="text-gray-600 mb-4 text-sm">
-                          {consultation.completed_sessions > 0 ? `${consultation.completed_sessions}/${consultation.pricing?.total_sessions || 0} 회기 완료` : '상담 시작 전'}
-                        </p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                          <div className="flex items-center space-x-2">
-                            <User className="h-4 w-4 text-gray-400" />
-                            <div>
-                              <span className="font-medium">{consultation.expert?.name || '-'}</span>
-                              <span className="text-gray-500 ml-1">({consultation.expert?.specialty_display || '-'})</span>
-                            </div>
-                          </div>
-
-                          {consultation.sessions?.[0]?.scheduled_at && (
-                            <>
-                              <div className="flex items-center space-x-2">
-                                <Calendar className="h-4 w-4 text-gray-400" />
-                                <span>{formatDate(consultation.sessions[0].scheduled_at)}</span>
-                              </div>
-
-                              <div className="flex items-center space-x-2">
-                                <Clock className="h-4 w-4 text-gray-400" />
-                                <span>{formatTime(consultation.sessions[0].scheduled_at)}</span>
-                              </div>
-                            </>
+                        <div className="flex items-center gap-1 mt-1 text-sm text-gray-600">
+                          <User className="h-3.5 w-3.5 text-gray-400" />
+                          <span>{consultation.expert?.name || '-'}</span>
+                          {consultation.expert?.specialty_display && (
+                            <span className="text-gray-400">· {consultation.expert.specialty_display}</span>
                           )}
-
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm font-medium text-gray-700">
-                              상담 금액: {consultation.paid_amount?.toLocaleString() || 0} 에그
-                            </span>
-                          </div>
                         </div>
+                      </div>
+                      {/* <div className="text-sm font-medium text-gray-600">
+                        {consultation.paid_amount?.toLocaleString() || 0} 에그
+                      </div> */}
+                    </div>
 
-                        {consultation.expert?.specialty && (
-                          <div className="flex flex-wrap gap-1 mb-4">
-                            <Badge variant="outline" className="text-xs">
-                              {consultation.expert.specialty_display || consultation.expert.specialty}
-                            </Badge>
-                          </div>
-                        )}
-                        
-                        {consultation.status === 'completed' && consultation.rating && (
-                          <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                            <div className="flex items-center mb-2">
-                              <span className="text-sm font-medium mr-2">내 평가:</span>
-                              <div className="flex">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                  <Star
-                                    key={star}
-                                    className={`h-4 w-4 ${
-                                      star <= consultation.rating
-                                        ? 'text-yellow-400 fill-current'
-                                        : 'text-gray-300'
-                                    }`}
-                                  />
-                                ))}
+                    {/* 세션별 카드 */}
+                    {consultation.sessions && consultation.sessions.length > 0 && (
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-semibold text-gray-700">회차별 상담</h4>
+                        {consultation.sessions.map((session, index) => (
+                          <div key={session.id} className="border rounded-lg p-4 bg-gray-50">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <h5 className="font-medium text-gray-900">
+                                    {session.session_number || index + 1}회차 상담
+                                  </h5>
+                                  <Badge className={getSessionStatusColor(session.status)}>
+                                    {getSessionStatusText(session)}
+                                  </Badge>
+                                </div>
+                                {session.scheduled_at && (
+                                  <div className="flex items-center gap-3 text-sm text-gray-600">
+                                    <div className="flex items-center gap-1">
+                                      <Calendar className="h-3 w-3" />
+                                      <span>{formatDate(session.scheduled_at)}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-3 w-3" />
+                                      <span>{formatTime(session.scheduled_at)}</span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="flex flex-col gap-2 ml-4">
+                                {/* 예정된 세션 - 상담 참여 버튼 */}
+                                {session.status?.toUpperCase() === 'SCHEDULED' && isUpcoming(session.scheduled_at) && (
+                                  <Link href={`/video-call/${session.id}`}>
+                                    <Button size="sm" className="w-24">
+                                      <Video className="mr-1 h-3.5 w-3.5" />
+                                      상담 입장
+                                    </Button>
+                                  </Link>
+                                )}
+
+                                {/* 완료된 세션 - 상담 일지 + 커리큘럼 + 리뷰 */}
+                                {session.status?.toUpperCase() === 'COMPLETED' && (
+                                  <>
+                                    <Link href={`/client/consultations/${consultation.id}/log?session=${session.id}`}>
+                                      <Button size="sm" variant="outline" className="w-24">
+                                        <FileText className="mr-1 h-3.5 w-3.5" />
+                                        상담일지
+                                      </Button>
+                                    </Link>
+                                    {/* 1회차 완료 + 다회성 상담 - 커리큘럼 버튼 */}
+                                    {session.session_number === 1 && consultation.session_type !== 'SINGLE' && (
+                                      <Link href={`/client/consultations/${consultation.id}/curriculum`}>
+                                        <Button size="sm" variant="outline" className="w-24">
+                                          <BookOpen className="mr-1 h-3.5 w-3.5" />
+                                          커리큘럼
+                                        </Button>
+                                      </Link>
+                                    )}
+                                    {/* 마지막 세션 완료 시 리뷰 버튼 */}
+                                    {index === consultation.sessions.length - 1 && !consultation.rating && (
+                                      <Link href={`/client/consultations/${consultation.id}/review`}>
+                                        <Button size="sm" variant="outline" className="w-24">
+                                          <Star className="mr-1 h-3.5 w-3.5" />
+                                          리뷰
+                                        </Button>
+                                      </Link>
+                                    )}
+                                  </>
+                                )}
                               </div>
                             </div>
-                            {consultation.feedback && (
-                              <p className="text-sm text-gray-600">{consultation.feedback}</p>
-                            )}
                           </div>
-                        )}
-                        
-                        {consultation.expert_notes && (
-                          <div className="bg-blue-50 rounded-lg p-4 mb-4">
-                            <div className="flex items-center mb-2">
-                              <MessageSquare className="h-4 w-4 text-blue-600 mr-2" />
-                              <span className="text-sm font-medium text-blue-900">전문가 소견:</span>
-                            </div>
-                            <p className="text-sm text-blue-800">{consultation.expert_notes}</p>
-                          </div>
-                        )}
+                        ))}
                       </div>
-                      
-                      <div className="flex flex-col space-y-2 ml-4">
-                        {/* PENDING 또는 CONFIRMED 상태일 때 취소 버튼 표시 */}
-                        {['PENDING', 'CONFIRMED'].includes(consultation.status?.toUpperCase()) && (
-                          <>
-                            {consultation.status?.toUpperCase() === 'CONFIRMED'
-                            && consultation.sessions?.[0]?.id
-                            && consultation.sessions?.[0]?.scheduled_at
-                            && isUpcoming(consultation.sessions[0].scheduled_at) && (
-                              <Link href={`/video-call/${consultation.sessions[0].id}`}>
-                                <Button size="sm">
-                                  <Video className="mr-1 h-4 w-4" />
-                                  상담 참여
-                                </Button>
-                              </Link>
-                            )}
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => openCancelModal(consultation.id)}
-                            >
-                              취소
-                            </Button>
-                          </>
-                        )}
-                        
-                        {/* 완료된 상담 (COMPLETED) - 상담 일지 확인 & 리뷰 작성 버튼 */}
-                        {consultation.status?.toUpperCase() === 'COMPLETED' && (
-                          <>
-                            {consultation.sessions?.[0]?.id && (
-                              <Link href={`/client/consultations/${consultation.sessions[0].id}/log`}>
-                                <Button size="sm" variant="outline">
-                                  <FileText className="mr-1 h-4 w-4" />
-                                  상담 일지
-                                </Button>
-                              </Link>
-                            )}
-                            {!consultation.rating && (
-                              <Link href={`/client/consultations/${consultation.id}/review`}>
-                                <Button size="sm" variant="outline">
-                                  <Star className="mr-1 h-4 w-4" />
-                                  리뷰 작성
-                                </Button>
-                              </Link>
-                            )}
-                          </>
-                        )}
+                    )}
+
+                    {/* 취소 버튼 */}
+                    {['PENDING', 'CONFIRMED'].includes(consultation.status?.toUpperCase()) && (
+                      <div className="mt-3 flex justify-end">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openCancelModal(consultation.id)}
+                        >
+                          상담 취소
+                        </Button>
                       </div>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
               ))
