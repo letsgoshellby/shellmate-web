@@ -36,6 +36,7 @@ export default function ClientChatDetailPage() {
   const chatRoomId = params.id;
 
   const [chatRoom, setChatRoom] = useState(null);
+  const [counselingRequestId, setCounselingRequestId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -61,9 +62,18 @@ export default function ClientChatDetailPage() {
 
   const loadChatRoom = async () => {
     try {
-      const data = await ChatAPI.getChatRoom(chatRoomId);
+      const [data, rooms] = await Promise.all([
+        ChatAPI.getChatRoom(chatRoomId),
+        ChatAPI.getChatRooms()
+      ]);
       setChatRoom(data);
-      // 모든 메시지 읽음 처리
+
+      const roomList = Array.isArray(rooms) ? rooms : rooms.results || [];
+      const matched = roomList.find((r) => String(r.id) === String(chatRoomId));
+      if (matched?.counseling_request_id) {
+        setCounselingRequestId(matched.counseling_request_id);
+      }
+
       await ChatAPI.markAllAsRead(chatRoomId);
     } catch (error) {
       console.error('채팅방 로딩 실패:', error);
@@ -332,6 +342,7 @@ export default function ClientChatDetailPage() {
                         participantName={chatRoom?.expert?.name}
                         sessionNumber={message.session_number}
                         chatRoomId={chatRoomId}
+                        counselingRequestId={counselingRequestId}
                         counselorName={chatRoom?.expert?.name}
                         counselingDate={message.counseling_date}
                         counselingLogId={message.counseling_log_id}

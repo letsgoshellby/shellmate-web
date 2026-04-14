@@ -24,6 +24,7 @@ export function AdminChat({
   participantName,
   sessionNumber,
   chatRoomId,
+  counselingRequestId,
   counselorName,
   counselingDate,
   counselingLogId,
@@ -260,13 +261,15 @@ export function AdminChat({
         {shouldShowButton() && (
           <div className="mb-4">
             {(messageType === 'CURRICULUM') && userType === 'client' ? (
-              // 커리큘럼 완료 메시지 - 내담자에게 다음 상담 예약 버튼
-              <Link href="/client/consultations/book">
-                <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-5 rounded-xl">
-                  <Calendar className="mr-2 h-4 w-4" />
-                  다음 상담 예약하기
-                </Button>
-              </Link>
+              // 커리큘럼 완료 메시지 - 내담자에게 추가 회차 일정 예약 버튼
+              counselingRequestId && (
+                <Link href={`/client/consultations/${counselingRequestId}/schedule`}>
+                  <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-5 rounded-xl">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    다음 상담 예약하기
+                  </Button>
+                </Link>
+              )
             ) : messageType === 'SYSTEM' && userType !== 'client' ? (
               // 1. SYSTEM 메시지 (커리큘럼 작성 요청)
               chatRoomId && (
