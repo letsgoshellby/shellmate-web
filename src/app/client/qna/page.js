@@ -339,7 +339,7 @@ export default function ClientQnAPage() {
                         <div className="flex items-center text-sm text-gray-500 space-x-4">
                           <div className="flex items-center">
                             <User className="mr-1 h-4 w-4" />
-                            {question.author?.nickname || question.author?.name || question.author_nickname || '익명'}
+                            {question.author?.nickname || question.expert?.name || question.author_nickname || '익명'}
                           </div>
                           <div className="flex items-center">
                             <Clock className="mr-1 h-4 w-4" />

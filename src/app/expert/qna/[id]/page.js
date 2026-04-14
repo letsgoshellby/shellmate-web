@@ -339,14 +339,23 @@ export default function ExpertQuestionDetailPage() {
               
               {answers.map((answer) => {
                 const authorName = answer.expert?.name || '익명';
+                const profileImage = answer.expert?.profile_image;
                 return (
                 <Card key={answer.id} className={answer.is_expert ? 'border-blue-200 bg-blue-50/30' : ''}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-medium">
-                          {authorName.charAt(0)}
-                        </div>
+                        {profileImage ? (
+                          <img
+                            src={profileImage}
+                            alt={authorName}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-medium">
+                            {authorName.charAt(0)}
+                          </div>
+                        )}
                         <div>
                           <div className="flex items-center space-x-2">
                             <span className="font-medium">{authorName}</span>
@@ -421,7 +430,7 @@ export default function ExpertQuestionDetailPage() {
                 
                 <div className="flex justify-between items-center">
                   <p className="text-sm text-gray-500">
-                    {newAnswer.length}/2000 글자
+                    {newAnswer.length}/200 글자
                   </p>
                   <Button 
                     onClick={handleSubmitAnswer}

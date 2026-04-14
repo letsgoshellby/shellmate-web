@@ -367,20 +367,43 @@ export default function QuestionDetailPage() {
             </h3>
             
             {answers.map((answer) => {
-              const authorName = answer.author?.name || answer.author_nickname || '익명';
-              const authorType = answer.author?.type || answer.author?.user_type;
+              const isExpert = !!answer.expert;
+              const authorName = isExpert ? (answer.expert.name || '전문가') : '익명';
+              const profileImage = answer.expert?.profile_image;
               return (
-              <Card key={answer.id}>
+              <Card key={answer.id} className={isExpert ? 'border-blue-200 bg-blue-50/30' : ''}>
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-medium">
-                        {authorName.charAt(0)}
-                      </div>
+                      {isExpert && answer.id ? (
+                        <Link href={`/client/experts/${answer.id}`}>
+                          {profileImage ? (
+                            <img
+                              src={profileImage}
+                              alt={authorName}
+                              className="w-8 h-8 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-medium cursor-pointer hover:opacity-80 transition-opacity">
+                              {authorName.charAt(0)}
+                            </div>
+                          )}
+                        </Link>
+                      ) : profileImage ? (
+                        <img
+                          src={profileImage}
+                          alt={authorName}
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-medium">
+                          {authorName.charAt(0)}
+                        </div>
+                      )}
                       <div>
                         <div className="flex items-center space-x-2">
                           <span className="font-medium">{authorName}</span>
-                          {authorType === 'expert' && (
+                          {isExpert && (
                             <Badge className="bg-blue-100 text-blue-800 text-xs">전문가</Badge>
                           )}
                         </div>
