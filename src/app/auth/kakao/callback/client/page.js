@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthAPI } from '@/lib/api/auth';
 import { exchangeCodeForToken } from '@/lib/auth/kakaoAuth';
@@ -13,8 +13,11 @@ export default function KakaoClientCallbackPage() {
   const router = useRouter();
   const { setUser } = useAuth();
   const [status, setStatus] = useState('processing');
+  const hasProcessed = useRef(false);
 
   useEffect(() => {
+    if (hasProcessed.current) return;
+    hasProcessed.current = true;
     handleKakaoCallback();
   }, []);
 
