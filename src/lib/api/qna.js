@@ -74,7 +74,7 @@ export class QnAClientAPI {
 export class QnAExpertAPI {
   /**
    * 답변 작성 (전문가 본인만 가능)
-   * POST /qna/expert/questions/{question_id}/answers/
+   * POST /qna/expert/answers/
    * @param {number} questionId - 질문 ID
    * @param {Object} data - { content }
    */
