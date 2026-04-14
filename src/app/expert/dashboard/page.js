@@ -79,9 +79,12 @@ export default function ExpertDashboard() {
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
 
-      // CONFIRMED 상태이고 오늘 예정된 상담만 필터링
+      // CONFIRMED 상태이거나 next_session이 SCHEDULED인 경우, 오늘 예정된 상담만 필터링
       const todaySessions = consultationList.filter(c => {
-        if (c.status?.toUpperCase() !== 'CONFIRMED') return false;
+        const isRelevant =
+          c.status?.toUpperCase() === 'CONFIRMED' ||
+          c.next_session?.status?.toUpperCase() === 'SCHEDULED';
+        if (!isRelevant) return false;
         if (!c.next_session?.scheduled_at) return false;
 
         const sessionDate = new Date(c.next_session.scheduled_at);

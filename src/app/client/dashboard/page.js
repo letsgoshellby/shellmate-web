@@ -39,9 +39,10 @@ export default function ClientDashboard() {
       const data = await ConsultationsAPI.getMyConsultations();
       const consultationList = Array.isArray(data) ? data : data.results || [];
 
-      // PENDING 또는 CONFIRMED 상태만 필터링
+      // PENDING, CONFIRMED 상태이거나 next_session이 SCHEDULED인 상담 필터링
       const upcoming = consultationList.filter(c =>
-        ['PENDING', 'CONFIRMED'].includes(c.status?.toUpperCase())
+        ['PENDING', 'CONFIRMED'].includes(c.status?.toUpperCase()) ||
+        c.next_session?.status?.toUpperCase() === 'SCHEDULED'
       );
 
       // next_session.scheduled_at 기준으로 정렬하고 최근 2개만
