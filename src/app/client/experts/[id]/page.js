@@ -154,13 +154,9 @@ export default function ExpertDetailPage({ params }) {
   const careerList = parseListField(expert.career_list);
   const certificatesList = parseListField(expert.certificates);
 
-  const verificationStatusMap = {
-    pending: { label: '검증 대기', color: 'bg-yellow-100 text-yellow-800' },
-    verified: { label: '검증 완료', color: 'bg-green-100 text-green-800' },
-    rejected: { label: '검증 거부', color: 'bg-red-100 text-red-800' },
-  };
-
-  const verificationStatus = verificationStatusMap[expert.verification_status] || verificationStatusMap.pending;
+  const verificationStatus = expert.verification_status === 'approved'
+    ? { label: '검증 완료', color: 'bg-green-100 text-green-800' }
+    : { label: '검증 대기', color: 'bg-yellow-100 text-yellow-800' };
 
   return (
     <AuthGuard requiredRole="client">
