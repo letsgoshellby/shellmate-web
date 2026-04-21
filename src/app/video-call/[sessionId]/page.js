@@ -193,11 +193,13 @@ export default function VideoCallPage({ params }) {
 
   const startDurationTimer = () => {
     if (scheduledStartTime) {
-      const now = new Date();
-      const elapsedSeconds = Math.max(0, Math.floor((now - scheduledStartTime) / 1000));
-      setCallDuration(elapsedSeconds);
+      const getElapsed = () => {
+        const diff = Math.floor((Date.now() - scheduledStartTime.getTime()) / 1000);
+        return diff < 0 ? 0 : diff;
+      };
+      setCallDuration(getElapsed());
       durationIntervalRef.current = setInterval(() => {
-        setCallDuration(prev => prev + 1);
+        setCallDuration(getElapsed());
       }, 1000);
     } else {
       durationIntervalRef.current = setInterval(() => {
@@ -275,26 +277,42 @@ export default function VideoCallPage({ params }) {
     }
   };
 
+  const releaseMediaAndNavigate = async (destination) => {
+    try {
+      if (agoraServiceRef.current) {
+        await agoraServiceRef.current.leaveChannel();
+        agoraServiceRef.current = null;
+      }
+    } catch (e) {
+      console.error('leaveChannel 실패:', e);
+    }
+    router.push(destination);
+  };
+
   const leaveOnly = async () => {
     if (isEndingCall) return;
     setIsEndingCall(true);
+    const destination = userType === 'client' ? '/client/consultations' : '/expert/consultations';
     try {
       await AgoraAPI.leaveVideoRoom(sessionId);
-      if (agoraServiceRef.current) await agoraServiceRef.current.leaveChannel();
-      router.push(userType === 'client' ? '/client/consultations' : '/expert/consultations');
-    } catch (e) { router.back(); }
+    } catch (e) {
+      console.error('leaveVideoRoom 실패:', e);
+    }
+    await releaseMediaAndNavigate(destination);
   };
 
   const completeSessionAndLeave = async () => {
     if (isEndingCall) return;
     setIsEndingCall(true);
+    const destination = userType === 'client' ? '/client/consultations' : '/expert/consultations';
     try {
       if (sessionType === 'SINGLE') await AgoraAPI.completeInitialSession(sessionId);
       else await AgoraAPI.completeSession(sessionId);
       await AgoraAPI.leaveVideoRoom(sessionId);
-      if (agoraServiceRef.current) await agoraServiceRef.current.leaveChannel();
-      router.push(userType === 'client' ? '/client/consultations' : '/expert/consultations');
-    } catch (e) { router.back(); }
+    } catch (e) {
+      console.error('상담 종료 API 실패:', e);
+    }
+    await releaseMediaAndNavigate(destination);
   };
 
   return (
