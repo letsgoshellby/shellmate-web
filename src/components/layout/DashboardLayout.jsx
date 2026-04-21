@@ -57,7 +57,7 @@ export function DashboardLayout({ children }) {
         { name: '전문가 칼럼', href: '/client/columns', icon: IoDocumentText },
         { name: '상담 예약', href: '/client/consultations', icon: IoVideocam },
         { name: '채팅', href: '/client/chat', icon: IoChatbubbles },
-        { name: '에그 충전', href: '/client/wallet/charge', icon: IoAdd },
+        { name: '내 지갑', href: '/client/wallet', icon: IoAdd },
       ];
     }
     
