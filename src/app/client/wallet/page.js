@@ -6,6 +6,16 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { WalletAPI } from '@/lib/api/wallet';
 import {
   Coins,
@@ -13,7 +23,8 @@ import {
   ArrowUpRight,
   ArrowDownLeft,
   Clock,
-  Loader2
+  Loader2,
+  RotateCcw,
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
@@ -21,6 +32,9 @@ import { toast } from 'react-hot-toast';
 export default function WalletPage() {
   const [walletInfo, setWalletInfo] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refundModalOpen, setRefundModalOpen] = useState(false);
+  const [refundForm, setRefundForm] = useState({ account_number: '', refund_reason: '' });
+  const [refundLoading, setRefundLoading] = useState(false);
 
   useEffect(() => {
     loadWalletInfo();
@@ -35,6 +49,25 @@ export default function WalletPage() {
       toast.error('지갑 정보를 불러오는데 실패했습니다');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRefundSubmit = async () => {
+    if (!refundForm.account_number.trim() || !refundForm.refund_reason.trim()) {
+      toast.error('계좌번호와 환불 사유를 모두 입력해주세요');
+      return;
+    }
+    setRefundLoading(true);
+    try {
+      await WalletAPI.requestEggRefund(refundForm.account_number, refundForm.refund_reason);
+      toast.success('환불 요청이 접수되었습니다');
+      setRefundModalOpen(false);
+      setRefundForm({ account_number: '', refund_reason: '' });
+    } catch (error) {
+      const message = error?.response?.data?.error || '환불 요청에 실패했습니다';
+      toast.error(message);
+    } finally {
+      setRefundLoading(false);
     }
   };
 
@@ -90,13 +123,58 @@ export default function WalletPage() {
               <h1 className="text-2xl font-bold text-gray-900">내 지갑</h1>
               <p className="text-gray-600">에그 잔액 및 거래 내역을 확인하세요</p>
             </div>
-            <Link href="/client/wallet/charge">
-              <Button className="bg-green-600 hover:bg-green-700">
-                <Plus className="mr-2 h-4 w-4" />
-                에그 충전
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setRefundModalOpen(true)}>
+                <RotateCcw className="mr-2 h-4 w-4" />
+                환불 신청
               </Button>
-            </Link>
+              <Link href="/client/wallet/charge">
+                <Button className="bg-green-600 hover:bg-green-700">
+                  <Plus className="mr-2 h-4 w-4" />
+                  에그 충전
+                </Button>
+              </Link>
+            </div>
           </div>
+
+          {/* 환불 신청 모달 */}
+          <Dialog open={refundModalOpen} onOpenChange={setRefundModalOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>에그 환불 신청</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-2">
+                <div className="space-y-2">
+                  <Label htmlFor="account_number">환불 계좌번호</Label>
+                  <Input
+                    id="account_number"
+                    placeholder="계좌번호를 입력하세요 (예: 110-123-456789)"
+                    value={refundForm.account_number}
+                    onChange={(e) => setRefundForm((prev) => ({ ...prev, account_number: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="refund_reason">환불 사유</Label>
+                  <Textarea
+                    id="refund_reason"
+                    placeholder="환불 사유를 입력하세요"
+                    rows={4}
+                    value={refundForm.refund_reason}
+                    onChange={(e) => setRefundForm((prev) => ({ ...prev, refund_reason: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setRefundModalOpen(false)} disabled={refundLoading}>
+                  취소
+                </Button>
+                <Button onClick={handleRefundSubmit} disabled={refundLoading} className="bg-green-600 hover:bg-green-700">
+                  {refundLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  환불 신청
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           {/* 잔액 카드 */}
           <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">

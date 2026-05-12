@@ -69,4 +69,19 @@ export class WalletAPI {
     const response = await apiClient.get('/wallet/transactions/', { params });
     return response.data;
   }
+
+  /**
+   * 에그 환불 요청
+   * POST /wallet/eggs/refund/request/
+   * @param {string} account_number - 환불 요청할 계좌번호
+   * @param {string} refund_reason - 환불 사유
+   * @returns {Object} 환불 요청 결과
+   */
+  static async requestEggRefund(account_number, refund_reason) {
+    const response = await apiClient.post('/wallet/eggs/refund/request/', {
+      account_number,
+      refund_reason,
+    });
+    return response.data;
+  }
 }
