@@ -161,8 +161,8 @@ export default function ClientConsultationsPage() {
     if (!scheduledAt) return false;
     const scheduledTime = new Date(scheduledAt).getTime();
     const now = Date.now();
-    const fifteenMinutesAfter = scheduledTime + (15 * 60 * 1000);
-    return now <= fifteenMinutesAfter;
+    // 시작 15분 전 ~ 시작 30분 후
+    return now >= scheduledTime - 15 * 60 * 1000 && now <= scheduledTime + 30 * 60 * 1000;
   };
 
   const getSessionStatusColor = (status) => {
@@ -313,8 +313,9 @@ export default function ClientConsultationsPage() {
                               </div>
 
                               <div className="flex flex-col gap-2 ml-4">
-                                {/* 예정된 세션 - 상담 참여 버튼 */}
-                                {session.status?.toUpperCase() === 'SCHEDULED' && isUpcoming(session.scheduled_at) && (
+                                {/* 예정된/진행중인 세션 - 상담 참여 버튼 */}
+                                {(session.status?.toUpperCase() === 'IN_PROGRESS' ||
+                                  (session.status?.toUpperCase() === 'SCHEDULED' && isUpcoming(session.scheduled_at))) && (
                                   <Link href={`/video-call/${session.id}`}>
                                     <Button size="sm" className="w-24">
                                       <Video className="mr-1 h-3.5 w-3.5" />

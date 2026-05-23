@@ -360,9 +360,9 @@ export default function ExpertDashboard() {
                     todayConsultations.map((consultation, index) => {
                       const now = Date.now();
                       const sessionTime = new Date(consultation.next_session.scheduled_at).getTime();
-                      const fifteenMinutesAfter = sessionTime + (15 * 60 * 1000);
-                      const canJoin = now <= fifteenMinutesAfter; // 시작 시간 15분 후까지 참여 가능
-                      const isPast = now > fifteenMinutesAfter;
+                      // 시작 15분 전 ~ 시작 30분 후
+                      const canJoin = now >= sessionTime - 15 * 60 * 1000 && now <= sessionTime + 30 * 60 * 1000;
+                      const isPast = now > sessionTime + 30 * 60 * 1000;
 
                       return (
                         <div key={consultation.id} className="flex items-center space-x-4">
