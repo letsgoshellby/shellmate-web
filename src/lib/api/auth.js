@@ -97,11 +97,23 @@ export class AuthAPI {
   }
   
   // 비밀번호 재설정 확인
-  static async confirmPasswordReset(token, newPassword) {
+  static async confirmPasswordReset(uid, token, newPassword, newPassword2) {
     await apiClient.post('/auth/password-reset/confirm/', {
+      uid,
       token,
-      password: newPassword,
+      new_password: newPassword,
+      new_password2: newPassword2,
     });
+  }
+
+  // 비밀번호 변경 (로그인 상태)
+  static async changePassword(currentPassword, newPassword, newPassword2) {
+    const response = await apiClient.post('/user/change-password/', {
+      current_password: currentPassword,
+      new_password: newPassword,
+      new_password2: newPassword2,
+    });
+    return response.data;
   }
 
   // 소셜 로그인 - Client

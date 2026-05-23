@@ -20,7 +20,7 @@ import {
   IoTrash
 } from 'react-icons/io5';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { TokenStorage } from '@/lib/auth/tokenStorage';
+import { AuthAPI } from '@/lib/api/auth';
 import { Loader2 } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -90,33 +90,17 @@ export default function ExpertSettingsPage() {
 
     setLoading(true);
     try {
-      const token = TokenStorage.getAccessToken();
-      const response = await fetch(`${API_BASE_URL}/user/change-password/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          old_password: passwordData.current_password,
-          new_password: passwordData.new_password,
-        }),
-      });
-
-      if (response.ok) {
-        toast.success('비밀번호가 변경되었습니다');
-        setPasswordData({
-          current_password: '',
-          new_password: '',
-          confirm_password: '',
-        });
-        setShowPasswordChange(false);
-      } else {
-        const errorData = await response.json();
-        toast.error(errorData.detail || '비밀번호 변경에 실패했습니다');
-      }
+      await AuthAPI.changePassword(
+        passwordData.current_password,
+        passwordData.new_password,
+        passwordData.confirm_password,
+      );
+      toast.success('비밀번호가 변경되었습니다');
+      setPasswordData({ current_password: '', new_password: '', confirm_password: '' });
+      setShowPasswordChange(false);
     } catch (error) {
-      toast.error('네트워크 오류가 발생했습니다');
+      const msg = error?.response?.data?.detail || error?.response?.data?.current_password?.[0];
+      toast.error(msg || '비밀번호 변경에 실패했습니다');
     } finally {
       setLoading(false);
     }
