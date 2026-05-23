@@ -40,9 +40,13 @@ export default function VideoCallPage({ params }) {
   const [participantName, setParticipantName] = useState('상대방');
   const [sessionInfo, setSessionInfo] = useState('');
   const [showEndCallModal, setShowEndCallModal] = useState(false);
-  const [userType, setUserType] = useState(null); 
+  const [showTimeWarning, setShowTimeWarning] = useState(false);
+  const [userType, setUserType] = useState(null);
   const [scheduledStartTime, setScheduledStartTime] = useState(null);
-  const [sessionType, setSessionType] = useState(null);
+  const [sessionNumber, setSessionNumber] = useState(null);
+
+  const timeWarningShownRef = useRef(false);
+  const timeWarningTimerRef = useRef(null);
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -71,6 +75,21 @@ export default function VideoCallPage({ params }) {
       }
     };
   }, [isConnected]);
+
+  useEffect(() => {
+    if (callDuration >= 45 * 60 && !timeWarningShownRef.current) {
+      timeWarningShownRef.current = true;
+      setShowTimeWarning(true);
+      timeWarningTimerRef.current = setTimeout(() => {
+        setShowTimeWarning(false);
+      }, 10000);
+    }
+    return () => {
+      if (timeWarningTimerRef.current) {
+        clearTimeout(timeWarningTimerRef.current);
+      }
+    };
+  }, [callDuration]);
 
   const initializeCall = async () => {
     console.log('🎬 [VideoCallPage] 초기화 시작 - ID:', sessionId);
@@ -117,7 +136,7 @@ export default function VideoCallPage({ params }) {
       const videoRoomData = await AgoraAPI.getVideoRoom(sessionId);
 
       setSessionInfo(`${sessionData.session_number || 1}회차`);
-      setSessionType(counselingRequest.session_type || 'SINGLE');
+      setSessionNumber(sessionData.session_number || 1);
       const scheduledTime = sessionData.scheduled_time || sessionData.scheduled_at;
       if (scheduledTime) setScheduledStartTime(new Date(scheduledTime));
 
@@ -185,6 +204,7 @@ export default function VideoCallPage({ params }) {
   const cleanup = async () => {
     if (durationIntervalRef.current) clearInterval(durationIntervalRef.current);
     if (tokenRefreshTimerRef.current) clearInterval(tokenRefreshTimerRef.current);
+    if (timeWarningTimerRef.current) clearTimeout(timeWarningTimerRef.current);
     if (agoraServiceRef.current) {
       await agoraServiceRef.current.leaveChannel();
       agoraServiceRef.current = null;
@@ -306,7 +326,7 @@ export default function VideoCallPage({ params }) {
     setIsEndingCall(true);
     const destination = userType === 'client' ? '/client/consultations' : '/expert/consultations';
     try {
-      if (sessionType === 'SINGLE') await AgoraAPI.completeInitialSession(sessionId);
+      if (sessionNumber === 1) await AgoraAPI.completeInitialSession(sessionId);
       else await AgoraAPI.completeSession(sessionId);
       await AgoraAPI.leaveVideoRoom(sessionId);
     } catch (e) {
@@ -364,6 +384,23 @@ export default function VideoCallPage({ params }) {
           )}
         </div>
       </div>
+
+      {showTimeWarning && (
+        <div className="absolute top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4">
+          <div className="bg-orange-500 text-white rounded-2xl px-5 py-4 shadow-xl flex items-center gap-4 w-full max-w-sm">
+            <span className="text-sm font-semibold flex-1">⏰ 상담 종료까지 5분 남았습니다.</span>
+            <button
+              onClick={() => {
+                setShowTimeWarning(false);
+                if (timeWarningTimerRef.current) clearTimeout(timeWarningTimerRef.current);
+              }}
+              className="bg-white text-orange-500 text-xs font-bold px-3 py-1.5 rounded-full shrink-0"
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/70 to-transparent">
         <div className="flex justify-between items-start">
