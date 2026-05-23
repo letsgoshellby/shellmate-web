@@ -15,10 +15,28 @@ export default function ExpertSocialTermsPage() {
   const [loading, setLoading] = useState(false);
   const [kakaoAccessToken, setKakaoAccessToken] = useState('');
 
+  // 1. 선언된 상태 변수들
   const [serviceTerms, setServiceTerms] = useState(false);
   const [privacyPolicy, setPrivacyPolicy] = useState(false);
   const [personalInfoAndThirdParty, setPersonalInfoAndThirdParty] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
+
+  // 2. 모든 약관이 체크되었는지 확인
+  const isAllChecked = 
+    serviceTerms && 
+    privacyPolicy && 
+    personalInfoAndThirdParty && 
+    marketingConsent;
+
+  // 3. 전체 동의 핸들러
+  const handleAllCheck = (checked) => {
+    const value = !!checked;
+    setServiceTerms(value);
+    setPrivacyPolicy(value);
+    setPersonalInfoAndThirdParty(value);
+    setMarketingConsent(value);
+  };
+
 
   useEffect(() => {
     // localStorage에서 카카오 Access Token 확인
@@ -89,12 +107,25 @@ export default function ExpertSocialTermsPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-3 border-t pt-4">
+              
+            {/* 전체 동의 버튼 추가 */}
+            <div className="flex items-center space-x-2 pb-3 mb-2 border-b">
+              <Checkbox
+                id="all_agree"
+                checked={isAllChecked}
+                onCheckedChange={(checked) => handleAllCheck(checked)}
+              />
+              <Label htmlFor="all_agree" className="text-base font-bold cursor-pointer">
+                전체 동의하기
+              </Label>
+            </div>
+
               {/* 필수 약관 */}
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="service_terms"
                   checked={serviceTerms}
-                  onCheckedChange={(checked) => setServiceTerms(checked)}
+                  onCheckedChange={(checked) => setServiceTerms(!!checked)}
                 />
                 <Label htmlFor="service_terms" className="text-sm font-normal cursor-pointer">
                   (필수) 전문가 이용약관에 동의합니다
@@ -105,7 +136,7 @@ export default function ExpertSocialTermsPage() {
                 <Checkbox
                   id="privacy_policy"
                   checked={privacyPolicy}
-                  onCheckedChange={(checked) => setPrivacyPolicy(checked)}
+                  onCheckedChange={(checked) => setPrivacyPolicy(!!checked)}
                 />
                 <Label htmlFor="privacy_policy" className="text-sm font-normal cursor-pointer">
                   (필수) 개인정보 처리방침에 동의합니다
@@ -116,7 +147,7 @@ export default function ExpertSocialTermsPage() {
                 <Checkbox
                   id="personal_info_and_third_party"
                   checked={personalInfoAndThirdParty}
-                  onCheckedChange={(checked) => setPersonalInfoAndThirdParty(checked)}
+                  onCheckedChange={(checked) => setPersonalInfoAndThirdParty(!!checked)}
                 />
                 <Label htmlFor="personal_info_and_third_party" className="text-sm font-normal cursor-pointer">
                   (필수) 개인정보 수집·이용 및 제3자 제공에 동의합니다
@@ -128,7 +159,7 @@ export default function ExpertSocialTermsPage() {
                 <Checkbox
                   id="marketing_consent"
                   checked={marketingConsent}
-                  onCheckedChange={(checked) => setMarketingConsent(checked)}
+                  onCheckedChange={(checked) => setMarketingConsent(!!checked)}
                 />
                 <Label htmlFor="marketing_consent" className="text-sm font-normal cursor-pointer">
                   (선택) 마케팅 정보 수신에 동의합니다
