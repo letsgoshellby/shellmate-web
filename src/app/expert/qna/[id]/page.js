@@ -453,7 +453,7 @@ export default function ExpertQuestionDetailPage() {
                 
                 {newAnswer.length > 0 && newAnswer.length < 50 && (
                   <p className="text-sm text-red-500">
-                    최소 50자 이상 작성해주세요. (현재 {newAnswer.length}자)
+                    {newAnswer.length}자/200자
                   </p>
                 )}
               </div>
