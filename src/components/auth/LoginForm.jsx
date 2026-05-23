@@ -28,7 +28,20 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
-  
+
+  // 뒤로가기 시 보호된 페이지 대신 홈으로 이동
+  useEffect(() => {
+    window.history.replaceState({ page: 'home' }, '', '/');
+    window.history.pushState({ page: 'login' }, '', '/login');
+
+    const handlePopState = () => {
+      router.replace('/');
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [router]);
+
   const {
     register,
     handleSubmit,
