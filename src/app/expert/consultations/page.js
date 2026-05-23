@@ -297,10 +297,8 @@ export default function ExpertConsultationsPage() {
     if (!scheduledAt) return false;
     const scheduledTime = new Date(scheduledAt).getTime();
     const now = Date.now();
-    const fifteenMinutesAfter = scheduledTime + (15 * 60 * 1000); // 시작 시간 + 15분
-
-    // 시작 시간 15분 후까지 참여 가능
-    return now <= fifteenMinutesAfter;
+    // 시작 15분 전 ~ 시작 30분 후
+    return now >= scheduledTime - 15 * 60 * 1000 && now <= scheduledTime + 30 * 60 * 1000;
   };
 
   if (loading) {
@@ -598,14 +596,22 @@ export default function ExpertConsultationsPage() {
                                       </>
                                     )}
 
-                                    {/* 진행중 상담 - 상담일지 버튼 */}
+                                    {/* 진행중 상담 - 상담 참여 + 상담일지 버튼 */}
                                     {session.status?.toUpperCase() === 'IN_PROGRESS' && (
-                                      <Link href={`/expert/consultations/${consultation.id}/log?session=${session.id}`}>
-                                        <Button size="sm" variant="outline">
-                                          <FileText className="mr-1 h-4 w-4" />
-                                          상담일지
-                                        </Button>
-                                      </Link>
+                                      <>
+                                        <Link href={`/video-call/${session.id}`} className="w-24">
+                                          <Button size="sm" className="w-full">
+                                            <Video className="mr-1 h-4 w-4" />
+                                            상담 참여
+                                          </Button>
+                                        </Link>
+                                        <Link href={`/expert/consultations/${consultation.id}/log?session=${session.id}`}>
+                                          <Button size="sm" variant="outline">
+                                            <FileText className="mr-1 h-4 w-4" />
+                                            상담일지
+                                          </Button>
+                                        </Link>
+                                      </>
                                     )}
 
                                     {/* 완료된 세션 - 상담일지 버튼 */}
