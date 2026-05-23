@@ -252,4 +252,23 @@ export class ConsultationsAPI {
     const response = await apiClient.post('/consultation/my-availability/', data);
     return response.data;
   }
+
+  /**
+   * 환불 요청
+   * POST /consultation/counseling-requests/{id}/refund/
+   * @param {number} counselingRequestId - 상담 신청 ID
+   * @param {string} refundReason - 환불 사유
+   * @param {number[]} refundSessions - 환불할 회차 번호 배열
+   * @returns {Object} 환불 요청 결과
+   */
+  static async requestRefund(counselingRequestId, refundReason, refundSessions = []) {
+    const response = await apiClient.post(
+      `/consultation/counseling-requests/${counselingRequestId}/refund/`,
+      {
+        refund_reason: refundReason,
+        refund_sessions: refundSessions,
+      }
+    );
+    return response.data;
+  }
 }
