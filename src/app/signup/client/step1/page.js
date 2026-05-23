@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import { SignupProgress } from '@/components/auth/SignupProgress';
 import { toast } from 'react-hot-toast';
 import { IoArrowForward } from 'react-icons/io5';
@@ -19,21 +20,7 @@ import { TokenStorage } from '@/lib/auth/tokenStorage';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// 필드명 한국어 매핑
-const fieldNameMap = {
-  birth_date: '생년월일',
-  gender: '성별',
-  child_order: '몇째 아이',
-  psychological_test_conducted: '심리검사 여부',
-  learning_problem: '학습 문제',
-  sensory_processing_problem: '감각 처리 문제',
-  emotional_anxiety_problem: '정서 및 불안 문제',
-  family_similar_symptoms: '가족 유사 증상',
-  medication_usage: '약물 복용 여부',
-};
-
 const step1Schema = z.object({
-  // 기본 정보
   birth_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '올바른 날짜 형식을 입력해주세요 (YYYY-MM-DD)'),
   gender: z.enum(['male', 'female'], {
     required_error: '성별을 선택해주세요',
@@ -43,26 +30,15 @@ const step1Schema = z.object({
     required_error: '몇째 아이인지 선택해주세요',
     invalid_type_error: '몇째 아이인지 선택해주세요',
   }),
-  // 세부 정보
   psychological_test_conducted: z.boolean({
     required_error: '심리검사 여부를 선택해주세요',
     invalid_type_error: '심리검사 여부를 선택해주세요',
   }),
-  learning_problem: z.enum(['none', 'reading', 'writing', 'math', 'other'], {
-    required_error: '학습 문제를 선택해주세요',
-    invalid_type_error: '학습 문제를 선택해주세요',
-  }),
-  learning_problem_other: z.string().optional(),
-  sensory_processing_problem: z.enum(['none', 'sound', 'touch', 'other'], {
-    required_error: '감각 처리 문제를 선택해주세요',
-    invalid_type_error: '감각 처리 문제를 선택해주세요',
-  }),
-  sensory_processing_problem_other: z.string().optional(),
-  emotional_anxiety_problem: z.enum(['none', 'obsessive_compulsive', 'tic', 'social_anxiety', 'other'], {
-    required_error: '정서 및 불안 문제를 선택해주세요',
-    invalid_type_error: '정서 및 불안 문제를 선택해주세요',
-  }),
-  emotional_anxiety_problem_other: z.string().optional(),
+  learning_problem: z.array(z.string()).min(1, '학습 문제를 하나 이상 선택해주세요'),
+  learning_problem_detail: z.string().optional(),
+  worries: z.array(z.string()).min(1, '고민/걱정을 하나 이상 선택해주세요'),
+  worries_detail: z.string().optional(),
+  emotional_anxiety_problem: z.array(z.string()).min(1, '정서 및 불안 문제를 하나 이상 선택해주세요'),
   family_similar_symptoms: z.boolean({
     required_error: '가족 유사 증상 여부를 선택해주세요',
     invalid_type_error: '가족 유사 증상 여부를 선택해주세요',
@@ -73,9 +49,40 @@ const step1Schema = z.object({
   }),
 });
 
+const LEARNING_PROBLEM_OPTIONS = [
+  { value: 'none', label: '없음' },
+  { value: 'reading', label: '읽기' },
+  { value: 'writing', label: '쓰기' },
+  { value: 'math', label: '수학' },
+  { value: 'speaking', label: '말하기' },
+  { value: 'attention', label: '집중력' },
+  { value: 'comprehension', label: '이해력' },
+  { value: 'memory', label: '기억력' },
+  { value: 'other', label: '기타' },
+];
+
+const WORRIES_OPTIONS = [
+  { value: 'none', label: '없음' },
+  { value: 'sociality', label: '사회성' },
+  { value: 'school_adaptation', label: '학교적응' },
+  { value: 'interpersonal', label: '대인관계' },
+  { value: 'other', label: '기타' },
+];
+
+const EMOTIONAL_ANXIETY_OPTIONS = [
+  { value: 'none', label: '없음' },
+  { value: 'obsessive_compulsive', label: '강박' },
+  { value: 'tic', label: '틱' },
+  { value: 'social_anxiety', label: '사회불안' },
+  { value: 'other', label: '기타' },
+];
+
 export default function ClientSignupStep1Page() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [selectedLearningProblems, setSelectedLearningProblems] = useState([]);
+  const [selectedWorries, setSelectedWorries] = useState([]);
+  const [selectedEmotionalProblems, setSelectedEmotionalProblems] = useState([]);
 
   const {
     register,
@@ -89,17 +96,28 @@ export default function ClientSignupStep1Page() {
       psychological_test_conducted: undefined,
       family_similar_symptoms: undefined,
       medication_usage: undefined,
+      learning_problem: [],
+      worries: [],
+      emotional_anxiety_problem: [],
     }
   });
 
   const watchGender = watch('gender');
   const watchChildOrder = watch('child_order');
-  const watchLearningProblem = watch('learning_problem');
-  const watchSensoryProcessingProblem = watch('sensory_processing_problem');
-  const watchEmotionalAnxietyProblem = watch('emotional_anxiety_problem');
   const watchPsychologicalTestConducted = watch('psychological_test_conducted');
   const watchFamilySimilarSymptoms = watch('family_similar_symptoms');
   const watchMedicationUsage = watch('medication_usage');
+
+  const handleCheckboxChange = (value, selected, setSelected, fieldName) => {
+    let next;
+    if (selected.includes(value)) {
+      next = selected.filter(v => v !== value);
+    } else {
+      next = [...selected, value];
+    }
+    setSelected(next);
+    setValue(fieldName, next);
+  };
 
   const handleStep1Submit = async (data) => {
     setLoading(true);
@@ -111,21 +129,13 @@ export default function ClientSignupStep1Page() {
         return;
       }
 
-      // 백엔드에서 배열로 기대하는 필드들을 배열로 변환
-      const submitData = {
-        ...data,
-        learning_problem: data.learning_problem ? [data.learning_problem] : [],
-        sensory_processing_problem: data.sensory_processing_problem ? [data.sensory_processing_problem] : [],
-        emotional_anxiety_problem: data.emotional_anxiety_problem ? [data.emotional_anxiety_problem] : [],
-      };
-
       const response = await fetch(`${API_BASE_URL}/me/client/child/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(submitData),
+        body: JSON.stringify(data),
       });
 
       const responseData = await response.json();
@@ -136,16 +146,8 @@ export default function ClientSignupStep1Page() {
         } else if (responseData.detail) {
           toast.error(responseData.detail);
         } else {
-          // 필드별 에러 메시지를 한국어로 표시
-          const errorFields = Object.keys(responseData);
-          if (errorFields.length > 0) {
-            const fieldNames = errorFields
-              .map(key => fieldNameMap[key] || key)
-              .join(', ');
-            toast.error(`오류가 발생했습니다.\n${fieldNames} 필드를 확인해주세요.`);
-          } else {
-            toast.error('오류가 발생했습니다. 입력 내용을 확인해주세요.');
-          }
+          const firstError = Object.values(responseData)[0];
+          toast.error(Array.isArray(firstError) ? firstError[0] : '입력 내용을 확인해주세요.');
         }
         return;
       }
@@ -181,7 +183,7 @@ export default function ClientSignupStep1Page() {
             <SignupProgress currentStep={1} />
 
             <form onSubmit={handleSubmit(handleStep1Submit)} className="space-y-6">
-              {/* 기본 정보 섹션 */}
+              {/* 기본 정보 */}
               <div className="space-y-8">
                 <h3 className="font-semibold text-lg border-b pb-2">기본 정보</h3>
 
@@ -194,8 +196,7 @@ export default function ClientSignupStep1Page() {
                     maxLength={10}
                     {...register('birth_date', {
                       onChange: (e) => {
-                        const formatted = formatDate(e.target.value);
-                        e.target.value = formatted;
+                        e.target.value = formatDate(e.target.value);
                       }
                     })}
                     className={errors.birth_date ? 'border-red-500' : ''}
@@ -252,10 +253,11 @@ export default function ClientSignupStep1Page() {
                 </div>
               </div>
 
-              {/* 세부 정보 섹션 */}
+              {/* 세부 정보 */}
               <div className="space-y-8">
                 <h3 className="font-semibold text-lg border-b pb-2">세부 정보</h3>
 
+                {/* 심리검사 여부 */}
                 <div className="space-y-4">
                   <Label>웩슬러 검사 등 관련 검사를 시행한 적이 있나요? *</Label>
                   <RadioGroup
@@ -274,122 +276,87 @@ export default function ClientSignupStep1Page() {
                   </RadioGroup>
                 </div>
 
+                {/* 학습 문제 - 복수선택 */}
                 <div className="space-y-4">
-                  <Label>학습 문제 *</Label>
-                  <RadioGroup
-                    value={watchLearningProblem}
-                    onValueChange={(value) => setValue('learning_problem', value)}
-                    className="grid grid-cols-2 sm:grid-cols-3 gap-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="none" id="learning_none" />
-                      <Label htmlFor="learning_none" className="font-normal cursor-pointer">없음</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="reading" id="reading" />
-                      <Label htmlFor="reading" className="font-normal cursor-pointer">읽기</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="writing" id="writing" />
-                      <Label htmlFor="writing" className="font-normal cursor-pointer">쓰기</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="math" id="math" />
-                      <Label htmlFor="math" className="font-normal cursor-pointer">수학</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="other" id="learning_other" />
-                      <Label htmlFor="learning_other" className="font-normal cursor-pointer">기타</Label>
-                    </div>
-                  </RadioGroup>
+                  <Label>학습 문제 * (복수 선택 가능)</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {LEARNING_PROBLEM_OPTIONS.map(({ value, label }) => (
+                      <div key={value} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`learning_${value}`}
+                          checked={selectedLearningProblems.includes(value)}
+                          onCheckedChange={() =>
+                            handleCheckboxChange(value, selectedLearningProblems, setSelectedLearningProblems, 'learning_problem')
+                          }
+                        />
+                        <Label htmlFor={`learning_${value}`} className="font-normal cursor-pointer">{label}</Label>
+                      </div>
+                    ))}
+                  </div>
                   {errors.learning_problem && (
                     <p className="text-sm text-red-500">{errors.learning_problem.message}</p>
                   )}
-                  {watchLearningProblem === 'other' && (
+                  {selectedLearningProblems.includes('other') && (
                     <Textarea
                       placeholder="기타 학습 문제를 입력해주세요"
-                      {...register('learning_problem_other')}
+                      {...register('learning_problem_detail')}
                       rows={3}
                     />
                   )}
                 </div>
 
+                {/* 고민/걱정 - 복수선택 */}
                 <div className="space-y-4">
-                  <Label>감각 처리 문제 *</Label>
-                  <RadioGroup
-                    value={watchSensoryProcessingProblem}
-                    onValueChange={(value) => setValue('sensory_processing_problem', value)}
-                    className="grid grid-cols-2 sm:grid-cols-4 gap-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="none" id="sensory_none" />
-                      <Label htmlFor="sensory_none" className="font-normal cursor-pointer">없음</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="sound" id="sound" />
-                      <Label htmlFor="sound" className="font-normal cursor-pointer">소리</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="touch" id="touch" />
-                      <Label htmlFor="touch" className="font-normal cursor-pointer">촉감</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="other" id="sensory_other" />
-                      <Label htmlFor="sensory_other" className="font-normal cursor-pointer">기타</Label>
-                    </div>
-                  </RadioGroup>
-                  {errors.sensory_processing_problem && (
-                    <p className="text-sm text-red-500">{errors.sensory_processing_problem.message}</p>
+                  <Label>고민/걱정 * (복수 선택 가능)</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {WORRIES_OPTIONS.map(({ value, label }) => (
+                      <div key={value} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`worries_${value}`}
+                          checked={selectedWorries.includes(value)}
+                          onCheckedChange={() =>
+                            handleCheckboxChange(value, selectedWorries, setSelectedWorries, 'worries')
+                          }
+                        />
+                        <Label htmlFor={`worries_${value}`} className="font-normal cursor-pointer">{label}</Label>
+                      </div>
+                    ))}
+                  </div>
+                  {errors.worries && (
+                    <p className="text-sm text-red-500">{errors.worries.message}</p>
                   )}
-                  {watchSensoryProcessingProblem === 'other' && (
+                  {selectedWorries.includes('other') && (
                     <Textarea
-                      placeholder="기타 감각 처리 문제를 입력해주세요"
-                      {...register('sensory_processing_problem_other')}
+                      placeholder="기타 고민/걱정을 입력해주세요"
+                      {...register('worries_detail')}
                       rows={3}
                     />
                   )}
                 </div>
 
+                {/* 정서 및 불안 문제 - 복수선택 */}
                 <div className="space-y-4">
-                  <Label>정서 및 불안 문제 *</Label>
-                  <RadioGroup
-                    value={watchEmotionalAnxietyProblem}
-                    onValueChange={(value) => setValue('emotional_anxiety_problem', value)}
-                    className="grid grid-cols-2 sm:grid-cols-3 gap-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="none" id="emotional_none" />
-                      <Label htmlFor="emotional_none" className="font-normal cursor-pointer">없음</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="obsessive_compulsive" id="obsessive_compulsive" />
-                      <Label htmlFor="obsessive_compulsive" className="font-normal cursor-pointer">강박</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="tic" id="tic" />
-                      <Label htmlFor="tic" className="font-normal cursor-pointer">틱</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="social_anxiety" id="social_anxiety" />
-                      <Label htmlFor="social_anxiety" className="font-normal cursor-pointer">사회불안</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="other" id="emotional_other" />
-                      <Label htmlFor="emotional_other" className="font-normal cursor-pointer">기타</Label>
-                    </div>
-                  </RadioGroup>
+                  <Label>정서 및 불안 문제 * (복수 선택 가능)</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {EMOTIONAL_ANXIETY_OPTIONS.map(({ value, label }) => (
+                      <div key={value} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`emotional_${value}`}
+                          checked={selectedEmotionalProblems.includes(value)}
+                          onCheckedChange={() =>
+                            handleCheckboxChange(value, selectedEmotionalProblems, setSelectedEmotionalProblems, 'emotional_anxiety_problem')
+                          }
+                        />
+                        <Label htmlFor={`emotional_${value}`} className="font-normal cursor-pointer">{label}</Label>
+                      </div>
+                    ))}
+                  </div>
                   {errors.emotional_anxiety_problem && (
                     <p className="text-sm text-red-500">{errors.emotional_anxiety_problem.message}</p>
                   )}
-                  {watchEmotionalAnxietyProblem === 'other' && (
-                    <Textarea
-                      placeholder="기타 정서 및 불안 문제를 입력해주세요"
-                      {...register('emotional_anxiety_problem_other')}
-                      rows={3}
-                    />
-                  )}
                 </div>
 
+                {/* 가족력 */}
                 <div className="space-y-4">
                   <Label>가족 중 유사한 증상을 경험한 분이 있나요? *</Label>
                   <RadioGroup
@@ -408,6 +375,7 @@ export default function ClientSignupStep1Page() {
                   </RadioGroup>
                 </div>
 
+                {/* 약물 복용 */}
                 <div className="space-y-4">
                   <Label>현재 복용 중인 약물이 있나요? *</Label>
                   <RadioGroup
@@ -435,10 +403,7 @@ export default function ClientSignupStep1Page() {
                 >
                   나중에 하기
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                >
+                <Button type="submit" disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

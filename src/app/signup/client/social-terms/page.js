@@ -21,6 +21,19 @@ export default function ClientSocialTermsPage() {
   const [sensitiveInfoAndThirdParty, setSensitiveInfoAndThirdParty] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
 
+// 모든 약관이 체크되었는지 확인 (UI 표시용)
+const isAllChecked = serviceTerms && privacyPolicy && detailedPrivacyConsent && sensitiveInfoAndThirdParty && marketingConsent;
+
+// 전체 동의 핸들러
+const handleAllCheck = (checked) => {
+  const value = !!checked;
+  setServiceTerms(value);
+  setPrivacyPolicy(value);
+  setDetailedPrivacyConsent(value);
+  setSensitiveInfoAndThirdParty(value);
+  setMarketingConsent(value);
+};
+
   useEffect(() => {
     // localStorage에서 카카오 Access Token 확인
     const token = localStorage.getItem('kakao_access_token');
@@ -91,12 +104,26 @@ export default function ClientSocialTermsPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-3 border-t pt-4">
+        
+            {/* 전체 동의 버튼 추가 */}
+            <div className="flex items-center space-x-2 pb-3 mb-2 border-b">
+              <Checkbox
+                id="all_agree"
+                checked={isAllChecked}
+                onCheckedChange={(checked) => handleAllCheck(checked)}
+              />
+              <Label htmlFor="all_agree" className="text-base font-bold cursor-pointer">
+                전체 동의하기
+              </Label>
+            </div>
+
+
               {/* 필수 약관 */}
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="service_terms"
                   checked={serviceTerms}
-                  onCheckedChange={(checked) => setServiceTerms(checked)}
+                  onCheckedChange={(checked) => setServiceTerms(!!checked)}
                 />
                 <Label htmlFor="service_terms" className="text-sm font-normal cursor-pointer">
                   (필수) 셸메이트 이용약관에 동의합니다
@@ -107,7 +134,7 @@ export default function ClientSocialTermsPage() {
                 <Checkbox
                   id="privacy_policy"
                   checked={privacyPolicy}
-                  onCheckedChange={(checked) => setPrivacyPolicy(checked)}
+                  onCheckedChange={(checked) => setPrivacyPolicy(!!checked)}
                 />
                 <Label htmlFor="privacy_policy" className="text-sm font-normal cursor-pointer">
                   (필수) 개인정보 처리방침에 동의합니다
@@ -118,7 +145,7 @@ export default function ClientSocialTermsPage() {
                 <Checkbox
                   id="detailed_privacy_consent"
                   checked={detailedPrivacyConsent}
-                  onCheckedChange={(checked) => setDetailedPrivacyConsent(checked)}
+                  onCheckedChange={(checked) => setDetailedPrivacyConsent(!!checked)}
                 />
                 <Label htmlFor="detailed_privacy_consent" className="text-sm font-normal cursor-pointer">
                   (필수) 개인정보 수집·이용에 동의합니다
@@ -129,7 +156,7 @@ export default function ClientSocialTermsPage() {
                 <Checkbox
                   id="sensitive_info_and_third_party"
                   checked={sensitiveInfoAndThirdParty}
-                  onCheckedChange={(checked) => setSensitiveInfoAndThirdParty(checked)}
+                  onCheckedChange={(checked) => setSensitiveInfoAndThirdParty(!!checked)}
                 />
                 <Label htmlFor="sensitive_info_and_third_party" className="text-sm font-normal cursor-pointer">
                   (필수) 민감정보 및 제3자 제공에 동의합니다
@@ -141,7 +168,7 @@ export default function ClientSocialTermsPage() {
                 <Checkbox
                   id="marketing_consent"
                   checked={marketingConsent}
-                  onCheckedChange={(checked) => setMarketingConsent(checked)}
+                  onCheckedChange={(checked) => setMarketingConsent(!!checked)}
                 />
                 <Label htmlFor="marketing_consent" className="text-sm font-normal cursor-pointer">
                   (선택) 마케팅 정보 수신에 동의합니다

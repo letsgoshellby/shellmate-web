@@ -24,7 +24,7 @@ const step3Schema = z.object({
 const interestOptions = [
   { value: 'academic', label: '학업' },
   { value: 'friendship', label: '친구관계' },
-  { value: 'sensory_issues', label: '감각 문제' },
+  // { value: 'sensory_issues', label: '감각 문제' },
   { value: 'language', label: '언어' },
   { value: 'emotional_anxiety', label: '정서 불안' },
   { value: 'behavioral_issues', label: '행동 문제' },

@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -21,11 +22,20 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const step2Schema = z.object({
   official_diagnosis: z.array(z.string()).min(1, '공식 진단 여부를 하나 이상 선택해주세요'),
-  treatment_status: z.enum(['treatment_only', 'counseling_only', 'both', 'none'], {
-    required_error: '현재 치료/상담 여부를 선택해주세요',
+  official_diagnosis_detail: z.string().max(100, '최대 100자까지 입력할 수 있습니다').optional(),
+  diagnosis_test_name: z.string().optional(),
+  diagnosis_result: z.string().optional(),
+  diagnosis_date: z.string().optional(),
+  treatment_status: z.enum(['treatment', 'none'], {
+    required_error: '치료 여부를 선택해주세요',
   }),
-  treatment_year: z.string().optional(),
-  medical_records: z.string().max(300, '최대 300자까지 입력할 수 있습니다').optional(),
+  treatment_detail: z.string().max(200, '최대 200자까지 입력할 수 있습니다').optional(),
+  counseling_status: z.enum(['counseling', 'none'], {
+    required_error: '상담 여부를 선택해주세요',
+  }),
+  counseling_detail: z.string().max(200, '최대 200자까지 입력할 수 있습니다').optional(),
+  learning_characteristics: z.string().max(100, '최대 100자까지 입력할 수 있습니다').optional(),
+  lifestyle_characteristics: z.string().max(100, '최대 100자까지 입력할 수 있습니다').optional(),
 });
 
 export default function ClientSignupStep2Page() {
@@ -47,6 +57,7 @@ export default function ClientSignupStep2Page() {
   });
 
   const watchTreatmentStatus = watch('treatment_status');
+  const watchCounselingStatus = watch('counseling_status');
 
   const handleDiagnosisChange = (value, checked) => {
     let newSelection;
@@ -107,9 +118,6 @@ export default function ClientSignupStep2Page() {
     router.push('/signup/client/step3');
   };
 
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: currentYear - 1999 }, (_, i) => currentYear - i);
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl w-full space-y-8">
@@ -124,6 +132,7 @@ export default function ClientSignupStep2Page() {
             <SignupProgress currentStep={2} />
 
             <form onSubmit={handleSubmit(handleStep2Submit)} className="space-y-8">
+              {/* 공식 진단 여부 */}
               <div className="space-y-4">
                 <Label>공식 진단 여부 * (복수 선택 가능)</Label>
                 <div className="grid grid-cols-2 gap-2">
@@ -133,9 +142,7 @@ export default function ClientSignupStep2Page() {
                       checked={selectedDiagnosis.includes('hospital')}
                       onCheckedChange={(checked) => handleDiagnosisChange('hospital', checked)}
                     />
-                    <Label htmlFor="hospital" className="font-normal cursor-pointer">
-                      병원 진단
-                    </Label>
+                    <Label htmlFor="hospital" className="font-normal cursor-pointer">병원 진단</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -143,9 +150,7 @@ export default function ClientSignupStep2Page() {
                       checked={selectedDiagnosis.includes('school')}
                       onCheckedChange={(checked) => handleDiagnosisChange('school', checked)}
                     />
-                    <Label htmlFor="school" className="font-normal cursor-pointer">
-                      학교 평가
-                    </Label>
+                    <Label htmlFor="school" className="font-normal cursor-pointer">학교 평가</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -153,9 +158,7 @@ export default function ClientSignupStep2Page() {
                       checked={selectedDiagnosis.includes('other')}
                       onCheckedChange={(checked) => handleDiagnosisChange('other', checked)}
                     />
-                    <Label htmlFor="other" className="font-normal cursor-pointer">
-                      기타
-                    </Label>
+                    <Label htmlFor="other" className="font-normal cursor-pointer">기타</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -163,81 +166,154 @@ export default function ClientSignupStep2Page() {
                       checked={selectedDiagnosis.includes('none')}
                       onCheckedChange={(checked) => handleDiagnosisChange('none', checked)}
                     />
-                    <Label htmlFor="none" className="font-normal cursor-pointer">
-                      없음
-                    </Label>
+                    <Label htmlFor="none" className="font-normal cursor-pointer">없음</Label>
                   </div>
                 </div>
                 {errors.official_diagnosis && (
                   <p className="text-sm text-red-500">{errors.official_diagnosis.message}</p>
                 )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="official_diagnosis_detail">진단 상세 메모 (최대 100자)</Label>
+                  <Textarea
+                    id="official_diagnosis_detail"
+                    placeholder="진단 관련 추가 내용을 입력해주세요"
+                    {...register('official_diagnosis_detail')}
+                    maxLength={100}
+                    rows={2}
+                  />
+                  {errors.official_diagnosis_detail && (
+                    <p className="text-sm text-red-500">{errors.official_diagnosis_detail.message}</p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="diagnosis_test_name">공식 진단명</Label>
+                    <Input
+                      id="diagnosis_test_name"
+                      placeholder="공식 진단명"
+                      {...register('diagnosis_test_name')}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="diagnosis_date">진단 일자</Label>
+                    <Input
+                      id="diagnosis_date"
+                      placeholder="예: 2024-03-15"
+                      {...register('diagnosis_date')}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="diagnosis_result">검사 결과</Label>
+                  <Textarea
+                    id="diagnosis_result"
+                    placeholder="검사 결과를 입력해주세요"
+                    {...register('diagnosis_result')}
+                    rows={2}
+                  />
+                </div>
               </div>
 
+              {/* 치료 여부 */}
               <div className="space-y-4">
-                <Label>현재 치료/상담 여부 *</Label>
+                <Label>현재 치료 여부 *</Label>
                 <RadioGroup
                   value={watchTreatmentStatus}
                   onValueChange={(value) => setValue('treatment_status', value)}
-                  className="grid grid-cols-2 gap-2"
+                  className="flex gap-4"
                 >
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="treatment_only" id="treatment_only" />
-                    <Label htmlFor="treatment_only" className="font-normal cursor-pointer">
-                      치료만
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="counseling_only" id="counseling_only" />
-                    <Label htmlFor="counseling_only" className="font-normal cursor-pointer">
-                      상담만
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="both" id="both" />
-                    <Label htmlFor="both" className="font-normal cursor-pointer">
-                      치료와 상담 모두
-                    </Label>
+                    <RadioGroupItem value="treatment" id="treatment_yes" />
+                    <Label htmlFor="treatment_yes" className="font-normal cursor-pointer">치료</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="none" id="treatment_none" />
-                    <Label htmlFor="treatment_none" className="font-normal cursor-pointer">
-                      안 함
-                    </Label>
+                    <Label htmlFor="treatment_none" className="font-normal cursor-pointer">안 함</Label>
                   </div>
                 </RadioGroup>
                 {errors.treatment_status && (
                   <p className="text-sm text-red-500">{errors.treatment_status.message}</p>
                 )}
+                {watchTreatmentStatus === 'treatment' && (
+                  <div className="space-y-2">
+                    <Textarea
+                      placeholder="치료 관련 내용을 입력해주세요 (최대 200자)"
+                      {...register('treatment_detail')}
+                      maxLength={200}
+                      rows={3}
+                    />
+                    {errors.treatment_detail && (
+                      <p className="text-sm text-red-500">{errors.treatment_detail.message}</p>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {watchTreatmentStatus && watchTreatmentStatus !== 'none' && (
-                <div className="space-y-4">
-                  <Label htmlFor="treatment_year">진단/평가 시행 연도</Label>
-                  <select
-                    id="treatment_year"
-                    {...register('treatment_year')}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="">연도를 선택해주세요</option>
-                    {years.map((year) => (
-                      <option key={year} value={year}>
-                        {year}년
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
+              {/* 상담 여부 */}
               <div className="space-y-4">
-                <Label htmlFor="medical_records">병원 또는 학교 기록 (최대 300자)</Label>
+                <Label>현재 상담 여부 *</Label>
+                <RadioGroup
+                  value={watchCounselingStatus}
+                  onValueChange={(value) => setValue('counseling_status', value)}
+                  className="flex gap-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="counseling" id="counseling_yes" />
+                    <Label htmlFor="counseling_yes" className="font-normal cursor-pointer">상담</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="none" id="counseling_none" />
+                    <Label htmlFor="counseling_none" className="font-normal cursor-pointer">안 함</Label>
+                  </div>
+                </RadioGroup>
+                {errors.counseling_status && (
+                  <p className="text-sm text-red-500">{errors.counseling_status.message}</p>
+                )}
+                {watchCounselingStatus === 'counseling' && (
+                  <div className="space-y-2">
+                    <Textarea
+                      placeholder="상담 관련 내용을 입력해주세요 (최대 200자)"
+                      {...register('counseling_detail')}
+                      maxLength={200}
+                      rows={3}
+                    />
+                    {errors.counseling_detail && (
+                      <p className="text-sm text-red-500">{errors.counseling_detail.message}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* 아동 학습 특성 */}
+              <div className="space-y-4">
+                <Label htmlFor="learning_characteristics">아동 학습 특성 (최대 100자)</Label>
                 <Textarea
-                  id="medical_records"
-                  placeholder="관련 기록이나 특이사항을 자유롭게 입력해주세요"
-                  {...register('medical_records')}
-                  rows={4}
+                  id="learning_characteristics"
+                  placeholder="아동의 학습 특성을 입력해주세요"
+                  {...register('learning_characteristics')}
+                  maxLength={100}
+                  rows={3}
                 />
-                {errors.medical_records && (
-                  <p className="text-sm text-red-500">{errors.medical_records.message}</p>
+                {errors.learning_characteristics && (
+                  <p className="text-sm text-red-500">{errors.learning_characteristics.message}</p>
+                )}
+              </div>
+
+              {/* 생활 특성 */}
+              <div className="space-y-4">
+                <Label htmlFor="lifestyle_characteristics">생활 특성 (최대 100자)</Label>
+                <Textarea
+                  id="lifestyle_characteristics"
+                  placeholder="아동의 생활 특성을 입력해주세요"
+                  {...register('lifestyle_characteristics')}
+                  maxLength={100}
+                  rows={3}
+                />
+                {errors.lifestyle_characteristics && (
+                  <p className="text-sm text-red-500">{errors.lifestyle_characteristics.message}</p>
                 )}
               </div>
 
