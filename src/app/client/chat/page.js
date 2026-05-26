@@ -106,7 +106,9 @@ export default function ClientChatPage() {
                             </span>
                           </div>
                           <p className="text-sm text-gray-600 truncate">
-                            {room.last_message?.content || '대화를 시작해보세요'}
+                            {(room.last_message?.message_type === 'SYSTEM' && room.last_message?.content?.includes('커리큘럼'))
+                              ? '대화를 시작해보세요'
+                              : room.last_message?.content || '대화를 시작해보세요'}
                           </p>
                         </div>
 
