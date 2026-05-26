@@ -5,12 +5,12 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import ColumnDetail from '@/components/columns/ColumnDetail';
 
-export default function ClientColumnDetailPage() {
+export default function ExpertColumnDetailPage() {
   const { id } = useParams();
   return (
-    <AuthGuard requiredRole="client">
+    <AuthGuard requiredRole="expert">
       <DashboardLayout>
-        <ColumnDetail columnId={id} backHref="/client/columns" />
+        <ColumnDetail columnId={id} backHref="/expert/columns" />
       </DashboardLayout>
     </AuthGuard>
   );

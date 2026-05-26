@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ConsultationsAPI } from '@/lib/api/consultations';
+import { toast } from 'react-hot-toast';
 
 const statusConfig = {
   pending: { label: '예약 대기', color: 'bg-yellow-100 text-yellow-800', icon: AlertCircle },
@@ -65,6 +66,7 @@ export default function ConsultationDetailPage() {
     try {
       await ConsultationsAPI.cancelConsultation(id);
       await fetchConsultationDetail();
+      toast.success('상담이 취소되었습니다.');
     } catch (err) {
       toast.error('상담 취소에 실패했습니다.');
     }

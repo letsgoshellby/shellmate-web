@@ -209,7 +209,7 @@ export default function ClientCurriculumPage({ params }) {
                                 주요 주제
                               </p>
                               <div className="flex flex-wrap gap-2">
-                                {session.tags.map((tag, tagIndex) => (
+                                {(Array.isArray(session.tags) ? session.tags : session.tags.split(',')).map((tag, tagIndex) => (
                                   <Badge
                                     key={tagIndex}
                                     variant="secondary"

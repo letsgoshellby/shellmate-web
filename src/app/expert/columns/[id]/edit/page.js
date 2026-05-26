@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -17,9 +17,11 @@ import { toast } from 'react-hot-toast';
 const QuillEditor = dynamic(() => import('@/components/editor/QuillEditor'), { ssr: false });
 const QuillViewer = dynamic(() => import('@/components/editor/QuillViewer'), { ssr: false });
 
-export default function NewColumnPage() {
+export default function EditColumnPage() {
   const router = useRouter();
+  const { id } = useParams();
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [preview, setPreview] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -39,6 +41,28 @@ export default function NewColumnPage() {
 
   const textLength = Math.max(0, getTextLength(content));
 
+  useEffect(() => {
+    loadColumn();
+  }, [id]);
+
+  const loadColumn = async () => {
+    try {
+      const data = await ColumnsAPI.getColumn(id);
+      if (!data.is_author) {
+        toast.error('수정 권한이 없습니다');
+        router.replace('/expert/columns');
+        return;
+      }
+      setTitle(data.title);
+      setContent(data.content);
+    } catch (error) {
+      toast.error('칼럼을 불러오는데 실패했습니다');
+      router.replace('/expert/columns');
+    } finally {
+      setPageLoading(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!title.trim()) {
       toast.error('제목을 입력해주세요');
@@ -51,15 +75,31 @@ export default function NewColumnPage() {
 
     setLoading(true);
     try {
-      await ColumnsAPI.createColumn({ title: title.trim(), content });
-      toast.success('칼럼이 성공적으로 등록되었습니다');
+      await ColumnsAPI.updateColumn(id, { title: title.trim(), content });
+      toast.success('칼럼이 수정되었습니다');
       router.push('/expert/columns');
     } catch (error) {
-      toast.error('칼럼 등록에 실패했습니다');
+      if (error?.response?.status === 403) {
+        toast.error('수정 권한이 없습니다');
+      } else {
+        toast.error('칼럼 수정에 실패했습니다');
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  if (pageLoading) {
+    return (
+      <AuthGuard requiredRole="expert">
+        <DashboardLayout>
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+          </div>
+        </DashboardLayout>
+      </AuthGuard>
+    );
+  }
 
   return (
     <AuthGuard requiredRole="expert">
@@ -75,8 +115,8 @@ export default function NewColumnPage() {
                 </Button>
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">새 칼럼 작성</h1>
-                <p className="text-gray-600">전문적인 지식과 경험을 공유해주세요</p>
+                <h1 className="text-2xl font-bold text-gray-900">칼럼 수정</h1>
+                <p className="text-gray-600">내용을 수정하고 저장하세요</p>
               </div>
             </div>
             <Button variant="outline" onClick={() => setPreview(!preview)}>
@@ -109,7 +149,6 @@ export default function NewColumnPage() {
                     <Label htmlFor="title">제목 *</Label>
                     <Input
                       id="title"
-                      placeholder="독자의 관심을 끄는 명확한 제목을 작성해주세요"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                     />
@@ -120,13 +159,12 @@ export default function NewColumnPage() {
               {/* 본문 */}
               <Card>
                 <CardHeader>
-                  <CardTitle>본문 작성</CardTitle>
+                  <CardTitle>본문 수정</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <QuillEditor
                     value={content}
                     onChange={setContent}
-                    placeholder="여기에 칼럼 내용을 작성해주세요"
                     className="min-h-[400px]"
                   />
                   <div className="mt-2 flex justify-end">
@@ -145,23 +183,23 @@ export default function NewColumnPage() {
           )}
 
           {/* 액션 버튼 */}
-          {/* <Card> */}
+          <Card>
             <CardContent className="p-6 flex justify-end">
               <Button onClick={handleSubmit} disabled={loading}>
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    등록 중...
+                    저장 중...
                   </>
                 ) : (
                   <>
                     <Save className="mr-2 h-4 w-4" />
-                    등록하기
+                    저장하기
                   </>
                 )}
               </Button>
             </CardContent>
-          {/* </Card> */}
+          </Card>
         </div>
       </DashboardLayout>
     </AuthGuard>
