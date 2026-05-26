@@ -50,6 +50,7 @@ export default function VideoCallPage({ params }) {
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
+  const pendingRemoteTrackRef = useRef(null);
   const durationIntervalRef = useRef(null);
   const agoraServiceRef = useRef(null);
   const isInitializedRef = useRef(false);
@@ -75,6 +76,14 @@ export default function VideoCallPage({ params }) {
       }
     };
   }, [isConnected]);
+
+  // isRemoteVideoOn이 true로 바뀐 후 div가 visible해진 시점에 play
+  useEffect(() => {
+    if (isRemoteVideoOn && pendingRemoteTrackRef.current && remoteVideoRef.current) {
+      pendingRemoteTrackRef.current.play(remoteVideoRef.current);
+      pendingRemoteTrackRef.current = null;
+    }
+  }, [isRemoteVideoOn]);
 
   useEffect(() => {
     if (callDuration >= 45 * 60 && !timeWarningShownRef.current) {
@@ -148,12 +157,10 @@ export default function VideoCallPage({ params }) {
       agoraServiceRef.current.setOnRemoteUserJoined((user, mediaType) => {
         setRemoteUid(user.uid);
         if (mediaType === 'video') {
-          setIsRemoteVideoOn(true);
           const trackLabel = user.videoTrack?.getMediaStreamTrack()?.label || '';
           setIsRemoteScreenSharing(trackLabel.includes('screen') || trackLabel.includes('window'));
-          if (remoteVideoRef.current && user.videoTrack) {
-            user.videoTrack.play(remoteVideoRef.current);
-          }
+          pendingRemoteTrackRef.current = user.videoTrack;
+          setIsRemoteVideoOn(true);
         } else if (mediaType === 'audio') {
           user.audioTrack?.play();
         }
