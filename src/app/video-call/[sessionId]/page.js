@@ -166,11 +166,23 @@ export default function VideoCallPage({ params }) {
           setRemoteUid(null);
           setIsRemoteVideoOn(false);
           setIsRemoteScreenSharing(false);
+        } else if (mediaType === 'video') {
+          // 화면공유 중지 또는 카메라 끔 — 잠시 비디오 숨김 (user-published 오면 다시 표시됨)
+          setIsRemoteVideoOn(false);
+          setIsRemoteScreenSharing(false);
         }
       });
 
       agoraServiceRef.current.setOnScreenShareStatusChanged((uid, isSharing) => {
         setIsRemoteScreenSharing(isSharing);
+      });
+
+      // 브라우저 "공유 중지" 버튼으로 종료됐을 때 state 동기화
+      agoraServiceRef.current.setOnScreenShareStopped(() => {
+        setIsScreenSharing(false);
+        if (localVideoRef.current) {
+          agoraServiceRef.current?.playLocalVideo(localVideoRef.current);
+        }
       });
 
       // 6. 채널 입장

@@ -320,8 +320,8 @@ class AgoraService {
    */
   async startScreenShare() {
     try {
-      // 화면 공유 트랙 생성
-      this.screenTrack = await AgoraRTC.createScreenVideoTrack({}, 'auto');
+      // 화면 공유 트랙 생성 ('disable': 항상 단일 비디오 트랙 반환, 배열 이슈 방지)
+      this.screenTrack = await AgoraRTC.createScreenVideoTrack({}, 'disable');
       console.log('✅ [AgoraService] 화면 공유 트랙 생성 완료');
 
       // 기존 비디오 트랙 언퍼블리시
@@ -338,9 +338,12 @@ class AgoraService {
       console.log('✅ [AgoraService] 화면 공유 시작');
 
       // 화면 공유 종료 이벤트 (사용자가 브라우저에서 중지 버튼을 누른 경우)
-      this.screenTrack.on('track-ended', () => {
+      this.screenTrack.on('track-ended', async () => {
         console.log('🔴 [AgoraService] 화면 공유가 종료되었습니다');
-        this.stopScreenShare();
+        await this.stopScreenShare();
+        if (this.onScreenShareStopped) {
+          this.onScreenShareStopped();
+        }
       });
 
       return true;
@@ -361,17 +364,21 @@ class AgoraService {
         // 화면 공유 트랙 언퍼블리시
         await this.client.unpublish(this.screenTrack);
 
-        // 화면 공유 트랙 닫기
-        this.screenTrack.close();
+        // 단일 트랙 또는 배열 모두 안전하게 close
+        if (Array.isArray(this.screenTrack)) {
+          this.screenTrack.forEach(track => track.close());
+        } else {
+          this.screenTrack.close();
+        }
         this.screenTrack = null;
       }
+
+      this.isScreenSharing = false;
 
       // 기존 비디오 트랙 다시 퍼블리시
       if (this.localVideoTrack) {
         await this.client.publish([this.localVideoTrack]);
       }
-
-      this.isScreenSharing = false;
 
       // 화면공유 중지 메시지 전송
       await this.sendDataStreamMessage('SCREEN_SHARE_STOP');
@@ -379,6 +386,8 @@ class AgoraService {
       return true;
     } catch (error) {
       console.error('🔴 [AgoraService] 화면 공유 중지 실패:', error);
+      this.isScreenSharing = false;
+      this.screenTrack = null;
       throw error;
     }
   }
@@ -409,6 +418,10 @@ class AgoraService {
    */
   setOnScreenShareStatusChanged(callback) {
     this.onScreenShareStatusChanged = callback;
+  }
+
+  setOnScreenShareStopped(callback) {
+    this.onScreenShareStopped = callback;
   }
 
   /**
