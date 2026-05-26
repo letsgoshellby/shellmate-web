@@ -151,11 +151,9 @@ export default function VideoCallPage({ params }) {
           setIsRemoteVideoOn(true);
           const trackLabel = user.videoTrack?.getMediaStreamTrack()?.label || '';
           setIsRemoteScreenSharing(trackLabel.includes('screen') || trackLabel.includes('window'));
-          setTimeout(() => {
-            if (remoteVideoRef.current && user.videoTrack) {
-              user.videoTrack.play(remoteVideoRef.current);
-            }
-          }, 100);
+          if (remoteVideoRef.current && user.videoTrack) {
+            user.videoTrack.play(remoteVideoRef.current);
+          }
         } else if (mediaType === 'audio') {
           user.audioTrack?.play();
         }
@@ -295,16 +293,20 @@ export default function VideoCallPage({ params }) {
         const isSharing = await agoraServiceRef.current.toggleScreenShare();
         setIsScreenSharing(isSharing);
         if (isSharing && localVideoRef.current) {
-          const track = Array.isArray(agoraServiceRef.current.screenTrack) 
-            ? agoraServiceRef.current.screenTrack[0] 
-            : agoraServiceRef.current.screenTrack;
-          track?.play(localVideoRef.current);
+          // 로컬 미리보기 실패는 화면공유 자체와 무관하므로 격리
+          try {
+            agoraServiceRef.current.screenTrack?.play(localVideoRef.current);
+          } catch {}
         } else if (localVideoRef.current) {
           agoraServiceRef.current.playLocalVideo(localVideoRef.current);
         }
       } catch (e) {
         if (e.name !== 'NotAllowedError') toast.error('화면 공유 실패');
         setIsScreenSharing(false);
+        // publish까지 된 경우 정리
+        if (agoraServiceRef.current?.isScreenSharing) {
+          agoraServiceRef.current.stopScreenShare().catch(() => {});
+        }
       }
     }
   };
@@ -352,9 +354,12 @@ export default function VideoCallPage({ params }) {
       <div className="relative w-full h-full">
         {remoteUid ? (
           <div className="w-full h-full">
-            {isRemoteVideoOn ? (
-              <div ref={remoteVideoRef} className="w-full h-full" />
-            ) : (
+            <div
+              ref={remoteVideoRef}
+              className="w-full h-full"
+              style={{ display: isRemoteVideoOn ? 'block' : 'none' }}
+            />
+            {!isRemoteVideoOn && (
               <div className="w-full h-full flex items-center justify-center bg-gray-800">
                 <div className="w-32 h-32 rounded-full bg-blue-600 flex items-center justify-center">
                   <span className="text-white text-5xl font-bold">{participantName[0]}</span>
@@ -385,9 +390,12 @@ export default function VideoCallPage({ params }) {
         )}
 
         <div className="absolute top-24 right-4 w-32 h-44 rounded-xl border-2 border-white overflow-hidden shadow-lg bg-gray-800">
-          {isLocalVideoOn ? (
-            <div ref={localVideoRef} className="w-full h-full" />
-          ) : (
+          <div
+            ref={localVideoRef}
+            className="w-full h-full"
+            style={{ display: isLocalVideoOn ? 'block' : 'none' }}
+          />
+          {!isLocalVideoOn && (
             <div className="w-full h-full flex items-center justify-center">
               <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center">
                 <span className="text-white text-2xl font-bold">나</span>

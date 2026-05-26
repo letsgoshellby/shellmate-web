@@ -349,6 +349,16 @@ class AgoraService {
       return true;
     } catch (error) {
       console.error('🔴 [AgoraService] 화면 공유 시작 실패:', error);
+      // publish까지 성공했을 수 있으므로 정리
+      if (this.screenTrack) {
+        try { await this.client.unpublish(this.screenTrack); } catch {}
+        try { this.screenTrack.close(); } catch {}
+        this.screenTrack = null;
+      }
+      // 카메라 복원
+      if (this.localVideoTrack) {
+        try { await this.client.publish([this.localVideoTrack]); } catch {}
+      }
       this.isScreenSharing = false;
       throw error;
     }
