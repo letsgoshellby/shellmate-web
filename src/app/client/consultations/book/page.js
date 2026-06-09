@@ -296,43 +296,45 @@ export default function BookConsultationPage() {
                   <Card key={expert.id} className="hover:shadow-lg transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-start space-x-4">
-                        <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-xl font-bold shrink-0">
+                        <Link href={`/client/experts/${expert.id}`} className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-xl font-bold shrink-0 overflow-hidden">
                           {expert.profile_image ? (
                             <img src={expert.profile_image} alt={expert.name} className="w-full h-full rounded-full object-cover" />
                           ) : (
                             expert.name.charAt(0)
                           )}
-                        </div>
+                        </Link>
 
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center flex-wrap gap-2 mb-2">
-                            <h3 className="text-lg font-semibold">{expert.name}</h3>
-                            <Badge className="bg-blue-100 text-blue-800">
-                              <Award className="mr-1 h-3 w-3" />
-                              {expert.title}
-                            </Badge>
-                          </div>
-
-                          <div className="flex items-center space-x-4 mb-3">
-                            <div className="flex items-center">
-                              <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
-                              <span className="text-sm font-medium">{expert.rating}</span>
-                              <span className="text-sm text-gray-500 ml-1">({expert.reviews_count})</span>
-                            </div>
-                            <span className="text-sm text-gray-600">경력 {expert.experience_years}년</span>
-                          </div>
-
-                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                            {expert.introduction}
-                          </p>
-
-                          <div className="flex flex-wrap gap-1 mb-4">
-                            {expert.specialties.map((specialty, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
-                                {specialty}
+                          <Link href={`/client/experts/${expert.id}`} className="block hover:opacity-80 transition-opacity">
+                            <div className="flex items-center flex-wrap gap-2 mb-2">
+                              <h3 className="text-lg font-semibold">{expert.name}</h3>
+                              <Badge className="bg-blue-100 text-blue-800">
+                                <Award className="mr-1 h-3 w-3" />
+                                {expert.title}
                               </Badge>
-                            ))}
-                          </div>
+                            </div>
+
+                            <div className="flex items-center space-x-4 mb-3">
+                              <div className="flex items-center">
+                                <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
+                                <span className="text-sm font-medium">{expert.rating}</span>
+                                <span className="text-sm text-gray-500 ml-1">({expert.reviews_count})</span>
+                              </div>
+                              <span className="text-sm text-gray-600">경력 {expert.experience_years}년</span>
+                            </div>
+
+                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                              {expert.introduction}
+                            </p>
+
+                            <div className="flex flex-wrap gap-1 mb-4">
+                              {expert.specialties.map((specialty, index) => (
+                                <Badge key={index} variant="outline" className="text-xs">
+                                  {specialty}
+                                </Badge>
+                              ))}
+                            </div>
+                          </Link>
 
                           <Button onClick={() => handleExpertSelect(expert)} className="w-full sm:w-auto">
                             이 전문가 선택하기
