@@ -186,6 +186,9 @@ export default function ExpertPricingPage() {
 
       toast.success('가격 설정이 완료되었습니다!');
 
+      // 온보딩 투어 플래그 설정
+      localStorage.setItem('expert_show_tour', 'true');
+
       // 온보딩 완료 - 대시보드로 이동
       window.location.href = '/expert/dashboard';
     } catch (error) {
@@ -268,7 +271,7 @@ export default function ExpertPricingPage() {
                       <div className="flex items-center justify-between">
                         <Label className="text-sm font-semibold">가격 (원)</Label>
                         <div className="text-right">
-                          <div className="text-2xl font-bold text-primary">
+                          <div className="text-xl font-bold text-primary">
                             {item.price.toLocaleString()}원
                           </div>
                         </div>
@@ -292,18 +295,23 @@ export default function ExpertPricingPage() {
                       </div>
                     </div>
 
-                    {/* 활성화 여부 */}
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id={`active_${index}`}
-                        checked={item.is_active}
-                        onChange={(e) => handlePricingChange(index, 'is_active', e.target.checked)}
-                        className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
-                      />
-                      <label htmlFor={`active_${index}`} className="ml-2 text-sm text-gray-700">
-                        활성화
-                      </label>
+                    {/* 활성화 여부 + 총액 */}
+                    <div className="flex items-center justify-between pt-8">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={`active_${index}`}
+                          checked={item.is_active}
+                          onChange={(e) => handlePricingChange(index, 'is_active', e.target.checked)}
+                          className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                        />
+                        <label htmlFor={`active_${index}`} className="ml-2 text-sm text-gray-700">
+                          활성화
+                        </label>
+                      </div>
+                      <span className="text-2xl font-bold text-primary">
+                        총 {(item.price * (SESSION_COUNTS[item.session_type] || 1)).toLocaleString()}원
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
