@@ -37,6 +37,13 @@ import { ConsultationsAPI } from '@/lib/api/consultations';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+const SPECIALTY_OPTIONS = [
+  { value: 'learning_disability', label: '학습·발달' },
+  { value: 'career_independence', label: '진로·자립' },
+  { value: 'parenting_emotional', label: '기본생활·양육' },
+  { value: 'social_skills', label: '정서행동·사회성' },
+];
+
 export default function ExpertProfilePage() {
   const { user, isAuthenticated, isExpert, refreshUser } = useAuth();
   const router = useRouter();
@@ -47,6 +54,8 @@ export default function ExpertProfilePage() {
   const [pricings, setPricings] = useState([]);
   const [education, setEducation] = useState([]);
   const [career, setCareer] = useState([]);
+  const [isProfessionalEditing, setIsProfessionalEditing] = useState(false);
+  const [editSpecialties, setEditSpecialties] = useState([]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -210,6 +219,64 @@ export default function ExpertProfilePage() {
     const newEducation = [...education];
     newEducation[index] = value;
     setEducation(newEducation);
+  };
+
+  const handleProfessionalEdit = () => {
+    const specialties = Array.isArray(profileData?.expert_profile?.specialty_list)
+      ? profileData.expert_profile.specialty_list
+      : [];
+    setEditSpecialties(specialties);
+    setEditData(prev => ({
+      ...prev,
+      experience_years: profileData?.expert_profile?.experience_years || '',
+      institution: profileData?.expert_profile?.institution || '',
+    }));
+    setIsProfessionalEditing(true);
+  };
+
+  const handleProfessionalCancel = () => {
+    setIsProfessionalEditing(false);
+  };
+
+  const handleProfessionalSave = async () => {
+    setLoading(true);
+    try {
+      const token = TokenStorage.getAccessToken();
+      const filteredSpecialties = editSpecialties.filter(s => s.trim() !== '');
+
+      const response = await fetch(`${API_BASE_URL}/user/me/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          experience_years: editData.experience_years,
+          institution: editData.institution,
+          specialty_list: filteredSpecialties,
+        }),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        setProfileData(responseData.user || responseData);
+        await refreshUser();
+        setIsProfessionalEditing(false);
+        toast.success('전문가 정보가 업데이트되었습니다');
+      } else {
+        toast.error('업데이트에 실패했습니다');
+      }
+    } catch (error) {
+      toast.error('네트워크 오류가 발생했습니다');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleSpecialty = (value) => {
+    setEditSpecialties(prev =>
+      prev.includes(value) ? prev.filter(s => s !== value) : [...prev, value]
+    );
   };
 
   const handleAddCareer = () => {
@@ -605,14 +672,33 @@ export default function ExpertProfilePage() {
 
           <TabsContent value="professional">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <IoTrophy className="h-5 w-5" />
-                  전문가 정보
-                </CardTitle>
-                <CardDescription>
-                  전문가 자격 및 경력 정보를 확인할 수 있습니다.
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <IoTrophy className="h-5 w-5" />
+                    전문가 정보
+                  </CardTitle>
+                  <CardDescription>
+                    전문가 자격 및 경력 정보를 확인하고 수정할 수 있습니다.
+                  </CardDescription>
+                </div>
+                {!isProfessionalEditing ? (
+                  <Button onClick={handleProfessionalEdit} variant="outline" size="sm">
+                    <IoCreate className="h-4 w-4 mr-2" />
+                    수정
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button onClick={handleProfessionalCancel} variant="outline" size="sm">
+                      <IoClose className="h-4 w-4 mr-2" />
+                      취소
+                    </Button>
+                    <Button onClick={handleProfessionalSave} size="sm" disabled={loading}>
+                      <IoSave className="h-4 w-4 mr-2" />
+                      저장
+                    </Button>
+                  </div>
+                )}
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -621,7 +707,7 @@ export default function ExpertProfilePage() {
                       <IoTime className="h-4 w-4" />
                       경력 (년)
                     </Label>
-                    {isEditing ? (
+                    {isProfessionalEditing ? (
                       <Input
                         type="number"
                         value={editData.experience_years || ''}
@@ -642,7 +728,7 @@ export default function ExpertProfilePage() {
                       <IoBusiness className="h-4 w-4" />
                       소속기관
                     </Label>
-                    {isEditing ? (
+                    {isProfessionalEditing ? (
                       <Input
                         value={editData.institution || ''}
                         onChange={(e) => setEditData({ ...editData, institution: e.target.value })}
@@ -658,31 +744,39 @@ export default function ExpertProfilePage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label>전문 분야</Label>
+                <div className="space-y-2">
+                  <Label>전문 분야</Label>
+                  {isProfessionalEditing ? (
+                    <div className="flex flex-wrap gap-3">
+                      {SPECIALTY_OPTIONS.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => handleToggleSpecialty(option.value)}
+                          className={`px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
+                            editSpecialties.includes(option.value)
+                              ? 'bg-primary text-primary-foreground border-primary'
+                              : 'bg-white text-gray-700 border-gray-300 hover:border-primary'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
                     <div className="flex flex-wrap gap-2">
                       {profileData.expert_profile?.specialty_list && profileData.expert_profile.specialty_list.length > 0 ? (
-                        profileData.expert_profile.specialty_list.map((specialty, index) => (
-                          <Badge key={index} variant="outline">
-                            {specialty}
-                          </Badge>
-                        ))
+                        profileData.expert_profile.specialty_list.map((value, index) => {
+                          const label = SPECIALTY_OPTIONS.find(o => o.value === value)?.label || value;
+                          return <Badge key={index} variant="outline">{label}</Badge>;
+                        })
                       ) : (
                         <Badge variant="secondary">미설정</Badge>
                       )}
                     </div>
-                  </div>
-
-                  {/* <div className="space-y-2">
-                    <Label>근무지</Label>
-                    <Input
-                      value={profileData.expert_profile?.workplace || '미입력'}
-                      disabled
-                      className="bg-gray-50"
-                    />
-                  </div> */}
+                  )}
                 </div>
+
 
                 {!profileData.expert_profile && (
                   <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
@@ -750,6 +844,9 @@ export default function ExpertProfilePage() {
                         </div>
                       </div>
                     )}
+                  <p className="text-sm text-muted-foreground">
+                    자격 증명서 관련 업데이트의 경우에는 letschugalong@gmail.com 메일을 통한 문의 부탁드립니다.
+                  </p>
                   </div>
                 )}
               </CardContent>
