@@ -49,9 +49,6 @@ export default function ConsultationDetailPage() {
     try {
       setLoading(true);
       const data = await ConsultationsAPI.getCounselingRequestDetail(id);
-      console.log('🔍 [DEBUG] consultation data:', data);
-      console.log('🔍 [DEBUG] consultation.status:', data.status);
-      console.log('🔍 [DEBUG] consultation.curriculum:', data.curriculum);
       setConsultation(data);
     } catch (err) {
       setError('상담 정보를 불러오는데 실패했습니다.');
