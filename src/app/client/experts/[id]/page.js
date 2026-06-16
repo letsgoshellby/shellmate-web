@@ -232,34 +232,49 @@ export default function ExpertDetailPage({ params }) {
                 </div>
               </div>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                  {reviews.map((review) => (
-                    <div key={review.id} className="border rounded-lg p-4 space-y-2">
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${
-                              i < review.rating
-                                ? 'text-yellow-400 fill-current'
-                                : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      {review.title && (
-                        <h4 className="font-semibold text-sm line-clamp-2">{review.title}</h4>
-                      )}
-                    </div>
-                  ))}
-                  <Button
-                    variant="outline"
-                    className="h-full flex items-center justify-center w-10"
+                {reviews.length === 0 ? (
+                  <button
                     onClick={() => router.push(`/client/experts/${expertId}/reviews`)}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg border border-dashed border-yellow-300 bg-yellow-50 hover:bg-yellow-100 transition-colors"
                   >
-                    <ChevronRight className="h-5 w-5" />
-                  </Button>
-                </div>
+                    <div className="flex items-center gap-0.5 shrink-0">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="h-3.5 w-3.5 text-yellow-300" />
+                      ))}
+                    </div>
+                    <p className="text-sm font-medium text-yellow-700">상담의 첫 번째 리뷰어가 되어주세요</p>
+                    <ChevronRight className="h-4 w-4 text-yellow-500 ml-auto shrink-0" />
+                  </button>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    {reviews.map((review) => (
+                      <div key={review.id} className="border rounded-lg p-4 space-y-2">
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${
+                                i < review.rating
+                                  ? 'text-yellow-400 fill-current'
+                                  : 'text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        {review.title && (
+                          <h4 className="font-semibold text-sm line-clamp-2">{review.title}</h4>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      className="h-full flex items-center justify-center w-10"
+                      onClick={() => router.push(`/client/experts/${expertId}/reviews`)}
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </CardContent>
           </Card>
