@@ -172,11 +172,10 @@ export default function ClientQnAPage() {
 
   const getCategoryName = (category) => {
     const categories = {
-      attention: '집중력',
-      language: '언어발달',
-      social: '사회성',
-      behavior: '행동',
-      learning: '학습',
+      learning_disability: '학습·발달',
+      career_independence: '진로·자립',
+      parenting_emotional: '기본생활·양육',
+      social_skills: '정서행동·사회성',
       all: '전체'
     };
     return categories[category] || category;
@@ -261,11 +260,10 @@ export default function ClientQnAPage() {
                     className="px-3 py-2 border rounded-md"
                   >
                     <option value="all">전체 카테고리</option>
-                    <option value="attention">집중력</option>
-                    <option value="language">언어발달</option>
-                    <option value="social">사회성</option>
-                    <option value="behavior">행동</option>
-                    <option value="learning">학습</option>
+                    <option value="learning_disability">학습·발달</option>
+                    <option value="career_independence">진로·자립</option>
+                    <option value="parenting_emotional">기본생활·양육</option>
+                    <option value="social_skills">정서행동·사회성</option>
                   </select>
                   <select
                     value={sortBy}

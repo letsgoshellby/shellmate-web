@@ -46,14 +46,10 @@ export default function NewQuestionPage() {
   const watchedContent = watch('content', '');
 
   const categories = [
-    { value: 'attention', label: '집중력/주의력' },
-    { value: 'language', label: '언어발달' },
-    { value: 'social', label: '사회성' },
-    { value: 'behavior', label: '행동문제' },
-    { value: 'learning', label: '학습능력' },
-    { value: 'emotion', label: '정서발달' },
-    { value: 'motor', label: '운동발달' },
-    { value: 'etc', label: '기타' },
+    { value: 'learning_disability', label: '학습·발달' },
+    { value: 'career_independence', label: '진로·자립' },
+    { value: 'parenting_emotional', label: '기본생활·양육' },
+    { value: 'social_skills', label: '정서행동·사회성' },
   ];
 
   const addTag = () => {

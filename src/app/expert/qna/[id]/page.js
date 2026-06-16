@@ -188,14 +188,14 @@ export default function ExpertQuestionDetailPage() {
     }
   };
 
-  const getUrgencyText = (urgency) => {
-    switch (urgency) {
-      case 'high': return '긴급';
-      case 'medium': return '보통';
-      case 'low': return '낮음';
-      default: return '보통';
-    }
-  };
+  // const getUrgencyText = (urgency) => {
+  //   switch (urgency) {
+  //     case 'high': return '긴급';
+  //     case 'medium': return '보통';
+  //     case 'low': return '낮음';
+  //     default: return '보통';
+  //   }
+  // };
 
   const hasExpertAnswer = answers.some(answer => answer.is_expert);
 
@@ -241,12 +241,12 @@ export default function ExpertQuestionDetailPage() {
               </Link>
             </div>
             
-            {!hasExpertAnswer && (
+            {/* {!hasExpertAnswer && (
               <Badge className="bg-orange-100 text-orange-800">
                 <AlertCircle className="mr-1 h-3 w-3" />
                 전문가 답변 필요
               </Badge>
-            )}
+            )} */}
           </div>
             
           {/* 질문자 정보 카드
@@ -273,7 +273,7 @@ export default function ExpertQuestionDetailPage() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-3">
-                    <Badge variant="secondary">
+                    {/* <Badge variant="secondary">
                       {getCategoryName(question.category)}
                     </Badge>
                     <Badge className={getUrgencyColor(question.urgency)}>
@@ -284,7 +284,7 @@ export default function ExpertQuestionDetailPage() {
                         <CheckCircle className="mr-1 h-3 w-3" />
                         해결됨
                       </Badge>
-                    )}
+                    )} */}
                   </div>
                   <CardTitle className="text-xl mb-4">{question.title}</CardTitle>
                   {question.tags && question.tags.length > 0 && (
@@ -301,7 +301,7 @@ export default function ExpertQuestionDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="prose max-w-none mb-6">
-                <p className="whitespace-pre-wrap text-gray-700">{question.content}</p>
+                <p className="whitespace-pre-wrap break-words text-gray-700">{question.content}</p>
               </div>
               
               <div className="flex items-center justify-between">
@@ -374,7 +374,7 @@ export default function ExpertQuestionDetailPage() {
                     </div>
                     
                     <div className="prose max-w-none mb-4">
-                      <p className="whitespace-pre-wrap text-gray-700">{answer.content}</p>
+                      <p className="whitespace-pre-wrap break-words text-gray-700">{answer.content}</p>
                     </div>
                     
                     <div className="flex items-center justify-between">
@@ -430,7 +430,7 @@ export default function ExpertQuestionDetailPage() {
                 
                 <div className="flex justify-between items-center">
                   <p className="text-sm text-gray-500">
-                    {newAnswer.length}/200 글자
+                    {newAnswer.length}/300 글자
                   </p>
                   <Button 
                     onClick={handleSubmitAnswer}
