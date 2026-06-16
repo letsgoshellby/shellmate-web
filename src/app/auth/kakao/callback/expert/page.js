@@ -51,7 +51,6 @@ export default function KakaoExpertCallbackPage() {
           // AuthContext 업데이트
           if (response.user) {
             setUser(response.user);
-            localStorage.setItem('user_data', JSON.stringify(response.user));
           }
           toast.success('로그인되었습니다');
           router.push('/expert/dashboard');
@@ -59,15 +58,15 @@ export default function KakaoExpertCallbackPage() {
         }
 
         // 신규 회원인 경우 - 약관 페이지로
-        localStorage.setItem('kakao_access_token', accessToken);
-        localStorage.setItem('kakao_provider', 'kakao');
+        sessionStorage.setItem('kakao_access_token', accessToken);
+        sessionStorage.setItem('kakao_provider', 'kakao');
         router.push('/signup/expert/social-terms');
       } catch (error) {
         // 약관 미동의 에러 처리
         if (error.response?.status === 400) {
           // 액세스 토큰 저장 후 약관 페이지로
-          localStorage.setItem('kakao_access_token', accessToken);
-          localStorage.setItem('kakao_provider', 'kakao');
+          sessionStorage.setItem('kakao_access_token', accessToken);
+          sessionStorage.setItem('kakao_provider', 'kakao');
           router.push('/signup/expert/social-terms');
         } else {
           throw error;

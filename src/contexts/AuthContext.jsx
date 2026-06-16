@@ -40,10 +40,9 @@ export function AuthProvider({ children }) {
     try {
       const userData = await AuthAPI.getCurrentUser();
       setUser(userData);
-      // 사용자 정보를 로컬스토리지에 저장
-      localStorage.setItem('user_data', JSON.stringify(userData));
+      sessionStorage.setItem('user_cache', JSON.stringify(userData));
     } catch (err) {
-      
+
       // 401 (인증 실패)인 경우에만 토큰 관련 처리
       if (err.response?.status === 401) {
         // 인증 실패 시 refresh token으로 재시도
@@ -53,25 +52,25 @@ export function AuthProvider({ children }) {
             TokenStorage.setTokens(newAccessToken, refreshToken);
             const userData = await AuthAPI.getCurrentUser();
             setUser(userData);
-            localStorage.setItem('user_data', JSON.stringify(userData));
+            sessionStorage.setItem('user_cache', JSON.stringify(userData));
           } catch (refreshErr) {
             // refresh도 실패하면 토큰 삭제
             TokenStorage.clearTokens();
-            localStorage.removeItem('user_data');
+            sessionStorage.removeItem('user_cache');
           }
         } else {
           // refresh token이 없으면 토큰 삭제
           TokenStorage.clearTokens();
-          localStorage.removeItem('user_data');
+          sessionStorage.removeItem('user_cache');
         }
       } else {
-        // 기타 에러는 로컬스토리지에서 사용자 정보 복원 시도
-        const storedUser = localStorage.getItem('user_data');
-        if (storedUser) {
+        // 네트워크 오류 등 기타 에러 — sessionStorage 캐시로 복원
+        const cached = sessionStorage.getItem('user_cache');
+        if (cached) {
           try {
-            setUser(JSON.parse(storedUser));
-          } catch (parseErr) {
-            localStorage.removeItem('user_data');
+            setUser(JSON.parse(cached));
+          } catch {
+            sessionStorage.removeItem('user_cache');
           }
         }
       }
@@ -84,8 +83,6 @@ export function AuthProvider({ children }) {
     try {
       const response = await AuthAPI.login({ email, password }, rememberMe);
       setUser(response.user);
-      // 사용자 정보를 로컬스토리지에 저장
-      localStorage.setItem('user_data', JSON.stringify(response.user));
       setError(null);
       return response;
     } catch (err) {
@@ -100,7 +97,7 @@ export function AuthProvider({ children }) {
     } finally {
       setUser(null);
       TokenStorage.clearTokens();
-      localStorage.removeItem('user_data');
+      sessionStorage.removeItem('user_cache');
       localStorage.removeItem('expertSignupComplete');
     }
   };
@@ -109,7 +106,6 @@ export function AuthProvider({ children }) {
     try {
       const userData = await AuthAPI.getCurrentUser();
       setUser(userData);
-      localStorage.setItem('user_data', JSON.stringify(userData));
     } catch (err) {
       setError(err);
     }

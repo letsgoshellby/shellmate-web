@@ -39,9 +39,9 @@ export default function ExpertSocialTermsPage() {
 
 
   useEffect(() => {
-    // localStorage에서 카카오 Access Token 확인
-    const token = localStorage.getItem('kakao_access_token');
-    const provider = localStorage.getItem('kakao_provider');
+    // sessionStorage에서 카카오 Access Token 확인
+    const token = sessionStorage.getItem('kakao_access_token');
+    const provider = sessionStorage.getItem('kakao_provider');
 
     if (!token || provider !== 'kakao') {
       toast.error('잘못된 접근입니다');
@@ -74,9 +74,9 @@ export default function ExpertSocialTermsPage() {
       // 소셜 로그인 API 호출 (약관 포함)
       const response = await AuthAPI.expertSocialLogin('kakao', kakaoAccessToken, terms);
 
-      // localStorage 정리
-      localStorage.removeItem('kakao_access_token');
-      localStorage.removeItem('kakao_provider');
+      // sessionStorage 정리
+      sessionStorage.removeItem('kakao_access_token');
+      sessionStorage.removeItem('kakao_provider');
 
       if (response.isNewUser) {
         // 신규 회원 - Step 1으로 이동
