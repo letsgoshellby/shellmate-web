@@ -571,7 +571,7 @@ export default function BookConsultationPage() {
                     </p>
                   </div>
 
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 space-y-3">
                     <h4 className="font-medium text-yellow-800 mb-2">상담 전 안내사항</h4>
                     <ul className="text-sm text-yellow-700 space-y-1">
                       <li>• 상담은 화상 통화로 진행됩니다</li>
@@ -579,6 +579,18 @@ export default function BookConsultationPage() {
                       <li>• 필요 토큰: {selectedPricing?.tokens_required.toLocaleString()}개</li>
                       <li>• 상담 24시간 전까지 취소 가능합니다</li>
                     </ul>
+                    <div className="border-t border-yellow-200 pt-3">
+                      <p className="text-sm font-medium text-yellow-800 mb-2">📝 상담 내용 작성 가이드</p>
+                      <p className="text-sm text-yellow-700 mb-1">아래 항목을 참고하여 상담 내용을 작성해주시면 더욱 효과적인 상담이 가능합니다.</p>
+                      <ul className="text-sm text-yellow-700 space-y-1">
+                        <li>• <span className="font-medium">문제 행동</span> — 어떤 행동이 문제가 되는지 구체적으로 적어주세요</li>
+                        <li>• <span className="font-medium">발생 빈도</span> — 얼마나 자주, 어떤 상황에서 나타나는지 적어주세요</li>
+                        <li>• <span className="font-medium">가장 고민인 것</span> — 현재 가장 힘들거나 걱정되는 부분을 적어주세요</li>
+                        <li>• <span className="font-medium">상담을 통해 원하는 것</span> — 상담 후 어떤 변화를 기대하시는지 적어주세요</li>
+                        <li>• <span className="font-medium">아동 특성</span> — 나이, 성별, 평소 성격, 발달 사항 등을 적어주세요</li>
+                      </ul>
+                      <p className="text-sm text-yellow-700 mt-2 font-medium">최대한 자세하게 적어주실수록 더 도움이 됩니다!</p>
+                    </div>
                   </div>
 
                   <div className="flex space-x-4">
