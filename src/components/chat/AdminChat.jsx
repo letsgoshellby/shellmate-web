@@ -283,7 +283,7 @@ export function AdminChat({
                 </div>
               )
             ) : (messageType === 'reservation_imminent' || messageType === 'SESSION_REMINDER') ? (
-              // 2. 상담 임박 - 화상 상담 시작하기 + 상담방 입장 (두 개의 버튼)
+              // 2. 상담 임박 - 화상 상담 시작하기 + 상담방 입장
               <div className="space-y-2">
                 {sessionId && (
                   <Link href={`/video-call/${sessionId}`}>
@@ -294,7 +294,7 @@ export function AdminChat({
                   </Link>
                 )}
                 {chatRoomId && (
-                  <Link href={`/expert/chat/${chatRoomId}`}>
+                  <Link href={userType === 'client' ? `/client/chat/${chatRoomId}` : `/expert/chat/${chatRoomId}`}>
                     <Button variant="outline" className="w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 font-medium py-5 rounded-xl">
                       상담방 입장
                     </Button>

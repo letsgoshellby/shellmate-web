@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ChatAPI } from '@/lib/api/chat';
+import { consultationAPI } from '@/lib/api/consultation';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   ArrowLeft,
@@ -36,6 +37,7 @@ export default function ExpertChatDetailPage() {
   const chatRoomId = params.id;
 
   const [chatRoom, setChatRoom] = useState(null);
+  const [nextSession, setNextSession] = useState(null);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -63,6 +65,12 @@ export default function ExpertChatDetailPage() {
       const data = await ChatAPI.getChatRoom(chatRoomId);
       setChatRoom(data);
       await ChatAPI.markAllAsRead(chatRoomId);
+      if (data.counseling_request_id) {
+        try {
+          const consultation = await consultationAPI.getConsultationDetail(data.counseling_request_id);
+          if (consultation.next_session) setNextSession(consultation.next_session);
+        } catch (_) {}
+      }
     } catch (error) {
       console.error('채팅방 로딩 실패:', error);
       toast.error('채팅방을 불러오는데 실패했습니다');
@@ -322,7 +330,7 @@ export default function ExpertChatDetailPage() {
                       <AdminChat
                         messageType={message.message_type}
                         metadata={message.metadata || {}}
-                        sessionId={message.session_id}
+                        sessionId={message.session_id || nextSession?.id}
                         participantName={chatRoom?.client?.name}
                         sessionNumber={message.session_number}
                         chatRoomId={chatRoomId}

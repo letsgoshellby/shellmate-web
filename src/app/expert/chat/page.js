@@ -25,7 +25,6 @@ export default function ExpertChatPage() {
       setChatRooms(rooms);
     } catch (error) {
       console.error('채팅방 목록 로딩 실패:', error);
-      console.error('Error details:', error.response?.data);
       toast.error('채팅방 목록을 불러오는데 실패했습니다');
     } finally {
       setLoading(false);
