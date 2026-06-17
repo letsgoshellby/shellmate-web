@@ -296,43 +296,45 @@ export default function BookConsultationPage() {
                   <Card key={expert.id} className="hover:shadow-lg transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-start space-x-4">
-                        <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-xl font-bold shrink-0">
+                        <Link href={`/client/experts/${expert.id}`} className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-xl font-bold shrink-0 overflow-hidden">
                           {expert.profile_image ? (
                             <img src={expert.profile_image} alt={expert.name} className="w-full h-full rounded-full object-cover" />
                           ) : (
                             expert.name.charAt(0)
                           )}
-                        </div>
+                        </Link>
 
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center flex-wrap gap-2 mb-2">
-                            <h3 className="text-lg font-semibold">{expert.name}</h3>
-                            <Badge className="bg-blue-100 text-blue-800">
-                              <Award className="mr-1 h-3 w-3" />
-                              {expert.title}
-                            </Badge>
-                          </div>
-
-                          <div className="flex items-center space-x-4 mb-3">
-                            <div className="flex items-center">
-                              <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
-                              <span className="text-sm font-medium">{expert.rating}</span>
-                              <span className="text-sm text-gray-500 ml-1">({expert.reviews_count})</span>
-                            </div>
-                            <span className="text-sm text-gray-600">경력 {expert.experience_years}년</span>
-                          </div>
-
-                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                            {expert.introduction}
-                          </p>
-
-                          <div className="flex flex-wrap gap-1 mb-4">
-                            {expert.specialties.map((specialty, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
-                                {specialty}
+                          <Link href={`/client/experts/${expert.id}`} className="block hover:opacity-80 transition-opacity">
+                            <div className="flex items-center flex-wrap gap-2 mb-2">
+                              <h3 className="text-lg font-semibold">{expert.name}</h3>
+                              <Badge className="bg-blue-100 text-blue-800">
+                                <Award className="mr-1 h-3 w-3" />
+                                {expert.title}
                               </Badge>
-                            ))}
-                          </div>
+                            </div>
+
+                            <div className="flex items-center space-x-4 mb-3">
+                              <div className="flex items-center">
+                                <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
+                                <span className="text-sm font-medium">{expert.rating}</span>
+                                <span className="text-sm text-gray-500 ml-1">({expert.reviews_count})</span>
+                              </div>
+                              <span className="text-sm text-gray-600">경력 {expert.experience_years}년</span>
+                            </div>
+
+                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                              {expert.introduction}
+                            </p>
+
+                            <div className="flex flex-wrap gap-1 mb-4">
+                              {expert.specialties.map((specialty, index) => (
+                                <Badge key={index} variant="outline" className="text-xs">
+                                  {specialty}
+                                </Badge>
+                              ))}
+                            </div>
+                          </Link>
 
                           <Button onClick={() => handleExpertSelect(expert)} className="w-full sm:w-auto">
                             이 전문가 선택하기
@@ -569,7 +571,7 @@ export default function BookConsultationPage() {
                     </p>
                   </div>
 
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 space-y-3">
                     <h4 className="font-medium text-yellow-800 mb-2">상담 전 안내사항</h4>
                     <ul className="text-sm text-yellow-700 space-y-1">
                       <li>• 상담은 화상 통화로 진행됩니다</li>
@@ -577,6 +579,18 @@ export default function BookConsultationPage() {
                       <li>• 필요 토큰: {selectedPricing?.tokens_required.toLocaleString()}개</li>
                       <li>• 상담 24시간 전까지 취소 가능합니다</li>
                     </ul>
+                    <div className="border-t border-yellow-200 pt-3">
+                      <p className="text-sm font-medium text-yellow-800 mb-2">📝 상담 내용 작성 가이드</p>
+                      <p className="text-sm text-yellow-700 mb-1">아래 항목을 참고하여 상담 내용을 작성해주시면 더욱 효과적인 상담이 가능합니다.</p>
+                      <ul className="text-sm text-yellow-700 space-y-1">
+                        <li>• <span className="font-medium">문제 행동</span> — 어떤 행동이 문제가 되는지 구체적으로 적어주세요</li>
+                        <li>• <span className="font-medium">발생 빈도</span> — 얼마나 자주, 어떤 상황에서 나타나는지 적어주세요</li>
+                        <li>• <span className="font-medium">가장 고민인 것</span> — 현재 가장 힘들거나 걱정되는 부분을 적어주세요</li>
+                        <li>• <span className="font-medium">상담을 통해 원하는 것</span> — 상담 후 어떤 변화를 기대하시는지 적어주세요</li>
+                        <li>• <span className="font-medium">아동 특성</span> — 나이, 성별, 평소 성격, 발달 사항 등을 적어주세요</li>
+                      </ul>
+                      <p className="text-sm text-yellow-700 mt-2 font-medium">최대한 자세하게 적어주실수록 더 도움이 됩니다!</p>
+                    </div>
                   </div>
 
                   <div className="flex space-x-4">
