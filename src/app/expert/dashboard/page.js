@@ -13,6 +13,7 @@ import { ReviewAPI } from '@/lib/api/review';
 import { AuthAPI } from '@/lib/api/auth';
 import { useAuth } from '@/contexts/AuthContext';
 import { OnboardingModal } from '@/components/expert/OnboardingModal';
+import { Joyride, STATUS } from 'react-joyride';
 
 export default function ExpertDashboard() {
   const { user } = useAuth();
@@ -21,6 +22,28 @@ export default function ExpertDashboard() {
   const [recentReviews, setRecentReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const [runTour, setRunTour] = useState(false);
+
+  const tourSteps = [
+    {
+      target: '#tour-schedule',
+      title: '상담 일정 관리',
+      content: '앞으로 2주간 상담사님의 상담 가능 일정을 설정할 수 있어요.',
+      disableBeacon: true,
+    },
+    {
+      target: '#tour-today',
+      title: '오늘의 상담 일정',
+      content: '확정되어 오늘 진행 예정인 상담을 확인할 수 있어요.',
+      disableBeacon: true,
+    },
+    {
+      target: '#tour-chat',
+      title: '채팅',
+      content: '상담 예약이 진행된 이후 채팅방이 개설되며, 학부모님과 상담과 관련된 소통을 해나가실 수 있어요.',
+      disableBeacon: true,
+    },
+  ];
 
   useEffect(() => {
     loadTodayConsultations();
@@ -30,6 +53,37 @@ export default function ExpertDashboard() {
   useEffect(() => {
     checkOnboardingStatus();
   }, [user]);
+
+  useEffect(() => {
+    const showTour = localStorage.getItem('expert_show_tour');
+    if (showTour === 'true') {
+      localStorage.removeItem('expert_show_tour');
+      setTimeout(() => setRunTour(true), 500);
+    }
+  }, []);
+
+
+  console.log('[DEBUG] runTour:', runTour);
+
+  const stopTour = () => {
+    console.log('[DEBUG] stopTour called');
+    setRunTour(false);
+  };
+
+  const handleTourCallback = ({ status, action, type }) => {
+    console.log('tour callback:', status, action, type);
+    if (
+      status === STATUS.FINISHED ||
+      status === STATUS.SKIPPED ||
+      action === 'close' ||
+      action === 'stop' ||
+      action === 'reset' ||
+      type === 'error' ||
+      type === 'target:not_found'
+    ) {
+      stopTour();
+    }
+  };
 
   const checkOnboardingStatus = async () => {
     if (!user) return;
@@ -172,14 +226,41 @@ export default function ExpertDashboard() {
   };
 
   return (
-    <AuthGuard requiredRole="expert">
-      <DashboardLayout>
-        {/* 온보딩 모달 */}
-        {showOnboardingModal && (
-          <OnboardingModal onClose={() => setShowOnboardingModal(false)} />
-        )}
+    <>
+      <Joyride
+        steps={tourSteps}
+        run={runTour}
+        callback={handleTourCallback}
+        continuous
+        showProgress
+        showSkipButton
+        locale={{
+          back: '이전',
+          close: '닫기',
+          last: '완료',
+          next: '다음',
+          skip: '건너뛰기',
+        }}
+        disableOverlayClose
+        styles={{
+          options: {
+            primaryColor: '#16a34a',
+            zIndex: 10000,
+            overlayColor: 'rgba(0, 0, 0, 0.5)',
+          },
+          beacon: {
+            zIndex: 10001,
+          },
+        }}
+      />
+      <AuthGuard requiredRole="expert">
+        <DashboardLayout tourActive={runTour}>
+          {/* 온보딩 모달 */}
+          {showOnboardingModal && (
+            <OnboardingModal onClose={() => setShowOnboardingModal(false)} />
+          )}
 
-        <div className="space-y-6">
+        <div className="space-y-6" style={{ pointerEvents: runTour ? 'none' : 'auto' }}>
           {/* 환영 메시지 */}
           <div className="bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-lg p-6">
             <h1 className="text-2xl font-bold mb-2">안녕하세요, 전문가님!</h1>
@@ -279,8 +360,8 @@ export default function ExpertDashboard() {
               </Link>
             </Card>
             
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-              <Link href="/expert/consultations">
+            <Card id="tour-schedule" className="hover:shadow-lg transition-shadow cursor-pointer">
+              <Link href="/expert/consultations/availability">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <IoVideocam className="mr-2 h-5 w-5" />
@@ -345,7 +426,7 @@ export default function ExpertDashboard() {
               </CardContent>
             </Card>
             
-            <Card>
+            <Card id="tour-today">
               <CardHeader>
                 <CardTitle>오늘의 상담 일정</CardTitle>
                 <CardDescription>오늘 예정된 상담 세션입니다</CardDescription>
@@ -403,7 +484,8 @@ export default function ExpertDashboard() {
             </Card>
           </div>
         </div>
-      </DashboardLayout>
-    </AuthGuard>
+        </DashboardLayout>
+      </AuthGuard>
+    </>
   );
 }

@@ -8,7 +8,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ReviewAPI } from '@/lib/api/review';
-import { ArrowLeft, Star, Loader2 } from 'lucide-react';
+import { ArrowLeft, Star, Loader2, PenLine } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
@@ -65,6 +65,10 @@ export default function ExpertReviewsPage({ params }) {
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-gray-900">전문가 리뷰</h1>
             </div>
+            <Button onClick={() => router.push(`/client/experts/${expertId}/reviews/new`)}>
+              <PenLine className="mr-2 h-4 w-4" />
+              리뷰 작성하기
+            </Button>
           </div>
 
           {/* 리뷰 목록 */}

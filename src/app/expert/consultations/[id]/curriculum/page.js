@@ -292,8 +292,6 @@ export default function CurriculumPage() {
       router.push('/expert/consultations');
     } catch (error) {
       console.error('커리큘럼 저장 실패:', error);
-      console.error('에러 응답:', error.response);
-      console.error('에러 데이터:', error.response?.data);
 
       const errorMessage = error.response?.data?.detail ||
                           error.response?.data?.message ||
@@ -550,10 +548,9 @@ export default function CurriculumPage() {
                           <Input
                             id={`session-duration-${index}`}
                             type="number"
-                            value={session.duration_minutes}
-                            onChange={(e) => handleSessionInfoChange(index, 'duration_minutes', parseInt(e.target.value) || 50)}
-                            min={30}
-                            max={120}
+                            value={50}
+                            disabled
+                            className="bg-gray-50"
                           />
                         </div>
                       </div>

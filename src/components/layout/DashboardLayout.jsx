@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { ChatAPI } from '@/lib/api/chat';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -29,10 +30,39 @@ import {
 import { toast } from 'react-hot-toast';
 import Image from 'next/image';
 
-export function DashboardLayout({ children }) {
+export function DashboardLayout({ children, tourActive = false }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [totalUnread, setTotalUnread] = useState(0);
   const { user, logout, isExpert, isClient } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+
+  const fetchUnread = async () => {
+    try {
+      const data = await ChatAPI.getChatRooms();
+      const rooms = Array.isArray(data) ? data : data.results || [];
+      const total = rooms.reduce((sum, room) => sum + (room.unread_count || 0), 0);
+      setTotalUnread(total);
+    } catch {
+      // 실패 시 무시
+    }
+  };
+
+  // 30초마다 폴링
+  useEffect(() => {
+    if (user) {
+      fetchUnread();
+      const interval = setInterval(fetchUnread, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  // 채팅방 진입 시 즉시 재조회
+  useEffect(() => {
+    if (user && pathname) {
+      fetchUnread();
+    }
+  }, [pathname]);
   
   const handleLogout = async () => {
     try {
@@ -80,7 +110,7 @@ export function DashboardLayout({ children }) {
   return (
     <div className="h-screen flex bg-gray-100">
       {/* 사이드바 */}
-      <div className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
+      <div style={{ pointerEvents: tourActive ? 'none' : 'auto' }} className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
         <div className="flex items-center gap-2 h-16 px-6 border-b">
           <Image
             src="/shellmate_logo.png"
@@ -104,11 +134,17 @@ export function DashboardLayout({ children }) {
               <li key={item.name}>
                 <Link
                   href={item.href}
+                  id={item.name === '채팅' ? 'tour-chat' : undefined}
                   className="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 hover:text-primary transition-colors"
                   onClick={() => setSidebarOpen(false)}
                 >
                   <item.icon className="mr-3 h-5 w-5" />
-                  {item.name}
+                  <span className="flex-1">{item.name}</span>
+                  {item.name === '채팅' && totalUnread > 0 && (
+                    <span className="ml-2 min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                      {totalUnread > 99 ? '99+' : totalUnread}
+                    </span>
+                  )}
                 </Link>
               </li>
             ))}

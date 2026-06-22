@@ -28,89 +28,13 @@ export default function ExpertQnAPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all'); // all, unanswered, answered
+  // const [statusFilter, setStatusFilter] = useState('all'); // all, unanswered, answered
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  
-  // 임시 데이터 (주석 처리)
-  // const mockQuestions = [
-  //   {
-  //     id: 1,
-  //     title: '6세 아이가 집중을 잘 못해요',
-  //     content: '우리 아이가 한 가지 일에 집중하는 시간이 너무 짧습니다. 어떻게 도와줄 수 있을까요?',
-  //     category: 'attention',
-  //     author: {
-  //       name: '김○○',
-  //       type: 'client'
-  //     },
-  //     created_at: '2024-01-15T10:30:00Z',
-  //     answers_count: 2,
-  //     likes_count: 5,
-  //     is_resolved: false,
-  //     has_accepted_answer: false,
-  //     has_expert_answer: true,
-  //     urgency: 'medium',
-  //     tags: ['집중력', '주의력', '6세']
-  //   },
-  //   {
-  //     id: 2,
-  //     title: '언어 발달이 또래보다 늦는 것 같아요',
-  //     content: '5세인데 아직 문장을 완전히 만들어서 말하지 못합니다. 언어치료를 받아야 할까요?',
-  //     category: 'language',
-  //     author: {
-  //       name: '이○○',
-  //       type: 'client'
-  //     },
-  //     created_at: '2024-01-14T15:20:00Z',
-  //     answers_count: 0,
-  //     likes_count: 8,
-  //     is_resolved: false,
-  //     has_accepted_answer: false,
-  //     has_expert_answer: false,
-  //     urgency: 'high',
-  //     tags: ['언어발달', '언어치료', '5세']
-  //   },
-  //   {
-  //     id: 3,
-  //     title: '친구들과 어울리지 못하는 아이',
-  //     content: '어린이집에서 혼자 노는 경우가 많다고 합니다. 사회성 발달을 위해 어떤 도움을 줄 수 있을까요?',
-  //     category: 'social',
-  //     author: {
-  //       name: '박○○',
-  //       type: 'client'
-  //     },
-  //     created_at: '2024-01-13T09:15:00Z',
-  //     answers_count: 1,
-  //     likes_count: 3,
-  //     is_resolved: false,
-  //     has_accepted_answer: false,
-  //     has_expert_answer: false,
-  //     urgency: 'medium',
-  //     tags: ['사회성', '친구관계', '어린이집']
-  //   },
-  //   {
-  //     id: 4,
-  //     title: '감정 조절이 어려운 7세 아이',
-  //     content: '작은 일에도 크게 화를 내고 진정하는데 시간이 오래 걸립니다.',
-  //     category: 'emotion',
-  //     author: {
-  //       name: '최○○',
-  //       type: 'client'
-  //     },
-  //     created_at: '2024-01-12T16:45:00Z',
-  //     answers_count: 0,
-  //     likes_count: 12,
-  //     is_resolved: false,
-  //     has_accepted_answer: false,
-  //     has_expert_answer: false,
-  //     urgency: 'high',
-  //     tags: ['감정조절', '화', '7세']
-  //   }
-  // ];
 
   useEffect(() => {
     loadQuestions();
-  }, [selectedCategory, statusFilter]);
+  }, [selectedCategory/*, statusFilter*/]);
 
   // 검색어 입력 시 디바운스 적용
   useEffect(() => {
@@ -166,12 +90,10 @@ export default function ExpertQnAPage() {
 
   const getCategoryName = (category) => {
     const categories = {
-      attention: '집중력',
-      language: '언어발달',
-      social: '사회성',
-      behavior: '행동',
-      learning: '학습',
-      emotion: '정서발달',
+      learning_disability: '학습·발달',
+      career_independence: '진로·자립',
+      parenting_emotional: '기본생활·양육',
+      social_skills: '정서행동·사회성',
       all: '전체'
     };
     return categories[category] || category;
@@ -186,29 +108,29 @@ export default function ExpertQnAPage() {
     }
   };
 
-  const getUrgencyText = (urgency) => {
-    switch (urgency) {
-      case 'high': return '긴급';
-      case 'medium': return '보통';
-      case 'low': return '낮음';
-      default: return '보통';
-    }
-  };
+  // const getUrgencyText = (urgency) => {
+  //   switch (urgency) {
+  //     case 'high': return '긴급';
+  //     case 'medium': return '보통';
+  //     case 'low': return '낮음';
+  //     default: return '보통';
+  //   }
+  // };
 
   const filteredQuestions = questions.filter(question => {
-    const matchesSearch = question.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         question.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = question.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         question.content?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || question.category === selectedCategory;
-    const matchesStatus = statusFilter === 'all' || 
-                         (statusFilter === 'unanswered' && !question.has_expert_answer) ||
-                         (statusFilter === 'answered' && question.has_expert_answer);
-    return matchesSearch && matchesCategory && matchesStatus;
+    // const matchesStatus = statusFilter === 'all' ||
+    //                      (statusFilter === 'unanswered' && !question.has_expert_answer) ||
+    //                      (statusFilter === 'answered' && question.has_expert_answer);
+    return matchesSearch && matchesCategory/* && matchesStatus*/;
   });
 
-  // 우선순위별로 정렬 (답변이 없는 긴급한 질문 우선)
+  // 우선순위별로 정렬 (긴급한 질문 우선)
   const sortedQuestions = filteredQuestions.sort((a, b) => {
-    if (!a.has_expert_answer && b.has_expert_answer) return -1;
-    if (a.has_expert_answer && !b.has_expert_answer) return 1;
+    // if (!a.has_expert_answer && b.has_expert_answer) return -1;
+    // if (a.has_expert_answer && !b.has_expert_answer) return 1;
 
     const urgencyOrder = { high: 3, medium: 2, low: 1 };
     return urgencyOrder[b.urgency] - urgencyOrder[a.urgency];
@@ -229,7 +151,7 @@ export default function ExpertQnAPage() {
   // 필터 변경 시 첫 페이지로
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedCategory, statusFilter]);
+  }, [searchTerm, selectedCategory/*, statusFilter*/]);
 
   if (loading) {
     return (
@@ -255,7 +177,7 @@ export default function ExpertQnAPage() {
             </div>
           </div>
 
-          {/* 통계 카드 */}
+          {/* 통계 카드
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
               <CardContent className="p-4">
@@ -310,7 +232,7 @@ export default function ExpertQnAPage() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </div> */}
 
           {/* 검색 및 필터 */}
           <Card>
@@ -329,7 +251,7 @@ export default function ExpertQnAPage() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <select
+                  {/* <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
                     className="px-3 py-2 border rounded-md"
@@ -337,19 +259,17 @@ export default function ExpertQnAPage() {
                     <option value="all">전체 상태</option>
                     <option value="unanswered">답변 대기</option>
                     <option value="answered">답변 완료</option>
-                  </select>
+                  </select> */}
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
                     className="px-3 py-2 border rounded-md"
                   >
                     <option value="all">전체 카테고리</option>
-                    <option value="attention">집중력</option>
-                    <option value="language">언어발달</option>
-                    <option value="social">사회성</option>
-                    <option value="behavior">행동</option>
-                    <option value="learning">학습</option>
-                    <option value="emotion">정서발달</option>
+                    <option value="learning_disability">학습·발달</option>
+                    <option value="career_independence">진로·자립</option>
+                    <option value="parenting_emotional">기본생활·양육</option>
+                    <option value="social_skills">정서행동·사회성</option>
                   </select>
                 </div>
               </div>
@@ -372,18 +292,18 @@ export default function ExpertQnAPage() {
               </Card>
             ) : (
               currentQuestions.map((question) => (
-                <Card key={question.id} className={`hover:shadow-md transition-shadow ${!question.has_expert_answer ? 'border-orange-200 bg-orange-50/30' : ''}`}>
+                <Card key={question.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="secondary">
+                          {/* <Badge variant="secondary">
                             {getCategoryName(question.category)}
                           </Badge>
                           <Badge className={getUrgencyColor(question.urgency)}>
                             {getUrgencyText(question.urgency)}
-                          </Badge>
-                          {!question.has_expert_answer && (
+                          </Badge> */}
+                          {/* {!question.has_expert_answer && (
                             <Badge className="bg-orange-100 text-orange-800">
                               답변 대기
                             </Badge>
@@ -392,7 +312,7 @@ export default function ExpertQnAPage() {
                             <Badge className="bg-green-100 text-green-800">
                               답변 완료
                             </Badge>
-                          )}
+                          )} */}
                         </div>
                         
                         <Link href={`/expert/qna/${question.id}`}>
@@ -432,8 +352,8 @@ export default function ExpertQnAPage() {
                           </div>
                           
                           <Link href={`/expert/qna/${question.id}`}>
-                            <Button size="sm" variant={question.has_expert_answer ? "outline" : "default"}>
-                              {question.has_expert_answer ? '답변 보기' : '답변하기'}
+                            <Button size="sm" variant="default">
+                              답변하기
                             </Button>
                           </Link>
                         </div>

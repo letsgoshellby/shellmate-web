@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -74,6 +74,13 @@ export default function ExpertCounselLogPage({ params }) {
     }
   };
 
+  // 기존 일지 ID를 서버에서 직접 조회해서 반환
+  const fetchExistingLogId = async () => {
+    const logs = await CounselingLogAPI.getCounselingLogs({ session_id: sessionId });
+    const list = Array.isArray(logs) ? logs : (logs?.results || []);
+    return list[0]?.id || null;
+  };
+
   const handleSaveDraft = async () => {
     if (!sessionGoal.trim() && !sessionContent.trim() && !counselorOpinion.trim()) {
       toast.error('최소 한 항목 이상 입력해주세요');
@@ -90,32 +97,35 @@ export default function ExpertCounselLogPage({ params }) {
       };
 
       if (existingLogId) {
-        // 기존 일지 수정
         await CounselingLogAPI.updateLog(existingLogId, data);
       } else {
-        // 새 일지 임시저장
         data.session_id = sessionId;
-        const newLog = await CounselingLogAPI.createLog(data);
-        setExistingLogId(newLog.id);
+        try {
+          const newLog = await CounselingLogAPI.createLog(data);
+          setExistingLogId(newLog.id);
+        } catch (createError) {
+          const errorData = createError.response?.data;
+          const hasSessionError = errorData?.session_id ||
+                                  (typeof errorData === 'object' && 'session_id' in errorData);
+          if (hasSessionError) {
+            // 이미 일지가 존재하면 해당 일지로 바로 업데이트
+            const foundId = await fetchExistingLogId();
+            if (foundId) {
+              setExistingLogId(foundId);
+              await CounselingLogAPI.updateLog(foundId, data);
+            } else {
+              throw createError;
+            }
+          } else {
+            throw createError;
+          }
+        }
       }
 
       toast.success('임시저장되었습니다');
     } catch (error) {
       console.error('임시저장 실패:', error);
-      console.error('에러 응답:', error.response?.data);
-
-      // 이미 작성된 상담일지가 있는 경우
-      const errorData = error.response?.data;
-      const hasSessionError = errorData?.session_id ||
-                             (typeof errorData === 'object' && 'session_id' in errorData);
-
-      if (hasSessionError) {
-        toast.error('이미 상담 일지가 작성된 세션입니다');
-        // 페이지 새로고침하여 PUBLISHED 상태로 불러오기
-        await loadSessionAndLog();
-      } else {
-        toast.error('임시저장에 실패했습니다');
-      }
+      toast.error('임시저장에 실패했습니다');
     } finally {
       setSaving(false);
     }
@@ -132,51 +142,50 @@ export default function ExpertCounselLogPage({ params }) {
 
     setPublishing(true);
     try {
-      if (existingLogId) {
-        // 기존 DRAFT를 먼저 업데이트하고 발행
-        const updateData = {
-          session_goal: sessionGoal.trim(),
-          session_content: sessionContent.trim(),
-          counselor_opinion: counselorOpinion.trim(),
-        };
-        await CounselingLogAPI.updateLog(existingLogId, updateData);
-        await CounselingLogAPI.publishLog(existingLogId);
+      const updateData = {
+        session_goal: sessionGoal.trim(),
+        session_content: sessionContent.trim(),
+        counselor_opinion: counselorOpinion.trim(),
+      };
+
+      let logId = existingLogId;
+
+      if (logId) {
+        await CounselingLogAPI.updateLog(logId, updateData);
+        await CounselingLogAPI.publishLog(logId);
       } else {
-        // 새로 생성 (바로 PUBLISHED 상태로)
-        const data = {
-          session_id: sessionId,
-          session_goal: sessionGoal.trim(),
-          session_content: sessionContent.trim(),
-          counselor_opinion: counselorOpinion.trim(),
-          status: 'PUBLISHED',
-        };
-        await CounselingLogAPI.createLog(data);
+        try {
+          await CounselingLogAPI.createLog({
+            session_id: sessionId,
+            ...updateData,
+            status: 'PUBLISHED',
+          });
+        } catch (createError) {
+          const errorData = createError.response?.data;
+          const hasSessionError = errorData?.session_id ||
+                                  (typeof errorData === 'object' && 'session_id' in errorData);
+          if (hasSessionError) {
+            // 이미 일지가 존재하면 해당 일지 업데이트 후 발행
+            logId = await fetchExistingLogId();
+            if (logId) {
+              setExistingLogId(logId);
+              await CounselingLogAPI.updateLog(logId, updateData);
+              await CounselingLogAPI.publishLog(logId);
+            } else {
+              throw createError;
+            }
+          } else {
+            throw createError;
+          }
+        }
       }
 
       toast.success('상담 일지가 저장되었습니다');
-
-      // 상담 목록 페이지로 이동
       router.push('/expert/consultations');
     } catch (error) {
       console.error('발행 실패:', error);
-      console.error('에러 응답:', error.response?.data);
-
-      // 이미 작성된 상담일지가 있는 경우
-      const errorData = error.response?.data;
-      const hasSessionError = errorData?.session_id ||
-                             (typeof errorData === 'object' && 'session_id' in errorData);
-
-      if (hasSessionError) {
-        toast.error('이미 상담 일지가 작성된 세션입니다');
-        // 페이지 새로고침하여 PUBLISHED 상태로 불러오기
-        await loadSessionAndLog();
-      } else if (error.response?.status === 400) {
-        // 기타 400 에러
-        const errorMsg = error.response?.data?.detail || '입력 데이터를 확인해주세요';
-        toast.error(errorMsg);
-      } else {
-        toast.error('저장 중 오류가 발생했습니다');
-      }
+      const errorMsg = error.response?.data?.detail || '저장 중 오류가 발생했습니다';
+      toast.error(errorMsg);
     } finally {
       setPublishing(false);
     }

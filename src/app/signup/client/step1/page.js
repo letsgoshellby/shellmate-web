@@ -55,7 +55,7 @@ const LEARNING_PROBLEM_OPTIONS = [
   { value: 'writing', label: '쓰기' },
   { value: 'math', label: '수학' },
   { value: 'speaking', label: '말하기' },
-  { value: 'attention', label: '집중력' },
+  { value: 'concentration', label: '집중력' },
   { value: 'comprehension', label: '이해력' },
   { value: 'memory', label: '기억력' },
   { value: 'other', label: '기타' },
@@ -64,8 +64,8 @@ const LEARNING_PROBLEM_OPTIONS = [
 const WORRIES_OPTIONS = [
   { value: 'none', label: '없음' },
   { value: 'sociality', label: '사회성' },
-  { value: 'school_adaptation', label: '학교적응' },
-  { value: 'interpersonal', label: '대인관계' },
+  { value: 'school_adjustment', label: '학교적응' },
+  { value: 'interpersonal_relationships', label: '대인관계' },
   { value: 'other', label: '기타' },
 ];
 

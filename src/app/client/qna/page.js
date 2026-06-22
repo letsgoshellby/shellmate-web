@@ -55,57 +55,6 @@ export default function ClientQnAPage() {
     }
   };
   
-  // 임시 데이터 (실제로는 API에서 가져올 데이터)
-  // const mockQuestions = [
-  //   {
-  //     id: 1,
-  //     title: '6세 아이가 집중을 잘 못해요',
-  //     content: '우리 아이가 한 가지 일에 집중하는 시간이 너무 짧습니다. 어떻게 도와줄 수 있을까요?',
-  //     category: 'attention',
-  //     author: {
-  //       name: '김○○',
-  //       type: 'client'
-  //     },
-  //     created_at: '2024-01-15T10:30:00Z',
-  //     answers_count: 3,
-  //     likes_count: 5,
-  //     is_resolved: false,
-  //     has_accepted_answer: false,
-  //     tags: ['집중력', '주의력', '6세']
-  //   },
-  //   {
-  //     id: 2,
-  //     title: '언어 발달이 또래보다 늦는 것 같아요',
-  //     content: '5세인데 아직 문장을 완전히 만들어서 말하지 못합니다. 언어치료를 받아야 할까요?',
-  //     category: 'language',
-  //     author: {
-  //       name: '이○○',
-  //       type: 'client'
-  //     },
-  //     created_at: '2024-01-14T15:20:00Z',
-  //     answers_count: 2,
-  //     likes_count: 8,
-  //     is_resolved: true,
-  //     has_accepted_answer: true,
-  //     tags: ['언어발달', '언어치료', '5세']
-  //   },
-  //   {
-  //     id: 3,
-  //     title: '친구들과 어울리지 못하는 아이',
-  //     content: '어린이집에서 혼자 노는 경우가 많다고 합니다. 사회성 발달을 위해 어떤 도움을 줄 수 있을까요?',
-  //     category: 'social',
-  //     author: {
-  //       name: '박○○',
-  //       type: 'client'
-  //     },
-  //     created_at: '2024-01-13T09:15:00Z',
-  //     answers_count: 1,
-  //     likes_count: 3,
-  //     is_resolved: false,
-  //     has_accepted_answer: false,
-  //     tags: ['사회성', '친구관계', '어린이집']
-  //   }
-  // ];
 
   useEffect(() => {
     loadQuestions();
@@ -172,11 +121,10 @@ export default function ClientQnAPage() {
 
   const getCategoryName = (category) => {
     const categories = {
-      attention: '집중력',
-      language: '언어발달',
-      social: '사회성',
-      behavior: '행동',
-      learning: '학습',
+      learning_disability: '학습·발달',
+      career_independence: '진로·자립',
+      parenting_emotional: '기본생활·양육',
+      social_skills: '정서행동·사회성',
       all: '전체'
     };
     return categories[category] || category;
@@ -261,11 +209,10 @@ export default function ClientQnAPage() {
                     className="px-3 py-2 border rounded-md"
                   >
                     <option value="all">전체 카테고리</option>
-                    <option value="attention">집중력</option>
-                    <option value="language">언어발달</option>
-                    <option value="social">사회성</option>
-                    <option value="behavior">행동</option>
-                    <option value="learning">학습</option>
+                    <option value="learning_disability">학습·발달</option>
+                    <option value="career_independence">진로·자립</option>
+                    <option value="parenting_emotional">기본생활·양육</option>
+                    <option value="social_skills">정서행동·사회성</option>
                   </select>
                   <select
                     value={sortBy}

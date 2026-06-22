@@ -159,9 +159,14 @@ export const loginWithKakao = async (role, onSuccess, onFailure) => {
     // Kakao SDK로 리다이렉트 방식 로그인 (인증 코드 받기)
     const redirectUri = getKakaoRedirectUri(role);
 
+    // CSRF 방어용 랜덤 state 생성, role은 sessionStorage에 별도 저장
+    const oauthState = crypto.randomUUID();
+    sessionStorage.setItem('kakao_oauth_state', oauthState);
+    sessionStorage.setItem('kakao_oauth_role', role);
+
     window.Kakao.Auth.authorize({
       redirectUri: redirectUri,
-      state: role, // 역할 정보를 state로 전달
+      state: oauthState,
     });
   } catch (err) {
     // console.error('Kakao login failed:', err);

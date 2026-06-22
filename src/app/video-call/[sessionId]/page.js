@@ -40,6 +40,7 @@ export default function VideoCallPage({ params }) {
   const [participantName, setParticipantName] = useState('상대방');
   const [sessionInfo, setSessionInfo] = useState('');
   const [showEndCallModal, setShowEndCallModal] = useState(false);
+  const [showLogPromptModal, setShowLogPromptModal] = useState(false);
   const [showTimeWarning, setShowTimeWarning] = useState(false);
   const [userType, setUserType] = useState(null);
   const [scheduledStartTime, setScheduledStartTime] = useState(null);
@@ -166,11 +167,23 @@ export default function VideoCallPage({ params }) {
         }
       });
 
-      agoraServiceRef.current.setOnRemoteUserLeft((user, mediaType) => {
+      agoraServiceRef.current.setOnRemoteUserLeft(async (_user, mediaType) => {
         if (mediaType === 'left') {
           setRemoteUid(null);
           setIsRemoteVideoOn(false);
           setIsRemoteScreenSharing(false);
+
+          // 상대방이 나갔을 때 세션 완료 상태면 자동 이동
+          try {
+            const latestSession = await AgoraAPI.getSession(sessionId);
+            if (latestSession.status === 'COMPLETED') {
+              toast('상담이 종료되었습니다. 상담 목록으로 이동합니다.', { icon: '📋' });
+              const destination = isExpert ? '/expert/consultations' : '/client/consultations';
+              setTimeout(() => releaseMediaAndNavigate(destination), 2000);
+            }
+          } catch (e) {
+            console.error('세션 상태 확인 실패:', e);
+          }
         } else if (mediaType === 'video') {
           // 화면공유 중지 또는 카메라 끔 — 잠시 비디오 숨김 (user-published 오면 다시 표시됨)
           setIsRemoteVideoOn(false);
@@ -229,20 +242,18 @@ export default function VideoCallPage({ params }) {
   };
 
   const startDurationTimer = () => {
-    if (scheduledStartTime) {
-      const getElapsed = () => {
-        const diff = Math.floor((Date.now() - scheduledStartTime.getTime()) / 1000);
-        return diff < 0 ? 0 : diff;
-      };
-      setCallDuration(getElapsed());
-      durationIntervalRef.current = setInterval(() => {
-        setCallDuration(getElapsed());
-      }, 1000);
-    } else {
-      durationIntervalRef.current = setInterval(() => {
-        setCallDuration(prev => prev + 1);
-      }, 1000);
+    if (!scheduledStartTime) {
+      console.warn('⚠️ 예약 시간 정보가 없어 타이머를 시작할 수 없습니다.');
+      return;
     }
+    const getElapsed = () => {
+      const diff = Math.floor((Date.now() - scheduledStartTime.getTime()) / 1000);
+      return diff < 0 ? 0 : diff;
+    };
+    setCallDuration(getElapsed());
+    durationIntervalRef.current = setInterval(() => {
+      setCallDuration(getElapsed());
+    }, 1000);
   };
 
   const formatDuration = (seconds) => {
@@ -345,7 +356,6 @@ export default function VideoCallPage({ params }) {
   const completeSessionAndLeave = async () => {
     if (isEndingCall) return;
     setIsEndingCall(true);
-    const destination = userType === 'client' ? '/client/consultations' : '/expert/consultations';
     try {
       if (sessionNumber === 1) await AgoraAPI.completeInitialSession(sessionId);
       else await AgoraAPI.completeSession(sessionId);
@@ -353,7 +363,19 @@ export default function VideoCallPage({ params }) {
     } catch (e) {
       console.error('상담 종료 API 실패:', e);
     }
-    await releaseMediaAndNavigate(destination);
+
+    // 미디어 해제 후 전문가는 일지 작성 팝업, 내담자는 바로 이동
+    if (agoraServiceRef.current) {
+      await agoraServiceRef.current.leaveChannel();
+      agoraServiceRef.current = null;
+    }
+
+    if (isExpert) {
+      setShowEndCallModal(false);
+      setShowLogPromptModal(true);
+    } else {
+      router.push('/client/consultations');
+    }
   };
 
   return (
@@ -466,8 +488,34 @@ export default function VideoCallPage({ params }) {
             <h3 className="text-xl font-semibold text-center mb-6">상담방을 나가시겠습니까?</h3>
             <div className="space-y-3">
               <Button onClick={leaveOnly} variant="outline" className="w-full py-6" disabled={isEndingCall}>나만 나가기</Button>
-              <Button onClick={completeSessionAndLeave} className="w-full py-6 bg-red-600 text-white" disabled={isEndingCall}>상담 종료</Button>
+              {isExpert && (
+                <Button onClick={completeSessionAndLeave} className="w-full py-6 bg-red-600 text-white" disabled={isEndingCall}>상담 종료</Button>
+              )}
               <Button onClick={() => setShowEndCallModal(false)} variant="ghost" className="w-full py-6" disabled={isEndingCall}>취소</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLogPromptModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm p-6 space-y-4">
+            <h3 className="text-lg font-semibold text-center">상담이 끝났습니다</h3>
+            <p className="text-gray-600 text-center text-sm">상담일지를 작성하시겠습니까?</p>
+            <div className="space-y-2">
+              <Button
+                className="w-full"
+                onClick={() => router.push(`/expert/consultations/${sessionId}/log`)}
+              >
+                작성하기
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full"
+                onClick={() => router.push('/expert/consultations')}
+              >
+                나중에 하기
+              </Button>
             </div>
           </div>
         </div>

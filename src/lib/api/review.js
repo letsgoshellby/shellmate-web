@@ -36,11 +36,27 @@ export class ReviewAPI {
   /**
    * 상담 리뷰 상세 조회
    * GET /consultation/reviews/{review_id}/
-   * @param {number} reviewId - 리뷰 ID
-   * @returns {Object} 리뷰 상세
    */
   static async getReview(reviewId) {
     const response = await apiClient.get(`/consultation/reviews/${reviewId}/`);
+    return response.data;
+  }
+
+  /**
+   * 상담 리뷰 수정
+   * PATCH /consultation/reviews/{review_id}/update/
+   */
+  static async updateReview(reviewId, data) {
+    const response = await apiClient.patch(`/consultation/reviews/${reviewId}/update/`, data);
+    return response.data;
+  }
+
+  /**
+   * 상담 리뷰 삭제 (Soft Delete)
+   * DELETE /consultation/reviews/{review_id}/delete/
+   */
+  static async deleteReview(reviewId) {
+    const response = await apiClient.delete(`/consultation/reviews/${reviewId}/delete/`);
     return response.data;
   }
 }
