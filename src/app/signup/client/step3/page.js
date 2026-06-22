@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { SignupProgress } from '@/components/auth/SignupProgress';
 import { toast } from 'react-hot-toast';
-import { IoArrowBack, IoCheckmarkCircle } from 'react-icons/io5';
+import { IoCheckmarkCircle } from 'react-icons/io5';
 import { Loader2 } from 'lucide-react';
 import { TokenStorage } from '@/lib/auth/tokenStorage';
 
@@ -165,15 +165,7 @@ export default function ClientSignupStep3Page() {
                 </p>
               </div>
 
-              <div className="flex justify-between pt-6">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.push('/signup/client/step2')}
-                >
-                  <IoArrowBack className="mr-2 h-4 w-4" />
-                  이전 단계
-                </Button>
+              <div className="flex justify-end pt-6">
                 <div className="space-x-2">
                   <Button
                     type="button"
