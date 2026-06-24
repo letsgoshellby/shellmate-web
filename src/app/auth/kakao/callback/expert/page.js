@@ -36,6 +36,16 @@ export default function KakaoExpertCallbackPage() {
         throw new Error('인증 코드가 없습니다');
       }
 
+      // CSRF state 검증
+      const returnedState = params.get('state');
+      const savedState = sessionStorage.getItem('kakao_oauth_state');
+      sessionStorage.removeItem('kakao_oauth_state');
+      if (!savedState || returnedState !== savedState) {
+        toast.error('로그인을 다시 시도해주세요');
+        router.push('/login');
+        return;
+      }
+
       // 인증 코드를 액세스 토큰으로 교환
       const accessToken = await exchangeCodeForToken(code, 'expert');
       // 백엔드로 액세스 토큰 전달

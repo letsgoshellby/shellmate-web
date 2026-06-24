@@ -102,8 +102,6 @@ export default function VideoCallPage({ params }) {
   }, [callDuration]);
 
   const initializeCall = async () => {
-    console.log('🎬 [VideoCallPage] 초기화 시작 - ID:', sessionId);
-
     try {
       if (agoraServiceRef.current) {
         await agoraServiceRef.current.leaveChannel();
@@ -112,14 +110,11 @@ export default function VideoCallPage({ params }) {
 
       // 1. 세션 기본 정보 조회
       const sessionData = await AgoraAPI.getSession(sessionId);
-      console.log('📋 전체 세션 데이터:', sessionData);
-      console.log('✅ 세션 상태:', sessionData.status);
 
       const counselingRequest = sessionData.counseling_request || {};
 
       // 2. 역할 판별 로직 - AuthContext 사용
       const currentUserType = isExpert ? 'expert' : 'client';
-      console.log('👤 사용자 타입 (AuthContext):', currentUserType);
       setUserType(currentUserType);
 
       // 이름 설정
@@ -135,7 +130,6 @@ export default function VideoCallPage({ params }) {
       // 3. 전문가이고 '예정' 상태라면 상담 활성화(Start API) 호출
       if (currentUserType === 'expert' && sessionData.status === 'SCHEDULED') {
         try {
-          console.log('🚀 전문가: 상담 시작(Start) API 호출...');
           await AgoraAPI.startSession(sessionId);
         } catch (startErr) {
           console.warn('⚠️ 상담 시작 처리 건너뜀:', startErr.message);
