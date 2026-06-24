@@ -13,7 +13,6 @@ import { ReviewAPI } from '@/lib/api/review';
 import { AuthAPI } from '@/lib/api/auth';
 import { useAuth } from '@/contexts/AuthContext';
 import { OnboardingModal } from '@/components/expert/OnboardingModal';
-import { Joyride, STATUS } from 'react-joyride';
 
 export default function ExpertDashboard() {
   const { user } = useAuth();
@@ -22,27 +21,15 @@ export default function ExpertDashboard() {
   const [recentReviews, setRecentReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
-  const [runTour, setRunTour] = useState(false);
+  // tourPhase: null | 'welcome' | 'main' | 'farewell'
+  const [tourPhase, setTourPhase] = useState(null);
+  const [tourStepIndex, setTourStepIndex] = useState(0);
+  const [tooltipPos, setTooltipPos] = useState(null);
 
   const tourSteps = [
-    {
-      target: '#tour-schedule',
-      title: '상담 일정 관리',
-      content: '앞으로 2주간 상담사님의 상담 가능 일정을 설정할 수 있어요.',
-      disableBeacon: true,
-    },
-    {
-      target: '#tour-today',
-      title: '오늘의 상담 일정',
-      content: '확정되어 오늘 진행 예정인 상담을 확인할 수 있어요.',
-      disableBeacon: true,
-    },
-    {
-      target: '#tour-chat',
-      title: '채팅',
-      content: '상담 예약이 진행된 이후 채팅방이 개설되며, 학부모님과 상담과 관련된 소통을 해나가실 수 있어요.',
-      disableBeacon: true,
-    },
+    { target: 'tour-schedule', title: '상담 일정 관리', content: '앞으로 2주간 상담사님의 상담 가능 일정을 설정할 수 있어요.' },
+    { target: 'tour-today', title: '오늘의 상담 일정', content: '확정되어 오늘 진행 예정인 상담을 확인할 수 있어요.' },
+    { target: 'tour-chat', title: '채팅', content: '상담 예약이 진행된 이후 채팅방이 개설되며, 학부모님과 상담과 관련된 소통을 해나가실 수 있어요.' },
   ];
 
   useEffect(() => {
@@ -58,31 +45,33 @@ export default function ExpertDashboard() {
     const showTour = localStorage.getItem('expert_show_tour');
     if (showTour === 'true') {
       localStorage.removeItem('expert_show_tour');
-      setTimeout(() => setRunTour(true), 500);
+      setTimeout(() => setTourPhase('welcome'), 500);
     }
   }, []);
 
+  useEffect(() => {
+    if (tourPhase === 'main') {
+      const el = document.getElementById(tourSteps[tourStepIndex].target);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => setTooltipPos(el.getBoundingClientRect()), 400);
+      }
+    }
+  }, [tourPhase, tourStepIndex]);
 
-  console.log('[DEBUG] runTour:', runTour);
-
-  const stopTour = () => {
-    console.log('[DEBUG] stopTour called');
-    setRunTour(false);
+  const handleTourNext = () => {
+    if (tourStepIndex < tourSteps.length - 1) {
+      setTourStepIndex(tourStepIndex + 1);
+    } else {
+      setTourPhase('farewell');
+      setTourStepIndex(0);
+    }
   };
 
-  const handleTourCallback = ({ status, action, type }) => {
-    console.log('tour callback:', status, action, type);
-    if (
-      status === STATUS.FINISHED ||
-      status === STATUS.SKIPPED ||
-      action === 'close' ||
-      action === 'stop' ||
-      action === 'reset' ||
-      type === 'error' ||
-      type === 'target:not_found'
-    ) {
-      stopTour();
-    }
+  const handleTourSkip = () => {
+    setTourPhase(null);
+    setTourStepIndex(0);
+    setTooltipPos(null);
   };
 
   const checkOnboardingStatus = async () => {
@@ -227,40 +216,71 @@ export default function ExpertDashboard() {
 
   return (
     <>
-      <Joyride
-        steps={tourSteps}
-        run={runTour}
-        callback={handleTourCallback}
-        continuous
-        showProgress
-        showSkipButton
-        locale={{
-          back: '이전',
-          close: '닫기',
-          last: '완료',
-          next: '다음',
-          skip: '건너뛰기',
-        }}
-        disableOverlayClose
-        styles={{
-          options: {
-            primaryColor: '#16a34a',
-            zIndex: 10000,
-            overlayColor: 'rgba(0, 0, 0, 0.5)',
-          },
-          beacon: {
-            zIndex: 10001,
-          },
-        }}
-      />
+      {/* 환영 모달 */}
+      {tourPhase === 'welcome' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="relative bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl text-center">
+            <h3 className="text-xl font-bold mb-3">반갑습니다!</h3>
+            <p className="text-gray-600 mb-8 leading-relaxed">셸메이트에 오신 것을 환영합니다.<br />함께 셸메이트의 기능을 살펴볼까요?</p>
+            <div className="flex justify-between items-center">
+              <button onClick={() => setTourPhase(null)} className="text-sm text-gray-400 hover:text-gray-600">건너뛰기</button>
+              <button onClick={() => setTourPhase('main')} style={{ backgroundColor: '#194E2B' }} className="text-white px-5 py-2 rounded-lg text-sm font-medium">시작하기</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 커스텀 툴팁 */}
+      {tourPhase === 'main' && tooltipPos && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/50" />
+          <div
+            className="fixed rounded-lg pointer-events-none"
+            style={{ top: tooltipPos.top - 4, left: tooltipPos.left - 4, width: tooltipPos.width + 8, height: tooltipPos.height + 8, zIndex: 9999, outline: '4px solid #194E2B' }}
+          />
+          <div
+            className="fixed z-50 bg-white rounded-2xl p-5 shadow-2xl w-72"
+            style={
+              tooltipPos.left < window.innerWidth / 3
+                ? { top: tooltipPos.top, left: tooltipPos.right + 12 }
+                : { top: tooltipPos.bottom + 12, left: Math.max(8, Math.min(tooltipPos.left, window.innerWidth - 300)) }
+            }
+          >
+            <p className="text-xs text-gray-400 mb-1">{tourStepIndex + 1} / {tourSteps.length}</p>
+            <h3 className="font-bold mb-1">{tourSteps[tourStepIndex].title}</h3>
+            <p className="text-sm text-gray-600 mb-4">{tourSteps[tourStepIndex].content}</p>
+            <div className="flex justify-between items-center">
+              <button onClick={handleTourSkip} className="text-sm text-gray-400 hover:text-gray-600">건너뛰기</button>
+              <button onClick={handleTourNext} style={{ backgroundColor: '#194E2B' }} className="text-white px-4 py-1.5 rounded-lg text-sm font-medium">
+                {tourStepIndex === tourSteps.length - 1 ? '완료' : '다음'}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* 마무리 모달 */}
+      {tourPhase === 'farewell' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="relative bg-white rounded-2xl p-8 max-w-sm w-full mx-4 shadow-2xl text-center">
+            <h3 className="text-xl font-bold mb-3">튜토리얼 완료!</h3>
+            <p className="text-gray-600 mb-8 leading-relaxed">이상으로 튜토리얼을 마치겠습니다.</p>
+            <div className="flex justify-end">
+              <button onClick={() => setTourPhase(null)} style={{ backgroundColor: '#194E2B' }} className="text-white px-5 py-2 rounded-lg text-sm font-medium">완료</button>
+            </div>
+          </div>
+        </div>
+      )}
       <AuthGuard requiredRole="expert">
-        <DashboardLayout tourActive={runTour}>
+        <DashboardLayout>
           {/* 온보딩 모달 */}
           {showOnboardingModal && (
             <OnboardingModal onClose={() => setShowOnboardingModal(false)} />
           )}
 
-        <div className="space-y-6" style={{ pointerEvents: runTour ? 'none' : 'auto' }}>
+        <div className="space-y-6">
           {/* 환영 메시지 */}
           <div className="bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-lg p-6">
             <h1 className="text-2xl font-bold mb-2">안녕하세요, 전문가님!</h1>
