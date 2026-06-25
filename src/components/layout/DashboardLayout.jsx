@@ -111,18 +111,18 @@ export function DashboardLayout({ children, tourActive = false }) {
     <div className="h-screen flex bg-gray-100">
       {/* 사이드바 */}
       <div style={{ pointerEvents: tourActive ? 'none' : 'auto' }} className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
-        <div className="flex items-center gap-2 h-16 px-6 border-b">
+        <div className="flex items-center h-16 px-6 border-b">
           <Image
             src="/shellmate_logo.png"
             alt="셸메이트 로고"
             width={128}
             height={128}
-            className=' w-8'
+            className="w-8 shrink-0"
           />
-          <h1 className="text-xl font-bold text-primary">셸메이트</h1>
+          <h1 className="text-xl font-bold text-primary ml-2 flex-1">셸메이트</h1>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden"
+            className="lg:hidden p-1 rounded hover:bg-gray-100"
           >
             <IoClose className="h-6 w-6" />
           </button>
@@ -196,24 +196,28 @@ export function DashboardLayout({ children, tourActive = false }) {
       
       {/* 메인 컨텐츠 */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* 헤더 
-        <header className="bg-white shadow-sm border-b h-16 flex items-center justify-between px-6 lg:px-8">
+        {/* 모바일 상단 헤더 */}
+        <header className="lg:hidden bg-white border-b h-14 flex items-center px-4 shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden"
+            className="p-1 rounded hover:bg-gray-100"
+            aria-label="메뉴 열기"
           >
             <IoMenu className="h-6 w-6" />
           </button>
-          
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-500">
-              안녕하세요, {user?.name}님!
-            </span>
+          <div className="flex items-center gap-2 ml-3">
+            <Image
+              src="/shellmate_logo.png"
+              alt="셸메이트 로고"
+              width={128}
+              height={128}
+              className="w-7"
+            />
+            <span className="text-lg font-bold text-primary">셸메이트</span>
           </div>
         </header>
-        */}
         {/* 메인 컨텐츠 영역 */}
-        <main className="flex-1 overflow-auto p-6 lg:p-8">
+        <main className="flex-1 overflow-auto p-4 lg:p-8">
           {children}
         </main>
       </div>

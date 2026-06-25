@@ -154,14 +154,11 @@ export default function CurriculumPage() {
     try {
       // 채팅방 목록 조회
       const chatRooms = await ChatAPI.getChatRooms();
-      console.log('📋 채팅방 목록:', chatRooms);
 
       // 현재 상담과 연결된 채팅방 찾기
       const chatRoom = Array.isArray(chatRooms)
         ? chatRooms.find(room => room.counseling_request_id === parseInt(consultationId) || room.counseling_request === parseInt(consultationId))
         : chatRooms?.results?.find(room => room.counseling_request_id === parseInt(consultationId) || room.counseling_request === parseInt(consultationId));
-
-      console.log('💬 찾은 채팅방:', chatRoom);
       return chatRoom?.id;
     } catch (error) {
       console.error('채팅방 ID 찾기 실패:', error);

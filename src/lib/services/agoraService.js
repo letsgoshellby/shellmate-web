@@ -69,15 +69,12 @@ class AgoraService {
         try {
           const decoder = new TextDecoder();
           const message = decoder.decode(data);
-          console.log('📨 [AgoraService] 수신 메시지:', message, 'from:', uid);
 
           if (message === 'SCREEN_SHARE_START') {
-            console.log('✅ 원격 사용자 화면공유 시작:', uid);
             if (this.onScreenShareStatusChanged) {
               this.onScreenShareStatusChanged(uid, true);
             }
           } else if (message === 'SCREEN_SHARE_STOP') {
-            console.log('✅ 원격 사용자 화면공유 중지:', uid);
             if (this.onScreenShareStatusChanged) {
               this.onScreenShareStatusChanged(uid, false);
             }
@@ -416,7 +413,6 @@ class AgoraService {
       const encoder = new TextEncoder();
       const data = encoder.encode(message);
       await this.client.sendStreamMessage(this.dataChannel, data);
-      console.log('📤 [AgoraService] 메시지 전송:', message);
     } catch (error) {
       console.error('🔴 [AgoraService] 메시지 전송 실패:', error);
     }
