@@ -19,6 +19,9 @@ export function AuthGuard({
         const isSignupPage = window.location.pathname.startsWith('/signup/expert');
 
         if (!isSignupPage) {
+          // 가격 설정까지 완료한 경우 (마지막 단계) 리다이렉트 스킵
+          if (localStorage.getItem('expertSignupComplete') === 'true') return;
+
           setCheckingSignupStatus(true);
 
           try {

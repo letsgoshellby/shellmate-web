@@ -72,7 +72,7 @@ const CHILD_ORDER_MAP = { first: '첫째', second: '둘째', third_or_more: '셋
 const GENDER_MAP = { male: '남자', female: '여자' };
 
 export default function ClientProfilePage() {
-  const { isAuthenticated, isClient } = useAuth();
+  const { isAuthenticated, isClient, user, refreshUser } = useAuth();
   const router = useRouter();
 
   // User profile state
@@ -130,6 +130,18 @@ export default function ClientProfilePage() {
     }
     fetchProfileData();
   }, [isAuthenticated, isClient, router]);
+
+  // AuthContext user로 profileData 초기화 (캐시된 데이터 즉시 표시)
+  useEffect(() => {
+    if (user && !profileData) {
+      setProfileData(user);
+      setEditData({
+        name: user.name || '',
+        nickname: user.nickname || '',
+        phone_number: user.phone_number || '',
+      });
+    }
+  }, [user]);
 
   const fetchProfileData = async () => {
     try {
@@ -209,7 +221,9 @@ export default function ClientProfilePage() {
         setIsEditing(false);
         toast.success('프로필이 업데이트되었습니다');
       } else {
-        toast.error('프로필 업데이트에 실패했습니다');
+        const err = await response.json().catch(() => ({}));
+        const firstError = Object.values(err).flat()[0];
+        toast.error(firstError || '프로필 업데이트에 실패했습니다');
       }
     } catch {
       toast.error('네트워크 오류가 발생했습니다');
@@ -277,7 +291,7 @@ export default function ClientProfilePage() {
         worries: selectedWorries,
         emotional_anxiety_problem: selectedEmotionalProblems,
       }, token);
-      if (response.ok) { await fetchProfileData(); return true; }
+      if (response.ok) { await fetchProfileData(); await refreshUser(); return true; }
       const err = await response.json();
       toast.error(err.detail || '저장에 실패했습니다');
       return false;

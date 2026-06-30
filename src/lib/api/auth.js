@@ -130,31 +130,26 @@ export class AuthAPI {
 
       // console.log('🔵 [소셜 로그인] 응답:', response.data);
 
-      // 토큰이 있으면 저장 (기존 회원)
+      // 토큰이 있으면 저장
       if (response.data.access && response.data.refresh) {
         TokenStorage.setTokens(response.data.access, response.data.refresh, false);
-        // console.log('✅ [소셜 로그인] 토큰 저장 완료');
 
         // 사용자 정보 가져오기
         const userResponse = await apiClient.get('/user/me/');
-        // console.log('✅ [소셜 로그인] 사용자 정보:', userResponse.data);
 
         return {
           ...response.data,
           user: userResponse.data,
-          isNewUser: false,
+          isNewUser: !!response.data.is_new,
         };
       }
 
-      // 토큰이 없으면 신규 회원
+      // 토큰이 없으면 신규 회원 (약관 미동의 등)
       return {
         ...response.data,
         isNewUser: true,
       };
     } catch (error) {
-      // console.log('🔴 [소셜 로그인] 에러 발생');
-      // console.log('🔴 [소셜 로그인] 상태 코드:', error.response?.status);
-      // console.log('🔴 [소셜 로그인] 에러 데이터:', error.response?.data);
       throw error;
     }
   }
@@ -173,31 +168,26 @@ export class AuthAPI {
 
       // console.log('🔵 [소셜 로그인] 응답:', response.data);
 
-      // 토큰이 있으면 저장 (기존 회원)
+      // 토큰이 있으면 저장
       if (response.data.access && response.data.refresh) {
         TokenStorage.setTokens(response.data.access, response.data.refresh, false);
-        // console.log('✅ [소셜 로그인] 토큰 저장 완료');
 
         // 사용자 정보 가져오기
         const userResponse = await apiClient.get('/user/me/');
-        // console.log('✅ [소셜 로그인] 사용자 정보:', userResponse.data);
 
         return {
           ...response.data,
           user: userResponse.data,
-          isNewUser: false,
+          isNewUser: !!response.data.is_new,
         };
       }
 
-      // 토큰이 없으면 신규 회원
+      // 토큰이 없으면 신규 회원 (약관 미동의 등)
       return {
         ...response.data,
         isNewUser: true,
       };
     } catch (error) {
-      // console.log('🔴 [소셜 로그인] 에러 발생');
-      // console.log('🔴 [소셜 로그인] 상태 코드:', error.response?.status);
-      // console.log('🔴 [소셜 로그인] 에러 데이터:', error.response?.data);
       throw error;
     }
   }
