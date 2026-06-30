@@ -147,7 +147,7 @@ export default function ConsultationDetailPage() {
             <div className="flex items-center space-x-4 mb-4">
               <Avatar className="h-16 w-16">
                 <AvatarImage src={consultation.expert.profile_image} />
-                <AvatarFallback>{consultation.expert.name[0]}</AvatarFallback>
+                <AvatarFallback>{consultation.expert.name?.[0] ?? '?'}</AvatarFallback>
               </Avatar>
               <div>
                 <h3 className="font-semibold text-lg">{consultation.expert.name}</h3>
@@ -165,7 +165,11 @@ export default function ConsultationDetailPage() {
             <div className="space-y-2">
               <div className="flex items-center text-sm">
                 <span className="font-medium">전문분야:</span>
-                <span className="ml-2">{consultation.expert.specialties.join(', ')}</span>
+                <span className="ml-2">
+                  {consultation.expert.specialty_display ||
+                   (Array.isArray(consultation.expert.specialty_list) ? consultation.expert.specialty_list.join(', ') : '') ||
+                   (Array.isArray(consultation.expert.specialties) ? consultation.expert.specialties.join(', ') : '') || '-'}
+                </span>
               </div>
               <div className="flex items-center text-sm">
                 <span className="font-medium">경력:</span>
@@ -173,7 +177,7 @@ export default function ConsultationDetailPage() {
               </div>
               <div className="flex items-center text-sm">
                 <span className="font-medium">학력:</span>
-                <span className="ml-2">{consultation.expert.education}</span>
+                <span className="ml-2">{consultation.expert.education || '-'}</span>
               </div>
             </div>
           </CardContent>
