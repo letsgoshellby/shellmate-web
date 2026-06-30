@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -36,7 +36,7 @@ const bookingSchema = z.object({
   client_notes: z.string().min(10, '상담 내용은 10자 이상이어야 합니다').max(500, '상담 내용은 500자를 초과할 수 없습니다'),
 });
 
-export default function BookConsultationPage() {
+function BookConsultationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedExpertId = searchParams.get('expertId');
@@ -627,5 +627,13 @@ export default function BookConsultationPage() {
         </div>
       </DashboardLayout>
     </AuthGuard>
+  );
+}
+
+export default function BookConsultationPageWrapper() {
+  return (
+    <Suspense>
+      <BookConsultationPage />
+    </Suspense>
   );
 }
