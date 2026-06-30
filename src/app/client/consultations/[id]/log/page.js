@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,7 +14,9 @@ import { toast } from 'react-hot-toast';
 
 export default function ClientCounselLogPage({ params }) {
   const unwrappedParams = use(params);
-  const sessionId = parseInt(unwrappedParams.id);
+  const searchParams = useSearchParams();
+  // URL id는 채팅방 ID이므로 쿼리파라미터 ?session=으로 넘어오는 실제 세션 ID 사용
+  const sessionId = searchParams.get('session') ? parseInt(searchParams.get('session')) : parseInt(unwrappedParams.id);
 
   const [sessionInfo, setSessionInfo] = useState(null);
   const [counselingLog, setCounselingLog] = useState(null);

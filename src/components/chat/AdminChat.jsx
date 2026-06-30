@@ -304,7 +304,10 @@ export function AdminChat({
             ) : (messageType === 'counseling_log_complete' || messageType === 'COUNSELING_LOG_COMPLETE') ? (
               // 3. 일지 완료 시
               counselingLogId && (
-                <Link href={`/expert/consultations/${counselingLogId}/log?session=${sessionId}`}>
+                <Link href={userType === 'client'
+                  ? `/client/consultations/${chatRoomId}/log?session=${sessionId}`
+                  : `/expert/consultations/${counselingLogId}/log?session=${sessionId}`
+                }>
                   <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-5 rounded-xl">
                     <FileText className="mr-2 h-4 w-4" />
                     {getButtonText()}
@@ -314,7 +317,10 @@ export function AdminChat({
             ) : (messageType === 'reservation_complete' || messageType === 'SESSION_COMPLETE') ? (
               // 4. 상담 완료(일지 작성 대기) 시
               sessionId && (
-                <Link href={`/expert/consultations/${sessionId}/log?session=${sessionId}`}>
+                <Link href={userType === 'client'
+                  ? `/client/consultations/${chatRoomId}/log?session=${sessionId}`
+                  : `/expert/consultations/${sessionId}/log?session=${sessionId}`
+                }>
                   <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-5 rounded-xl">
                     <PenSquare className="mr-2 h-4 w-4" />
                     {getButtonText()}

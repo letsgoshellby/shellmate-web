@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +9,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { QnAAPI } from '@/lib/api/qna';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Search,
   Plus,
@@ -16,14 +24,18 @@ import {
   User,
   CheckCircle,
   Heart,
-  Filter,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  MoreVertical,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
 export default function ClientQnAPage() {
+  const { user } = useAuth();
+  const router = useRouter();
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,6 +43,19 @@ export default function ClientQnAPage() {
   const [sortBy, setSortBy] = useState('recent');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+
+  const handleDeleteQuestion = async (questionId, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm('질문을 삭제하시겠습니까?')) return;
+    try {
+      await QnAAPI.deleteQuestion(questionId);
+      setQuestions(questions.filter(q => q.id !== questionId));
+      toast.success('질문이 삭제되었습니다');
+    } catch {
+      toast.error('질문 삭제에 실패했습니다');
+    }
+  };
 
   const handleLikeQuestion = async (questionId, e) => {
     e.preventDefault(); // Link 클릭 방지
@@ -249,7 +274,7 @@ export default function ClientQnAPage() {
               currentQuestions.map((question) => (
                 <Card key={question.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between gap-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <Badge variant="secondary">
@@ -307,6 +332,28 @@ export default function ClientQnAPage() {
                           </Button>
                         </div>
                       </div>
+                      {user?.id === question.author?.id && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={(e) => e.preventDefault()}>
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => router.push(`/client/qna/${question.id}/edit`)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              수정
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => handleDeleteQuestion(question.id, e)}
+                              className="text-red-600 focus:text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              삭제
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

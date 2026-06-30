@@ -221,7 +221,7 @@ export default function ExpertPricingPage() {
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-bold text-gray-900">상담 가격을 설정해주세요</h1>
             <p className="text-gray-600 text-sm">
-              일회성 상담: 1회 상담 / Care+ 패키지: 4, 8, 12회 패키지
+              일회성 상담: 1회 상담 / 집중형 상담: 4, 8, 12회 패키지
             </p>
           </div>
 

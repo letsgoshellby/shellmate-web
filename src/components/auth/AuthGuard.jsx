@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 import { TokenStorage } from '@/lib/auth/tokenStorage';
+import { ConsultationsAPI } from '@/lib/api/consultations';
 
 export function AuthGuard({
   children,
@@ -67,6 +68,19 @@ export function AuthGuard({
                 router.replace(targetPath);
               }
             } else if (currentStep === '4') {
+              // pricing까지 완료했으면 가입 완료로 처리 (다른 기기에서 로그인해도 redirectX)
+              try {
+                console.log('[AuthGuard] getMyPricing 호출 시작');
+                const pricings = await ConsultationsAPI.getMyPricing();
+                console.log('[AuthGuard] getMyPricing 결과:', pricings);
+                const pricingList = Array.isArray(pricings) ? pricings : (pricings?.results ?? []);
+                if (pricingList.length > 0) {
+                  localStorage.setItem('expertSignupComplete', 'true');
+                  return;
+                }
+              } catch (e) {
+                console.error('[AuthGuard] getMyPricing 에러:', e);
+              }
               const targetPath = '/signup/expert/introduction';
               if (currentPath !== targetPath) {
                 router.replace(targetPath);

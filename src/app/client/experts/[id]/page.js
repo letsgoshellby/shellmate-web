@@ -79,7 +79,7 @@ export default function ExpertDetailPage({ params }) {
   };
 
   const handleBookConsultation = () => {
-    router.push('/client/consultations/book');
+    router.push(`/client/consultations/book?expertId=${expertId}`);
   };
 
   if (loading) {

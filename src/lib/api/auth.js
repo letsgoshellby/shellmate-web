@@ -128,7 +128,10 @@ export class AuthAPI {
         ...terms,
       });
 
-      // console.log('🔵 [소셜 로그인] 응답:', response.data);
+      // 백엔드가 200으로 에러를 반환하는 경우 처리
+      if (response.data.error) {
+        throw new Error(response.data.detail || response.data.error);
+      }
 
       // 토큰이 있으면 저장
       if (response.data.access && response.data.refresh) {
@@ -166,7 +169,10 @@ export class AuthAPI {
         ...terms,
       });
 
-      // console.log('🔵 [소셜 로그인] 응답:', response.data);
+      // 백엔드가 200으로 에러를 반환하는 경우 처리
+      if (response.data.error) {
+        throw new Error(response.data.detail || response.data.error);
+      }
 
       // 토큰이 있으면 저장
       if (response.data.access && response.data.refresh) {

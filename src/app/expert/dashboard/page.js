@@ -275,10 +275,10 @@ export default function ExpertDashboard() {
       )}
       <AuthGuard requiredRole="expert">
         <DashboardLayout>
-          {/* 온보딩 모달 */}
-          {showOnboardingModal && (
+          {/* 온보딩 모달 - 승인 이후에만 표시해야 하므로 임시 비활성화 */}
+          {/* {showOnboardingModal && (
             <OnboardingModal onClose={() => setShowOnboardingModal(false)} />
-          )}
+          )} */}
 
         <div className="space-y-6">
           {/* 환영 메시지 */}
