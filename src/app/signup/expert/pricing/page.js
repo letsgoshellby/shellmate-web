@@ -188,6 +188,8 @@ export default function ExpertPricingPage() {
 
       // 온보딩 투어 플래그 설정
       localStorage.setItem('expert_show_tour', 'true');
+      // 회원가입 전체 완료 플래그
+      localStorage.setItem('expertSignupComplete', 'true');
 
       // 온보딩 완료 - 대시보드로 이동
       window.location.href = '/expert/dashboard';

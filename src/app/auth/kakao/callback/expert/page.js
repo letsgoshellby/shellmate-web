@@ -53,28 +53,70 @@ export default function KakaoExpertCallbackPage() {
         // 액세스 토큰을 백엔드로 전송하여 처리
         const response = await AuthAPI.expertSocialLogin('kakao', accessToken);
 
-        // 기존 회원인 경우
-        if (!response.is_new && response.access) {
-          // JWT 토큰 저장
+        // 토큰 저장
+        if (response.access) {
           TokenStorage.setTokens(response.access, response.refresh);
+        }
 
-          // AuthContext 업데이트
-          if (response.user) {
-            setUser(response.user);
-          }
-          toast.success('로그인되었습니다');
-          router.push('/expert/dashboard');
+        // AuthContext 업데이트
+        if (response.user) {
+          setUser(response.user);
+        }
+
+        // 신규 회원 - 약관 페이지로
+        if (response.is_new) {
+          sessionStorage.setItem('kakao_access_token', accessToken);
+          sessionStorage.setItem('kakao_provider', 'kakao');
+          router.push('/signup/expert/social-terms');
           return;
         }
 
-        // 신규 회원인 경우 - 약관 페이지로
-        sessionStorage.setItem('kakao_access_token', accessToken);
-        sessionStorage.setItem('kakao_provider', 'kakao');
-        router.push('/signup/expert/social-terms');
+        // signup_incomplete가 있는 경우 - step으로 라우팅
+        if (response.signup_incomplete) {
+          if (response.step === 'expert_initial_info') {
+            router.push('/signup/expert/step1');
+          } else if (response.step === 'verification_pending') {
+            toast('심사 대기 중입니다. 승인까지 1-2일 소요됩니다.', { icon: '⏳' });
+            router.push('/expert/dashboard');
+          } else {
+            router.push('/expert/dashboard');
+          }
+          return;
+        }
+
+        // signup_incomplete 없는 경우 - 승인 여부 + current_step 확인
+        const verificationStatus = response.user?.expert_profile?.verification_status;
+
+        if (verificationStatus === 'approved') {
+          const statusRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/expert/signup/status/`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${response.access}` },
+          });
+
+          if (statusRes.ok) {
+            const { current_step } = await statusRes.json();
+
+            if (current_step === '2') {
+              router.push('/signup/expert/contract');
+            } else if (current_step === '3') {
+              router.push('/signup/expert/bank-account');
+            } else if (current_step === '4') {
+              router.push('/signup/expert/introduction');
+            } else {
+              localStorage.setItem('expertSignupComplete', 'true');
+              toast.success('로그인되었습니다');
+              router.push('/expert/dashboard');
+            }
+            return;
+          }
+        }
+
+        // 회원가입 완료
+        localStorage.setItem('expertSignupComplete', 'true');
+        toast.success('로그인되었습니다');
+        router.push('/expert/dashboard');
       } catch (error) {
-        // 약관 미동의 에러 처리
         if (error.response?.status === 400) {
-          // 액세스 토큰 저장 후 약관 페이지로
           sessionStorage.setItem('kakao_access_token', accessToken);
           sessionStorage.setItem('kakao_provider', 'kakao');
           router.push('/signup/expert/social-terms');

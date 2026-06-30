@@ -97,10 +97,14 @@ export function ClientSignupForm() {
           } else {
             toast.error(emailError);
           }
+        } else if (responseData.nickname) {
+          const msg = Array.isArray(responseData.nickname) ? responseData.nickname[0] : responseData.nickname;
+          toast.error(msg);
         } else if (responseData.detail) {
           toast.error(responseData.detail);
         } else {
-          toast.error('회원가입 중 오류가 발생했습니다');
+          const firstError = Object.values(responseData).flat()[0];
+          toast.error(typeof firstError === 'string' ? firstError : '회원가입 중 오류가 발생했습니다');
         }
         return;
       }

@@ -19,7 +19,9 @@ export function AuthGuard({
         const isSignupPage = window.location.pathname.startsWith('/signup/expert');
 
         if (!isSignupPage) {
+          // 가격 설정까지 완료한 경우 (마지막 단계) 리다이렉트 스킵
           if (localStorage.getItem('expertSignupComplete') === 'true') return;
+
           setCheckingSignupStatus(true);
 
           try {
@@ -46,20 +48,29 @@ export function AuthGuard({
             const currentPath = window.location.pathname;
 
             if (currentStep === '1') {
-              const targetPath = '/signup/expert/step2';
+              const targetPath = '/signup/expert/step1';
               if (currentPath !== targetPath) {
                 router.replace(targetPath);
               }
             } else if (currentStep === '2') {
-              // 심사 대기 중이므로 추가 단계 진행 안 함
+              // 승인된 경우 계약서 페이지로, 심사 대기 중이면 dashboard 유지
+              const verificationStatus = user?.expert_profile?.verification_status;
+              if (verificationStatus === 'approved') {
+                const targetPath = '/signup/expert/contract';
+                if (currentPath !== targetPath) {
+                  router.replace(targetPath);
+                }
+              }
             } else if (currentStep === '3') {
               const targetPath = '/signup/expert/bank-account';
               if (currentPath !== targetPath) {
                 router.replace(targetPath);
               }
             } else if (currentStep === '4') {
-              // 회원가입 완료, 대시보드 접근 허용
-              localStorage.setItem('expertSignupComplete', 'true');
+              const targetPath = '/signup/expert/introduction';
+              if (currentPath !== targetPath) {
+                router.replace(targetPath);
+              }
             }
 
           } catch (error) {

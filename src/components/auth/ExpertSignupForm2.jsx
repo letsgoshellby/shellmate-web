@@ -173,7 +173,7 @@ export function ExpertSignupForm2() {
       }
 
       toast.success('전문가 정보가 등록되었습니다. 심사 후 승인되면 알려드리겠습니다.');
-      router.push('/');
+      router.push('/expert/dashboard');
 
     } catch (error) {
       console.error('Signup error:', error);
