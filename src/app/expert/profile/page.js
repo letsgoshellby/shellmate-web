@@ -916,7 +916,7 @@ export default function ExpertProfilePage() {
                             <div className="space-y-1">
                               <div className="flex items-baseline gap-2">
                                 <span className="text-2xl font-bold text-primary">
-                                  {(pricing.tokens_required * 1000).toLocaleString()}
+                                  {Math.round(pricing.tokens_required / 0.0011).toLocaleString()}
                                 </span>
                                 <span className="text-gray-600">원</span>
                               </div>
