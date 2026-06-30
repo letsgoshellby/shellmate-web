@@ -19,7 +19,9 @@ import {
 } from '@/components/ui/form';
 import { Star, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { consultationAPI } from '@/lib/api/consultation';
+import { ConsultationsAPI } from '@/lib/api/consultations';
+import { ReviewAPI } from '@/lib/api/review';
+import { toast } from 'react-hot-toast';
 
 const reviewSchema = z.object({
   rating: z.number().min(1, '별점을 선택해주세요').max(5),
@@ -53,19 +55,19 @@ export default function ReviewPage() {
   const fetchConsultationDetail = async () => {
     try {
       setLoading(true);
-      const data = await consultationAPI.getConsultationDetail(id);
-      
+      const data = await ConsultationsAPI.getCounselingRequestDetail(id);
+
       // 리뷰 작성 가능한 상담인지 확인
-      if (data.status !== 'completed') {
+      if (data.status?.toUpperCase() !== 'COMPLETED') {
         setError('완료된 상담에 대해서만 리뷰를 작성할 수 있습니다.');
         return;
       }
-      
+
       if (data.review) {
         setError('이미 리뷰를 작성한 상담입니다.');
         return;
       }
-      
+
       setConsultation(data);
     } catch (err) {
       setError('상담 정보를 불러오는데 실패했습니다.');
@@ -77,12 +79,13 @@ export default function ReviewPage() {
   const onSubmit = async (data) => {
     try {
       setSubmitting(true);
-      await consultationAPI.createReview(id, {
+      await ReviewAPI.createReview({
+        counseling_request: id,
         rating: data.rating,
         content: data.content,
       });
-      
-      toast.error('리뷰가 성공적으로 등록되었습니다.');
+
+      toast.success('리뷰가 성공적으로 등록되었습니다.');
       router.push(`/client/consultations/${id}`);
     } catch (err) {
       toast.error('리뷰 등록에 실패했습니다. 다시 시도해주세요.');

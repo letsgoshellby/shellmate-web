@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { set, z } from 'zod';
@@ -38,6 +38,9 @@ const bookingSchema = z.object({
 
 export default function BookConsultationPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const preselectedExpertId = searchParams.get('expertId');
+
   const [step, setStep] = useState(1); // 1: 전문가 선택, 2: 상담 유형 선택, 3: 날짜 시간 선택, 4: 상담 정보 입력
   const [experts, setExperts] = useState([]);
   const [selectedExpert, setSelectedExpert] = useState(null);
@@ -58,8 +61,6 @@ export default function BookConsultationPage() {
   } = useForm({
     resolver: zodResolver(bookingSchema),
   });
-
-
 
   useEffect(() => {
     loadExperts();
@@ -91,6 +92,17 @@ export default function BookConsultationPage() {
         toast.error('등록된 전문가가 없습니다');
       }
       setExperts(mappedExperts);
+
+      // 전문가 상세 페이지에서 진입한 경우 자동 선택 후 step 2로 이동
+      if (preselectedExpertId) {
+        const preselected = mappedExperts.find(e => String(e.id) === String(preselectedExpertId));
+        if (preselected) {
+          setValue('expert_id', preselected.id);
+          setSelectedExpert(preselected);
+          loadPricingOptions(preselected.id);
+          setStep(2);
+        }
+      }
     } catch (error) {
       console.error('전문가 목록 로딩 실패:', error);
       toast.error('전문가 목록을 불러오는데 실패했습니다');

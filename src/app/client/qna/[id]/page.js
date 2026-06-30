@@ -10,17 +10,26 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { QnAAPI } from '@/lib/api/qna';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  ArrowLeft, 
-  Clock, 
-  User, 
-  Heart, 
-  MessageSquare, 
+import {
+  ArrowLeft,
+  Clock,
+  User,
+  Heart,
+  MessageSquare,
   CheckCircle,
   ThumbsUp,
   Send,
-  Loader2
+  Loader2,
+  MoreVertical,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
@@ -37,6 +46,17 @@ export default function QuestionDetailPage() {
   useEffect(() => {
     loadQuestionDetail();
   }, [params.id]);
+
+  const handleDeleteQuestion = async () => {
+    if (!confirm('질문을 삭제하시겠습니까?')) return;
+    try {
+      await QnAAPI.deleteQuestion(params.id);
+      toast.success('질문이 삭제되었습니다');
+      router.push('/client/qna');
+    } catch {
+      toast.error('질문 삭제에 실패했습니다');
+    }
+  };
 
   const loadQuestionDetail = async () => {
     try {
@@ -190,7 +210,7 @@ export default function QuestionDetailPage() {
           {/* 질문 카드 */}
           <Card>
             <CardHeader>
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between gap-2">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-3">
                     <Badge variant="secondary">
@@ -214,6 +234,28 @@ export default function QuestionDetailPage() {
                     </div>
                   )}
                 </div>
+                {user?.id === question.author?.id && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => router.push(`/client/qna/${params.id}/edit`)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        수정
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={handleDeleteQuestion}
+                        className="text-red-600 focus:text-red-600"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        삭제
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </CardHeader>
             <CardContent>

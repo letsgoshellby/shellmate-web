@@ -38,7 +38,7 @@ const LEARNING_PROBLEM_OPTIONS = [
 const WORRIES_OPTIONS = [
   { value: 'none', label: '없음' },
   { value: 'sociality', label: '사회성' },
-  { value: 'school_adaptation', label: '학교적응' },
+  { value: 'school_adjustment', label: '학교적응' },
   { value: 'interpersonal_relationships', label: '대인관계' },
   { value: 'other', label: '기타' },
 ];
@@ -953,7 +953,7 @@ export default function ClientProfilePage() {
                       <Label htmlFor="email" className="flex items-center gap-2">
                         <IoMail className="h-4 w-4" />이메일
                       </Label>
-                      <Input id="email" value={profileData.email} disabled className="bg-gray-50" />
+                      <Input id="email" value={profileData.email ?? ''} disabled className="bg-gray-50" />
                       <p className="text-xs text-gray-500">이메일은 변경할 수 없습니다</p>
                     </div>
                     <div className="space-y-2">
@@ -961,7 +961,7 @@ export default function ClientProfilePage() {
                       {isEditing ? (
                         <Input id="name" value={editData.name} onChange={(e) => setEditData({ ...editData, name: e.target.value })} />
                       ) : (
-                        <Input value={profileData.name} disabled className="bg-gray-50" />
+                        <Input value={profileData.name ?? ''} disabled className="bg-gray-50" />
                       )}
                     </div>
                     <div className="space-y-2">
@@ -969,7 +969,7 @@ export default function ClientProfilePage() {
                       {isEditing ? (
                         <Input id="nickname" value={editData.nickname} onChange={(e) => setEditData({ ...editData, nickname: e.target.value })} />
                       ) : (
-                        <Input value={profileData.nickname} disabled className="bg-gray-50" />
+                        <Input value={profileData.nickname ?? ''} disabled className="bg-gray-50" />
                       )}
                     </div>
                     <div className="space-y-2">
@@ -979,7 +979,7 @@ export default function ClientProfilePage() {
                       {isEditing ? (
                         <Input id="phone" value={editData.phone_number} onChange={(e) => setEditData({ ...editData, phone_number: e.target.value })} />
                       ) : (
-                        <Input value={profileData.phone_number} disabled className="bg-gray-50" />
+                        <Input value={profileData.phone_number ?? ''} disabled className="bg-gray-50" />
                       )}
                     </div>
                     <div className="space-y-2">

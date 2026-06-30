@@ -64,14 +64,31 @@ export default function ClientChatDetailPage() {
 
   const loadChatRoom = async () => {
     try {
-      const [data, rooms] = await Promise.all([
-        ChatAPI.getChatRoom(chatRoomId),
-        ChatAPI.getChatRooms()
-      ]);
-      setChatRoom(data);
-
+      const rooms = await ChatAPI.getChatRooms();
       const roomList = Array.isArray(rooms) ? rooms : rooms.results || [];
       const matched = roomList.find((r) => String(r.id) === String(chatRoomId));
+
+      // 단건 조회 시도, 실패 시 목록에서 찾은 데이터 사용
+      let data;
+      try {
+        data = await ChatAPI.getChatRoom(chatRoomId);
+      } catch {
+        data = matched || null;
+      }
+
+      if (!data) {
+        toast.error('채팅방을 찾을 수 없습니다');
+        router.push('/client/chat');
+        return;
+      }
+
+      // 목록 데이터 폴백 시 partner → expert 필드 정규화
+      if (!data.expert && data.partner) {
+        data = { ...data, expert: data.partner };
+      }
+
+      setChatRoom(data);
+
       if (matched?.counseling_request_id) {
         setCounselingRequestId(matched.counseling_request_id);
         try {

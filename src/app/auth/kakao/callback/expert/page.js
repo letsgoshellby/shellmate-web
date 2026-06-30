@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthAPI } from '@/lib/api/auth';
+import { ConsultationsAPI } from '@/lib/api/consultations';
 import { exchangeCodeForToken } from '@/lib/auth/kakaoAuth';
 import { TokenStorage } from '@/lib/auth/tokenStorage';
 import { useAuth } from '@/contexts/AuthContext';
@@ -101,6 +102,17 @@ export default function KakaoExpertCallbackPage() {
             } else if (current_step === '3') {
               router.push('/signup/expert/bank-account');
             } else if (current_step === '4') {
+              // pricing 여부 확인 후 완료 처리
+              try {
+                const pricings = await ConsultationsAPI.getMyPricing();
+                const pricingList = Array.isArray(pricings) ? pricings : (pricings?.results ?? []);
+                if (pricingList.length > 0) {
+                  localStorage.setItem('expertSignupComplete', 'true');
+                  toast.success('로그인되었습니다');
+                  router.push('/expert/dashboard');
+                  return;
+                }
+              } catch {}
               router.push('/signup/expert/introduction');
             } else {
               localStorage.setItem('expertSignupComplete', 'true');
