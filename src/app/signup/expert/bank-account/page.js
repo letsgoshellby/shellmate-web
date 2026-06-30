@@ -90,7 +90,7 @@ export default function BankAccountPage() {
 
       await response.json();
       toast.success('정산 계좌 정보가 등록되었습니다!');
-      window.location.href = '/expert/dashboard';
+      window.location.href = '/signup/expert/introduction';
     } catch (error) {
       console.error('계좌 정보 등록 실패:', error);
       toast.error(error.message || '계좌 정보 등록에 실패했습니다');
