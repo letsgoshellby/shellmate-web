@@ -49,11 +49,8 @@ apiClient.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${access}`;
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // 갱신 실패 시 로그아웃
+        // 갱신 실패 시 토큰 삭제 (redirect는 AuthGuard에서 처리)
         TokenStorage.clearTokens();
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
-        }
         return Promise.reject(refreshError);
       }
     }
