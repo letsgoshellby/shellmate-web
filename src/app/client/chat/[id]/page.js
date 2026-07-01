@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ChatAPI } from '@/lib/api/chat';
-import { consultationAPI } from '@/lib/api/consultation';
+import { ConsultationsAPI } from '@/lib/api/consultations';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   ArrowLeft,
@@ -38,7 +38,7 @@ export default function ClientChatDetailPage() {
 
   const [chatRoom, setChatRoom] = useState(null);
   const [counselingRequestId, setCounselingRequestId] = useState(null);
-  const [nextSession, setNextSession] = useState(null);
+  const [sessions, setSessions] = useState([]);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -92,8 +92,8 @@ export default function ClientChatDetailPage() {
       if (matched?.counseling_request_id) {
         setCounselingRequestId(matched.counseling_request_id);
         try {
-          const consultation = await consultationAPI.getConsultationDetail(matched.counseling_request_id);
-          if (consultation.next_session) setNextSession(consultation.next_session);
+          const consultation = await ConsultationsAPI.getCounselingRequestDetail(matched.counseling_request_id);
+          setSessions(consultation.sessions || []);
         } catch (_) {}
       }
 
@@ -361,7 +361,7 @@ export default function ClientChatDetailPage() {
                       <AdminChat
                         messageType={message.message_type}
                         metadata={message.metadata || {}}
-                        sessionId={message.session_id || nextSession?.id}
+                        sessionId={message.session_id || sessions[sessions.length - 1]?.id}
                         participantName={chatRoom?.expert?.name}
                         sessionNumber={message.session_number}
                         chatRoomId={chatRoomId}
