@@ -68,7 +68,7 @@ export default function ExpertPricingPage() {
           setPricingItems(existingPricings.map(p => ({
             id: p.id,
             session_type: p.session_type,
-            price: tokensToWon(p.tokens_required),
+            price: Math.round(tokensToWon(p.tokens_required) / (SESSION_COUNTS[p.session_type] || 1) / 1000) * 1000,
             is_active: p.is_active,
           })));
         } else {
@@ -150,6 +150,7 @@ export default function ExpertPricingPage() {
     try {
       // 기존 가격 설정 가져오기
       const existingPricings = await ConsultationsAPI.getMyPricing();
+      const isFirstTimeSetup = !existingPricings || existingPricings.length === 0;
       const existingIds = existingPricings.map(p => p.id);
       const currentIds = pricingItems.filter(p => p.id !== null).map(p => p.id);
 
@@ -186,8 +187,8 @@ export default function ExpertPricingPage() {
 
       toast.success('가격 설정이 완료되었습니다!');
 
-      // 온보딩 투어 플래그 설정
-      localStorage.setItem('expert_show_tour', 'true');
+      // 최초 가격 설정 시에만 온보딩 투어 표시
+      if (isFirstTimeSetup) localStorage.setItem('expert_show_tour', 'true');
       // 회원가입 전체 완료 플래그
       localStorage.setItem('expertSignupComplete', 'true');
 
