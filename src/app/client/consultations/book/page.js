@@ -404,8 +404,7 @@ function BookConsultationPage() {
                               <h3 className="text-lg font-semibold">{pricing.session_type_display}</h3>
                             </div>
                             <p className="text-sm text-gray-600">
-                              총 {pricing.total_sessions + (pricing?.additional_sessions || 0)}회 상담
-                              {(pricing?.additional_sessions || 0) > 0 && ` (기본 ${pricing.total_sessions}회 + 보너스 ${pricing.additional_sessions}회)`}
+                              총 {pricing.total_sessions}회 상담
                             </p>
                           </div>
                           <div className="flex items-center gap-4">
@@ -415,7 +414,7 @@ function BookConsultationPage() {
                                 {pricing.tokens_required.toLocaleString()} 토큰
                               </div>
                               <p className="text-xs text-gray-500">
-                                회당 {Math.round(pricing.tokens_required / (pricing.total_sessions + (pricing.additional_sessions || 0))).toLocaleString()} 토큰
+                                회당 {Math.round(pricing.tokens_required / pricing.total_sessions).toLocaleString()} 토큰
                               </p>
                             </div>
                             <Button>선택하기</Button>
