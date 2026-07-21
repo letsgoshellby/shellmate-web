@@ -120,6 +120,14 @@ class AgoraService {
       [this.localAudioTrack, this.localVideoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();
     } catch (error) {
       console.error('🔴 [AgoraService] 로컬 트랙 생성 실패:', error);
+      const code = error?.code || error?.name || '';
+      if (code === 'PERMISSION_DENIED' || code === 'NotAllowedError') {
+        throw new Error('MEDIA_PERMISSION_DENIED');
+      } else if (code === 'DEVICE_NOT_FOUND' || code === 'NotFoundError') {
+        throw new Error('MEDIA_DEVICE_NOT_FOUND');
+      } else if (code === 'NotReadableError' || code === 'TrackStartError') {
+        throw new Error('MEDIA_DEVICE_IN_USE');
+      }
       throw error;
     }
   }
