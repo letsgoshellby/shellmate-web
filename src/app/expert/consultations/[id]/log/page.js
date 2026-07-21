@@ -139,7 +139,7 @@ function ExpertCounselLogPage({ params }) {
       return;
     }
 
-    const confirmed = window.confirm('저장 후에는 수정할 수 없습니다.\n저장하시겠습니까?');
+    const confirmed = window.confirm('저장 후에는 수정이 불가하며,\n학부모님께 상담 일지 내용이 전송됩니다.\n\n저장하시겠습니까?');
     if (!confirmed) return;
 
     setPublishing(true);
