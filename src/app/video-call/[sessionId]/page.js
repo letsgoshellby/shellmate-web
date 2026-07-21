@@ -56,6 +56,7 @@ export default function VideoCallPage({ params }) {
   const agoraServiceRef = useRef(null);
   const isInitializedRef = useRef(false);
   const tokenRefreshTimerRef = useRef(null);
+  const wakeLockRef = useRef(null);
 
   useEffect(() => {
     if (isInitializedRef.current) return;
@@ -79,12 +80,15 @@ export default function VideoCallPage({ params }) {
   }, [isConnected]);
 
   // isRemoteVideoOn이 true로 바뀐 후 div가 visible해진 시점에 play
+  // 화면 공유는 contain(전체 표시), 카메라는 cover(꽉 채움)
   useEffect(() => {
     if (isRemoteVideoOn && pendingRemoteTrackRef.current && remoteVideoRef.current) {
-      pendingRemoteTrackRef.current.play(remoteVideoRef.current);
+      pendingRemoteTrackRef.current.play(remoteVideoRef.current, {
+        fit: isRemoteScreenSharing ? 'contain' : 'cover',
+      });
       pendingRemoteTrackRef.current = null;
     }
-  }, [isRemoteVideoOn]);
+  }, [isRemoteVideoOn, isRemoteScreenSharing]);
 
   useEffect(() => {
     if (callDuration >= 45 * 60 && !timeWarningShownRef.current) {
@@ -157,6 +161,23 @@ export default function VideoCallPage({ params }) {
           pendingRemoteTrackRef.current = user.videoTrack;
           setIsRemoteVideoOn(true);
         } else if (mediaType === 'audio') {
+          // iOS에서 WebRTC 오디오가 이어피스로 라우팅되는 문제 방지
+          // AudioContext를 통해 스피커(playback) 모드로 강제 전환
+          try {
+            const AudioCtx = window.AudioContext || /** @type {any} */ (window).webkitAudioContext;
+            if (AudioCtx) {
+              const ctx = new AudioCtx();
+              const gain = ctx.createGain();
+              gain.gain.value = 0;
+              gain.connect(ctx.destination);
+              const buf = ctx.createBuffer(1, 1, 22050);
+              const src = ctx.createBufferSource();
+              src.buffer = buf;
+              src.connect(gain);
+              src.start(0);
+            }
+          } catch (e) {}
+          user.audioTrack?.setVolume(100);
           user.audioTrack?.play();
         }
       });
@@ -215,13 +236,36 @@ export default function VideoCallPage({ params }) {
         agoraServiceRef.current.playLocalVideo(localVideoRef.current);
       }
 
+      // 화상 통화 중 화면 자동 꺼짐 방지
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLockRef.current = await navigator.wakeLock.request('screen');
+          // 탭이 백그라운드에서 돌아올 때 wake lock 재요청
+          document.addEventListener('visibilitychange', reacquireWakeLock);
+        }
+      } catch (e) {}
+
       setIsConnected(true);
       toast.success('화상 상담에 연결되었습니다');
 
     } catch (error) {
       console.error('🔴 초기화 실패:', error);
-      toast.error(error.response?.data?.message || '연결에 실패했습니다.');
+      const mediaErrors = {
+        MEDIA_PERMISSION_DENIED: '카메라/마이크 권한이 거부되었습니다.\n브라우저 설정에서 권한을 허용해주세요.',
+        MEDIA_DEVICE_NOT_FOUND: '카메라 또는 마이크를 찾을 수 없습니다.\n장치 연결을 확인해주세요.',
+        MEDIA_DEVICE_IN_USE: '카메라 또는 마이크가 다른 앱에서 사용 중입니다.\n다른 앱을 종료 후 다시 시도해주세요.',
+      };
+      const message = mediaErrors[error.message] || error.response?.data?.message || '연결에 실패했습니다.';
+      toast.error(message);
       setTimeout(() => router.back(), 2000);
+    }
+  };
+
+  const reacquireWakeLock = async () => {
+    if (document.visibilityState === 'visible' && 'wakeLock' in navigator) {
+      try {
+        wakeLockRef.current = await navigator.wakeLock.request('screen');
+      } catch (e) {}
     }
   };
 
@@ -229,6 +273,11 @@ export default function VideoCallPage({ params }) {
     if (durationIntervalRef.current) clearInterval(durationIntervalRef.current);
     if (tokenRefreshTimerRef.current) clearInterval(tokenRefreshTimerRef.current);
     if (timeWarningTimerRef.current) clearTimeout(timeWarningTimerRef.current);
+    document.removeEventListener('visibilitychange', reacquireWakeLock);
+    if (wakeLockRef.current) {
+      wakeLockRef.current.release();
+      wakeLockRef.current = null;
+    }
     if (agoraServiceRef.current) {
       await agoraServiceRef.current.leaveChannel();
       agoraServiceRef.current = null;
@@ -496,6 +545,7 @@ export default function VideoCallPage({ params }) {
           <div className="bg-white rounded-2xl w-full max-w-sm p-6 space-y-4">
             <h3 className="text-lg font-semibold text-center">상담이 끝났습니다</h3>
             <p className="text-gray-600 text-center text-sm">상담일지를 작성하시겠습니까?</p>
+            <p className="text-gray-400 text-center text-xs">작성하여 제출하신 상담일지 내용은 내담자에게 공개됩니다.</p>
             <div className="space-y-2">
               <Button
                 className="w-full"
