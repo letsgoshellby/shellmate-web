@@ -302,10 +302,10 @@ export default function ExpertDetailPage({ params }) {
                             <span className="text-2xl font-bold text-black">
                               {pricing.tokens_required.toLocaleString()}
                             </span>
-                            <span className="text-sm text-gray-600">토큰</span>
+                            <span className="text-sm text-gray-600">에그</span>
                           </div>
                           <p className="text-xs text-gray-500">
-                            회당 {Math.round(pricing.tokens_required / pricing.total_sessions)} 토큰
+                            회당 {Math.round(pricing.tokens_required / pricing.total_sessions)} 에그
                           </p>
                         </div>
                       </div>

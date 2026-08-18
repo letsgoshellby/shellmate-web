@@ -945,7 +945,7 @@ export default function ExpertProfilePage() {
                         <div>
                           <h4 className="font-semibold text-sm text-blue-900 mb-1">가격 안내</h4>
                           <p className="text-xs text-blue-800">
-                            1토큰 = 1,000원입니다. 설정된 가격은 내담자에게 표시됩니다.
+                            1 에그 = 1,000원입니다. 설정된 가격은 내담자에게 표시됩니다.
                           </p>
                         </div>
                       </div>
