@@ -6,12 +6,12 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { QnAAPI } from '@/lib/api/qna';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  ArrowLeft,
   Clock,
   User,
   Heart,
@@ -184,9 +184,7 @@ export default function QuestionDetailPage() {
         <DashboardLayout>
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold mb-2">질문을 찾을 수 없습니다</h2>
-            <Link href="/client/qna">
-              <Button>목록으로 돌아가기</Button>
-            </Link>
+            <BackButton />
           </div>
         </DashboardLayout>
       </AuthGuard>
@@ -199,12 +197,7 @@ export default function QuestionDetailPage() {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* 헤더 */}
           <div className="flex items-center space-x-4">
-            <Link href="/client/qna">
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                목록으로
-              </Button>
-            </Link>
+            <BackButton />
           </div>
 
           {/* 질문 카드 */}

@@ -5,12 +5,11 @@ import { useParams, useRouter } from 'next/navigation';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Badge } from '@/components/ui/badge';
 import { ReviewAPI } from '@/lib/api/review';
-import { ArrowLeft, Loader2, Calendar, User } from 'lucide-react';
+import { Loader2, Calendar, User } from 'lucide-react';
 import { IoStar } from 'react-icons/io5';
-import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
 export default function ExpertReviewDetailPage() {
@@ -100,9 +99,7 @@ export default function ExpertReviewDetailPage() {
         <DashboardLayout>
           <div className="text-center py-12">
             <p className="text-gray-500">리뷰를 찾을 수 없습니다</p>
-            <Link href="/expert/reviews">
-              <Button className="mt-4">리뷰 목록으로</Button>
-            </Link>
+            <BackButton variant="default" className="mt-4" />
           </div>
         </DashboardLayout>
       </AuthGuard>
@@ -115,12 +112,7 @@ export default function ExpertReviewDetailPage() {
         <div className="space-y-6">
           {/* 뒤로가기 버튼 */}
           <div>
-            <Link href="/expert/reviews">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                리뷰 목록으로
-              </Button>
-            </Link>
+            <BackButton variant="ghost" />
           </div>
 
           {/* 리뷰 상세 */}
@@ -211,12 +203,7 @@ export default function ExpertReviewDetailPage() {
 
           {/* 하단 액션 버튼 */}
           <div className="flex justify-between">
-            <Link href="/expert/reviews">
-              <Button variant="outline">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                목록으로
-              </Button>
-            </Link>
+            <BackButton size="default" />
           </div>
         </div>
       </DashboardLayout>

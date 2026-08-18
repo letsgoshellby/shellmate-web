@@ -6,6 +6,7 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,7 +21,6 @@ import {
   Plus,
   Trash2,
   Save,
-  ArrowLeft,
   Calendar,
   X,
   Image as ImageIcon
@@ -319,15 +319,7 @@ export default function CurriculumPage() {
         <DashboardLayout>
           <div className="space-y-6">
             <div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/expert/consultations')}
-                className="mb-2"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                상담 목록으로
-              </Button>
+              <BackButton variant="ghost" className="mb-2" />
               <h1 className="text-2xl font-bold text-gray-900">커리큘럼</h1>
               <p className="text-gray-600">
                 {consultation?.client?.name || '내담자'}님의 커리큘럼
@@ -404,15 +396,7 @@ export default function CurriculumPage() {
           {/* 헤더 */}
           <div className="flex items-center justify-between">
             <div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/expert/consultations')}
-                className="mb-2"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                상담 목록으로
-              </Button>
+              <BackButton variant="ghost" className="mb-2" />
               <h1 className="text-2xl font-bold text-gray-900">커리큘럼 설계</h1>
               <p className="text-gray-600">
                 {consultation?.client?.name || '내담자'}님을 위한 맞춤 커리큘럼을 설계하세요

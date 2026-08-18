@@ -1,18 +1,16 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { CurriculumAPI } from '@/lib/api/curriculum';
 import { ConsultationsAPI } from '@/lib/api/consultations';
 import {
   FileText,
-  ArrowLeft,
   Calendar,
   Clock,
   BookOpen,
@@ -23,7 +21,6 @@ import { toast } from 'react-hot-toast';
 export default function ClientCurriculumPage({ params }) {
   const unwrappedParams = use(params);
   const consultationId = unwrappedParams.id;
-  const router = useRouter();
 
   const [loading, setLoading] = useState(true);
   const [consultation, setConsultation] = useState(null);
@@ -89,14 +86,7 @@ export default function ClientCurriculumPage({ params }) {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* 헤더 */}
           <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/client/consultations')}
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              돌아가기
-            </Button>
+            <BackButton />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">맞춤 커리큘럼</h1>
               <p className="text-gray-600">전문가가 설계한 맞춤 커리큘럼을 확인하세요</p>

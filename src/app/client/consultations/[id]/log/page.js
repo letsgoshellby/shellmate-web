@@ -5,11 +5,10 @@ import { useSearchParams } from 'next/navigation';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { CounselingLogAPI } from '@/lib/api/counselingLog';
 import { AgoraAPI } from '@/lib/api/agora';
-import { ArrowLeft, Loader2, FileText } from 'lucide-react';
-import Link from 'next/link';
+import { Loader2, FileText } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 function ClientCounselLogPage({ params }) {
@@ -80,12 +79,7 @@ function ClientCounselLogPage({ params }) {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* 헤더 */}
           <div className="flex items-center space-x-4">
-            <Link href="/client/consultations">
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                돌아가기
-              </Button>
-            </Link>
+            <BackButton />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">상담 일지</h1>
               <p className="text-gray-600">전문가가 작성한 상담 일지를 확인하세요</p>

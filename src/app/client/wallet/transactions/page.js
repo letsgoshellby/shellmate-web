@@ -5,10 +5,10 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Badge } from '@/components/ui/badge';
 import { WalletAPI } from '@/lib/api/wallet';
 import {
-  ArrowLeft,
   Coins,
   ArrowUpRight,
   ArrowDownLeft,
@@ -16,7 +16,6 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
 const FILTER_TYPES = [
@@ -113,12 +112,7 @@ export default function TransactionsPage() {
         <div className="space-y-6">
           {/* 헤더 */}
           <div className="flex items-center space-x-4">
-            <Link href="/client/wallet">
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                돌아가기
-              </Button>
-            </Link>
+            <BackButton />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">전체 거래 내역</h1>
               <p className="text-gray-600">에그 충전 및 사용 내역을 확인하세요</p>

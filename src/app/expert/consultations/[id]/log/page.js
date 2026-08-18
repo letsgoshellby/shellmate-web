@@ -6,12 +6,12 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { CounselingLogAPI } from '@/lib/api/counselingLog';
 import { AgoraAPI } from '@/lib/api/agora';
-import { ArrowLeft, Save, Send, Loader2 } from 'lucide-react';
-import Link from 'next/link';
+import { Save, Send, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 function ExpertCounselLogPage({ params }) {
@@ -221,12 +221,7 @@ function ExpertCounselLogPage({ params }) {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* 헤더 */}
           <div className="flex items-center space-x-4">
-            <Link href="/expert/consultations">
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                돌아가기
-              </Button>
-            </Link>
+            <BackButton />
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-gray-900">
                 {isPublished ? '상담 일지 조회' : '상담 일지 작성'}
@@ -234,9 +229,9 @@ function ExpertCounselLogPage({ params }) {
               <p className="text-gray-600">
                 {isPublished
                   ? '작성 완료된 상담 일지입니다'
-                  : '상담 내용을 기록하고 저장하세요'}
+                  : '상담 내용을 기록하고 저장하세요. 작성하시는 상담 일지 내용은 내담자에게 공개됩니다.'}
               </p>
-              <p className="text-gray-600">작성하시는 상담 일지 내용은 내담자에게 공개됩니다</p>
+              {/* <p className="text-gray-600">작성하시는 상담 일지 내용은 내담자에게 공개됩니다</p> */}
             </div>
             {isPublished && (
               <div className="px-4 py-2 bg-green-100 text-green-800 rounded-lg font-medium">

@@ -6,13 +6,13 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { QnAAPI, QnAExpertAPI } from '@/lib/api/qna';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  ArrowLeft, 
-  Clock, 
+import {
+  Clock,
   User, 
   Heart, 
   MessageSquare, 
@@ -23,7 +23,6 @@ import {
   AlertCircle,
   Star
 } from 'lucide-react';
-import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
 export default function ExpertQuestionDetailPage() {
@@ -145,9 +144,7 @@ export default function ExpertQuestionDetailPage() {
         <DashboardLayout>
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold mb-2">질문을 찾을 수 없습니다</h2>
-            <Link href="/expert/qna">
-              <Button>목록으로 돌아가기</Button>
-            </Link>
+            <BackButton />
           </div>
         </DashboardLayout>
       </AuthGuard>
@@ -161,12 +158,7 @@ export default function ExpertQuestionDetailPage() {
           {/* 헤더 */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link href="/expert/qna">
-                <Button variant="outline" size="sm">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  목록으로
-                </Button>
-              </Link>
+              <BackButton />
             </div>
             
             {/* {!hasExpertAnswer && (
