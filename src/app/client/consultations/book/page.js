@@ -81,7 +81,7 @@ function BookConsultationPage() {
         experience_years: expert.experience_years || 0,
         rating: parseFloat(expert.rating) || 0,
         reviews_count: expert.review_count || 0,
-        profile_image: expert.profile_image,
+        profile_image: expert.expert_profile?.profile_image || expert.profile_image,
         introduction: expert.introduction || '',
         certifications: [],
         institution: expert.institution,

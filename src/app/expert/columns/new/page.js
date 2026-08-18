@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ColumnsAPI } from '@/lib/api/columns';
+import { getQuillTextLength } from '@/lib/quillText';
 import { ArrowLeft, Save, Eye, Loader2, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
@@ -24,20 +25,7 @@ export default function NewColumnPage() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
-  const getTextLength = (deltaJson) => {
-    if (!deltaJson) return 0;
-    try {
-      const delta = JSON.parse(deltaJson);
-      return delta.ops.reduce((acc, op) => {
-        if (typeof op.insert === 'string') return acc + op.insert.length;
-        return acc;
-      }, 0) - 1;
-    } catch {
-      return 0;
-    }
-  };
-
-  const textLength = Math.max(0, getTextLength(content));
+  const textLength = Math.max(0, getQuillTextLength(content));
 
   const handleSubmit = async () => {
     if (!title.trim()) {

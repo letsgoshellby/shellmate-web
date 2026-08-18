@@ -17,6 +17,7 @@ import {
   MonitorStop
 } from 'lucide-react';
 import { AgoraAPI } from '@/lib/api/agora';
+import { formatDuration } from '@/lib/formatDuration';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -141,7 +142,16 @@ export default function VideoCallPage({ params }) {
       }
 
       // 4. 화상 상담방 정보 조회 (Start 이후 호출해야 400 방지)
-      const videoRoomData = await AgoraAPI.getVideoRoom(sessionId);
+      let videoRoomData;
+      try {
+        videoRoomData = await AgoraAPI.getVideoRoom(sessionId);
+      } catch (roomErr) {
+        // 내담자가 전문가보다 먼저 입장한 경우 방이 아직 없음 (400)
+        if (currentUserType === 'client' && roomErr.response?.status === 400) {
+          throw new Error('ROOM_NOT_READY');
+        }
+        throw roomErr;
+      }
 
       setSessionInfo(`${sessionData.session_number || 1}회차`);
       setSessionNumber(sessionData.session_number || 1);
@@ -250,6 +260,14 @@ export default function VideoCallPage({ params }) {
 
     } catch (error) {
       console.error('🔴 초기화 실패:', error);
+
+      // 내담자가 전문가보다 먼저 입장 — 방이 아직 준비되지 않음
+      if (error.message === 'ROOM_NOT_READY') {
+        toast.error('전문가가 아직 상담을 시작하지 않았습니다.\n잠시 후 다시 시도해주세요.', { duration: 4000 });
+        setTimeout(() => router.back(), 3000);
+        return;
+      }
+
       const mediaErrors = {
         MEDIA_PERMISSION_DENIED: '카메라/마이크 권한이 거부되었습니다.\n브라우저 설정에서 권한을 허용해주세요.',
         MEDIA_DEVICE_NOT_FOUND: '카메라 또는 마이크를 찾을 수 없습니다.\n장치 연결을 확인해주세요.',
@@ -297,12 +315,6 @@ export default function VideoCallPage({ params }) {
     durationIntervalRef.current = setInterval(() => {
       setCallDuration(getElapsed());
     }, 1000);
-  };
-
-  const formatDuration = (seconds) => {
-    const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const secs = (seconds % 60).toString().padStart(2, '0');
-    return `${mins}:${secs}`;
   };
 
   const startTokenRefreshTimer = () => {

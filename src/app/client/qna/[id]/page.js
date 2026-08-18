@@ -89,7 +89,7 @@ export default function QuestionDetailPage() {
       });
     } catch (error) {
       console.error('공감 처리 실패:', error);
-      toast.error('공감 처리에 실패했습니다');
+      toast.error(error?.response?.data?.error || '공감 처리에 실패했습니다');
     }
   };
 
@@ -303,7 +303,7 @@ export default function QuestionDetailPage() {
             {answers.map((answer) => {
               const isExpert = !!answer.expert;
               const authorName = isExpert ? (answer.expert.name || '전문가') : '익명';
-              const profileImage = answer.expert?.profile_image;
+              const profileImage = answer.expert?.expert_profile?.profile_image || answer.expert?.profile_image;
               return (
               <Card key={answer.id} className={isExpert ? 'border-blue-200 bg-blue-50/30' : ''}>
                 <CardContent className="p-6">

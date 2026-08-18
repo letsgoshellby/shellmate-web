@@ -152,7 +152,7 @@ export default function ReviewPage() {
         <CardContent>
           <div className="flex items-center space-x-4">
             <Avatar className="h-16 w-16">
-              <AvatarImage src={consultation.expert.profile_image} />
+              <AvatarImage src={consultation.expert.expert_profile?.profile_image || consultation.expert.profile_image} />
               <AvatarFallback>{consultation.expert.name[0]}</AvatarFallback>
             </Avatar>
             <div>

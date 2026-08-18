@@ -2,6 +2,7 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "react-hot-toast";
 import { ScriptLoader } from "@/components/ScriptLoader";
+import { KakaoChatButton } from "@/components/KakaoChatButton";
 
 export const metadata = {
   title: "셸메이트 - 느린아이 비대면 상담 플랫폼",
@@ -54,6 +55,7 @@ export default function RootLayout({ children }) {
         <ScriptLoader />
         <AuthProvider>
           {children}
+          <KakaoChatButton />
           <Toaster position="top-right" />
         </AuthProvider>
       </body>

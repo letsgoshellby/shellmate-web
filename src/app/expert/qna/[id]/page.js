@@ -267,7 +267,7 @@ export default function ExpertQuestionDetailPage() {
               
               {answers.map((answer) => {
                 const authorName = answer.expert?.name || '익명';
-                const profileImage = answer.expert?.profile_image;
+                const profileImage = answer.expert?.expert_profile?.profile_image || answer.expert?.profile_image;
                 return (
                 <Card key={answer.id} className={answer.is_expert ? 'border-blue-200 bg-blue-50/30' : ''}>
                   <CardContent className="p-6">
