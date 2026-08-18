@@ -447,13 +447,14 @@ export default function CurriculumPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">커리큘럼 설명</Label>
+                  <Label htmlFor="description">커리큘럼 설명 *</Label>
                   <Textarea
                     id="description"
                     value={curriculumData.description}
                     onChange={(e) => setCurriculumData({ ...curriculumData, description: e.target.value })}
                     placeholder="커리큘럼의 전반적인 목표와 방향성을 설명해주세요"
                     rows={4}
+                    required
                   />
                 </div>
 
@@ -518,13 +519,14 @@ export default function CurriculumPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor={`session-description-${index}`}>세션 설명</Label>
+                        <Label htmlFor={`session-description-${index}`}>세션 설명 *</Label>
                         <Textarea
                           id={`session-description-${index}`}
                           value={session.description}
                           onChange={(e) => handleSessionInfoChange(index, 'description', e.target.value)}
                           placeholder="이 세션의 목표, 활동 내용, 기대 효과 등을 작성하세요"
                           rows={3}
+                          required
                         />
                       </div>
 
