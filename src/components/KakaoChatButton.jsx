@@ -4,12 +4,28 @@ import { usePathname } from 'next/navigation';
 
 const KAKAO_OPEN_CHAT_URL = 'https://pf.kakao.com/_gPdPn';
 
+// 하단 우측에 저장/제출 버튼이 있어 카카오 버튼과 겹치는 페이지들
+const RAISED_BUTTON_PATHS = [
+  /^\/expert\/consultations\/[^/]+\/log$/,
+  /^\/expert\/consultations\/[^/]+\/curriculum$/,
+  /^\/expert\/consultations\/availability$/,
+  /^\/expert\/columns\/new$/,
+  /^\/expert\/columns\/[^/]+\/edit$/,
+  /^\/client\/qna\/new$/,
+  /^\/client\/qna\/[^/]+\/edit$/,
+];
+
 export function KakaoChatButton() {
   const pathname = usePathname();
 
   // 화상 상담 화면에서는 하단 컨트롤 바 위쪽(우측)에 위치
   const isVideoCall = pathname?.startsWith('/video-call');
-  const positionClass = isVideoCall ? 'bottom-36 right-6' : 'bottom-6 right-6';
+  const isRaisedButtonPage = RAISED_BUTTON_PATHS.some((re) => re.test(pathname || ''));
+  const positionClass = isVideoCall
+    ? 'bottom-36 right-6'
+    : isRaisedButtonPage
+      ? 'bottom-20 right-6'
+      : 'bottom-6 right-6';
 
   return (
     <a

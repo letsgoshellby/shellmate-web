@@ -153,6 +153,10 @@ export default function ExpertConsultationsPage() {
         case 'reading': return '읽기';
         case 'writing': return '쓰기';
         case 'math': return '수학';
+        case 'speaking': return '말하기';
+        case 'concentration': return '집중력';
+        case 'comprehension': return '이해력';
+        case 'memory': return '기억력';
         case 'other': return '기타';
         default: return e;
       }
