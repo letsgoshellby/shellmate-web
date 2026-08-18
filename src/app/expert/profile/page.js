@@ -56,6 +56,8 @@ export default function ExpertProfilePage() {
   const [career, setCareer] = useState([]);
   const [isProfessionalEditing, setIsProfessionalEditing] = useState(false);
   const [editSpecialties, setEditSpecialties] = useState([]);
+  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [profileImagePreview, setProfileImagePreview] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -119,6 +121,8 @@ export default function ExpertProfilePage() {
 
   const handleCancel = () => {
     setIsEditing(false);
+    setProfileImageFile(null);
+    setProfileImagePreview(null);
     setEditData({
       name: profileData?.name || '',
       phone_number: profileData?.phone_number || '',
@@ -141,6 +145,23 @@ export default function ExpertProfilePage() {
     setCareer(careerData);
   };
 
+  const handleProfileImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('파일 크기는 10MB 이하여야 합니다');
+      return;
+    }
+    if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+      toast.error('JPG, JPEG, PNG 형식만 업로드 가능합니다');
+      return;
+    }
+    setProfileImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setProfileImagePreview(reader.result);
+    reader.readAsDataURL(file);
+  };
+
   const handleSave = async () => {
     setLoading(true);
     try {
@@ -150,21 +171,44 @@ export default function ExpertProfilePage() {
       const filteredEducation = education.filter(item => item.trim() !== '');
       const filteredCareer = career.filter(item => item.trim() !== '');
 
-      const requestData = {
-        ...editData,
-        education: filteredEducation,
-        career: filteredCareer,
-      };
+      // 프로필 이미지가 있으면 FormData, 없으면 JSON
+      let response;
+      if (profileImageFile) {
+        // 프로필 이미지만 먼저 FormData로 업로드
+        const imageFormData = new FormData();
+        imageFormData.append('profile_image', profileImageFile, profileImageFile.name);
 
+        const imageResponse = await fetch(`${API_BASE_URL}/user/me/`, {
+          method: 'PATCH',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: imageFormData,
+        });
 
-      const response = await fetch(`${API_BASE_URL}/user/me/`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestData),
-      });
+        if (!imageResponse.ok) {
+          const err = await imageResponse.json();
+          const msg = err.profile_image?.[0] || '프로필 사진 업로드에 실패했습니다';
+          toast.error(msg);
+          setLoading(false);
+          return;
+        }
+      }
+
+      {
+        // 나머지 정보는 JSON으로 전송
+        const requestData = {
+          ...editData,
+          education: filteredEducation,
+          career: filteredCareer,
+        };
+        response = await fetch(`${API_BASE_URL}/user/me/`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(requestData),
+        });
+      }
 
       if (response.ok) {
         const responseData = await response.json();
@@ -177,6 +221,8 @@ export default function ExpertProfilePage() {
         await refreshUser();
 
         setIsEditing(false);
+        setProfileImageFile(null);
+        setProfileImagePreview(null);
         toast.success('프로필이 업데이트되었습니다');
       } else {
         const errorData = await response.json();
@@ -356,6 +402,26 @@ export default function ExpertProfilePage() {
                 )}
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* 프로필 사진 */}
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-3xl font-bold overflow-hidden">
+                    {profileImagePreview ? (
+                      <img src={profileImagePreview} alt="프로필 미리보기" className="w-full h-full object-cover" />
+                    ) : profileData.expert_profile?.profile_image || profileData.profile_image ? (
+                      <img src={profileData.expert_profile?.profile_image || profileData.profile_image} alt="프로필" className="w-full h-full object-cover" />
+                    ) : (
+                      profileData.name?.charAt(0)
+                    )}
+                  </div>
+                  {isEditing && (
+                    <label className="cursor-pointer text-sm text-primary font-medium hover:underline flex items-center gap-1">
+                      <IoImage className="h-4 w-4" />
+                      사진 변경
+                      <input type="file" accept="image/jpeg,image/jpg,image/png" onChange={handleProfileImageChange} className="hidden" />
+                    </label>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="email" className="flex items-center gap-2">
