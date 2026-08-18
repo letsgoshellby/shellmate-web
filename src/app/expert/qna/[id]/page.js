@@ -10,6 +10,7 @@ import { BackButton } from '@/components/ui/back-button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { QnAAPI, QnAExpertAPI } from '@/lib/api/qna';
+import { formatQnADate } from '@/lib/qna';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Clock,
@@ -80,30 +81,6 @@ export default function ExpertQuestionDetailPage() {
     } finally {
       setSubmittingAnswer(false);
     }
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
-    
-    if (diffHours < 24) return `${diffHours}시간 전`;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays < 7) return `${diffDays}일 전`;
-    return date.toLocaleDateString('ko-KR');
-  };
-
-  const getCategoryName = (category) => {
-    const categories = {
-      concentration: '집중력',
-      language: '언어발달',
-      social: '사회성',
-      behavior: '행동',
-      learning: '학습',
-      emotion: '정서발달'
-    };
-    return categories[category] || category;
   };
 
   const getUrgencyColor = (urgency) => {
@@ -232,7 +209,7 @@ export default function ExpertQuestionDetailPage() {
                   </div>
                   <div className="flex items-center">
                     <Clock className="mr-1 h-4 w-4" />
-                    {formatDate(question.created_at)}
+                    {formatQnADate(question.created_at)}
                   </div>
                 </div>
                 
@@ -287,7 +264,7 @@ export default function ExpertQuestionDetailPage() {
                             )}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {formatDate(answer.created_at)}
+                            {formatQnADate(answer.created_at)}
                           </div>
                         </div>
                       </div>
