@@ -89,7 +89,7 @@ export default function QuestionDetailPage() {
       });
     } catch (error) {
       console.error('공감 처리 실패:', error);
-      toast.error('공감 처리에 실패했습니다');
+      toast.error(error?.response?.data?.error || '공감 처리에 실패했습니다');
     }
   };
 
