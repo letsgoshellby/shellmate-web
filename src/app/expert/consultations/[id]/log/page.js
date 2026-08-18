@@ -236,6 +236,7 @@ function ExpertCounselLogPage({ params }) {
                   ? '작성 완료된 상담 일지입니다'
                   : '상담 내용을 기록하고 저장하세요'}
               </p>
+              <p className="text-gray-600">작성하시는 상담 일지 내용은 내담자에게 공개됩니다</p>
             </div>
             {isPublished && (
               <div className="px-4 py-2 bg-green-100 text-green-800 rounded-lg font-medium">
