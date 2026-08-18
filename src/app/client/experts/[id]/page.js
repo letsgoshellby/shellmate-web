@@ -180,9 +180,9 @@ export default function ExpertDetailPage({ params }) {
             <CardContent className="p-3 py-2">
               <div className="flex items-start space-x-6">
                 <div className="w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white text-3xl font-bold shrink-0">
-                  {expert.profile_image ? (
+                  {(expert.expert_profile?.profile_image || expert.profile_image) ? (
                     <img
-                      src={expert.profile_image}
+                      src={expert.expert_profile?.profile_image || expert.profile_image}
                       alt={expert.name}
                       className="w-full h-full rounded-full object-cover"
                     />

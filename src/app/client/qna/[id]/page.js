@@ -303,7 +303,7 @@ export default function QuestionDetailPage() {
             {answers.map((answer) => {
               const isExpert = !!answer.expert;
               const authorName = isExpert ? (answer.expert.name || '전문가') : '익명';
-              const profileImage = answer.expert?.profile_image;
+              const profileImage = answer.expert?.expert_profile?.profile_image || answer.expert?.profile_image;
               return (
               <Card key={answer.id} className={isExpert ? 'border-blue-200 bg-blue-50/30' : ''}>
                 <CardContent className="p-6">

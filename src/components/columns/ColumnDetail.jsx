@@ -174,9 +174,9 @@ export default function ColumnDetail({ columnId, backHref, editBasePath = '/expe
       <Card className="bg-blue-50 border-blue-200">
         <CardContent className="p-5">
           <div className="flex items-center gap-4">
-            {column.author?.profile_image ? (
+            {(column.author?.expert_profile?.profile_image || column.author?.profile_image) ? (
               <img
-                src={column.author.profile_image}
+                src={column.author.expert_profile?.profile_image || column.author.profile_image}
                 alt={column.author.nickname || column.author.name}
                 className="w-12 h-12 rounded-full object-cover flex-shrink-0"
               />
