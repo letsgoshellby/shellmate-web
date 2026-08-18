@@ -37,6 +37,7 @@ export default function ExpertChatDetailPage() {
   const chatRoomId = params.id;
 
   const [chatRoom, setChatRoom] = useState(null);
+  const [counselingRequestId, setCounselingRequestId] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,12 +63,18 @@ export default function ExpertChatDetailPage() {
 
   const loadChatRoom = async () => {
     try {
+      // 단건 조회 응답에는 counseling_request_id가 없어서 목록에서 함께 찾음
+      const rooms = await ChatAPI.getChatRooms();
+      const roomList = Array.isArray(rooms) ? rooms : rooms.results || [];
+      const matched = roomList.find((r) => String(r.id) === String(chatRoomId));
+
       const data = await ChatAPI.getChatRoom(chatRoomId);
       setChatRoom(data);
       await ChatAPI.markAllAsRead(chatRoomId);
-      if (data.counseling_request_id) {
+      if (matched?.counseling_request_id) {
+        setCounselingRequestId(matched.counseling_request_id);
         try {
-          const consultation = await ConsultationsAPI.getCounselingRequestDetail(data.counseling_request_id);
+          const consultation = await ConsultationsAPI.getCounselingRequestDetail(matched.counseling_request_id);
           setSessions(consultation.sessions || []);
         } catch (_) {}
       }
@@ -334,6 +341,7 @@ export default function ExpertChatDetailPage() {
                         participantName={chatRoom?.client?.name}
                         sessionNumber={message.session_number}
                         chatRoomId={chatRoomId}
+                        counselingRequestId={counselingRequestId}
                         counselorName={user?.name}
                         counselingDate={message.counseling_date}
                         counselingLogId={message.counseling_log_id}
