@@ -7,14 +7,13 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { WalletAPI } from '@/lib/api/wallet';
 import {
-  ArrowLeft,
   Coins,
   Loader2,
   CheckCircle,
 } from 'lucide-react';
-import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
 export default function ChargeEggPage() {
@@ -129,12 +128,7 @@ export default function ChargeEggPage() {
         <div className="max-w-2xl mx-auto space-y-6">
           {/* 헤더 */}
           <div className="flex items-center space-x-4">
-            <Link href="/client/wallet">
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                돌아가기
-              </Button>
-            </Link>
+            <BackButton />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">에그 충전</h1>
               <p className="text-gray-600">상담에 사용할 에그를 충전하세요</p>

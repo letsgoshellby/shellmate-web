@@ -9,6 +9,7 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,7 +17,6 @@ import { Badge } from '@/components/ui/badge';
 import { ConsultationsAPI } from '@/lib/api/consultations';
 import { ExpertAPI } from '@/lib/api/expert';
 import {
-  ArrowLeft,
   Calendar,
   Clock,
   Star,
@@ -253,12 +253,7 @@ function BookConsultationPage() {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* 헤더 */}
           <div className="flex items-center space-x-4">
-            <Link href="/client/consultations">
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                돌아가기
-              </Button>
-            </Link>
+            <BackButton />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">상담 예약</h1>
               <p className="text-gray-600">전문가와 1:1 비대면 상담을 예약하세요</p>
@@ -411,10 +406,10 @@ function BookConsultationPage() {
                             <div className="text-right">
                               <div className="flex items-center text-xl font-bold text-primary">
                                 <Coins className="h-5 w-5 mr-1" />
-                                {pricing.tokens_required.toLocaleString()} 토큰
+                                {pricing.tokens_required.toLocaleString()} 에그
                               </div>
                               <p className="text-xs text-gray-500">
-                                회당 {Math.round(pricing.tokens_required / pricing.total_sessions).toLocaleString()} 토큰
+                                회당 {Math.round(pricing.tokens_required / pricing.total_sessions).toLocaleString()} 에그
                               </p>
                             </div>
                             <Button>선택하기</Button>
@@ -453,7 +448,7 @@ function BookConsultationPage() {
                     </div>
                     <div className="text-right">
                       <p className="font-medium">{selectedPricing.session_type_display}</p>
-                      <p className="text-sm text-blue-800">{selectedPricing.tokens_required.toLocaleString()} 토큰</p>
+                      <p className="text-sm text-blue-800">{selectedPricing.tokens_required.toLocaleString()} 에그</p>
                     </div>
                   </div>
                 </CardContent>
@@ -582,7 +577,7 @@ function BookConsultationPage() {
                     <ul className="text-sm text-yellow-700 space-y-1">
                       <li>• 상담은 화상 통화로 진행됩니다</li>
                       <li>• 상담 시간은 회당 50분입니다</li>
-                      <li>• 필요 토큰: {selectedPricing?.tokens_required.toLocaleString()}개</li>
+                      <li>• 필요 에그: {selectedPricing?.tokens_required.toLocaleString()}개</li>
                       <li>• 상담 24시간 전까지 취소 가능합니다</li>
                     </ul>
                     <div className="border-t border-yellow-200 pt-3">

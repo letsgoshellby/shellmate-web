@@ -88,7 +88,9 @@ export function AdminChat({
       case 'COUNSELING_LOG_COMPLETE':
         return `${sessionNumber || ''}회차 상담 일지가 작성 완료되었습니다.\n아래 버튼을 눌러 상담 일지를 확인하세요.`;
       case 'CURRICULUM':
-        return '1회차 상담이 완료되었습니다.\n추가 회차 진행을 위해 커리큘럼(상담일지)을 작성해 주세요.';
+        return userType === 'client'
+          ? '1회차 상담이 완료되었습니다.\n추가 회차 진행을 위해 남은 회차 상담 예약을 진행해주세요.'
+          : '1회차 상담이 완료되었습니다.\n내담자의 남은 회차 상담 예약 후, 커리큘럼에 따라 남은 회차 상담을 진행해주세요.';
       case 'SYSTEM':
         // SYSTEM 메시지 중 커리큘럼 작성 요청
         return '📝 1회차 상담이 완료되었습니다.\n추가 회차 진행을 위해 커리큘럼 및 상담일지를 작성해 주세요.';
@@ -182,7 +184,7 @@ export function AdminChat({
   };
 
   return (
-    <div className="max-w-sm">
+    <div className="w-full max-w-sm">
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
         {/* 제목 */}
         <h3 className="text-lg font-bold text-gray-900 mb-3">
@@ -260,9 +262,10 @@ export function AdminChat({
         {/* 버튼 영역 */}
         {shouldShowButton() && (
           <div className="mb-4">
-            {(messageType === 'CURRICULUM') && userType === 'client' ? (
-              // 커리큘럼 완료 메시지 - 내담자에게 추가 회차 일정 예약 버튼
-              counselingRequestId && (
+            {messageType === 'CURRICULUM' ? (
+              // 커리큘럼 완료 메시지 - 내담자에게만 추가 회차 일정 예약 버튼, 전문가는 버튼 없음
+              // (개별 상담은 회차별 예정 일정에 맞춰 진행되므로 여기서 바로 입장할 대상이 없음)
+              userType === 'client' && counselingRequestId && (
                 <Link href={`/client/consultations/${counselingRequestId}/schedule`}>
                   <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-5 rounded-xl">
                     <Calendar className="mr-2 h-4 w-4" />
@@ -274,7 +277,7 @@ export function AdminChat({
               // 1. SYSTEM 메시지 (커리큘럼 작성 요청)
               chatRoomId && (
                 <div className="space-y-2">
-                  <Link href={`/expert/consultations/${chatRoomId}/curriculum`}>
+                  <Link href={`/expert/consultations/${counselingRequestId}/curriculum`}>
                     <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-5 rounded-xl">
                       <FileText className="mr-2 h-4 w-4" />
                       커리큘럼 작성하기

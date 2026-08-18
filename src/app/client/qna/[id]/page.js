@@ -6,12 +6,13 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { QnAAPI } from '@/lib/api/qna';
+import { formatQnADate, getQnACategoryName } from '@/lib/qna';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  ArrowLeft,
   Clock,
   User,
   Heart,
@@ -143,29 +144,6 @@ export default function QuestionDetailPage() {
     }
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
-    
-    if (diffHours < 24) return `${diffHours}시간 전`;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays < 7) return `${diffDays}일 전`;
-    return date.toLocaleDateString('ko-KR');
-  };
-
-  const getCategoryName = (category) => {
-    const categories = {
-      concentration: '집중력',
-      language: '언어발달',
-      social: '사회성',
-      behavior: '행동',
-      learning: '학습',
-    };
-    return categories[category] || category;
-  };
-
   if (loading) {
     return (
       <AuthGuard requiredRole="client">
@@ -184,9 +162,7 @@ export default function QuestionDetailPage() {
         <DashboardLayout>
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold mb-2">질문을 찾을 수 없습니다</h2>
-            <Link href="/client/qna">
-              <Button>목록으로 돌아가기</Button>
-            </Link>
+            <BackButton />
           </div>
         </DashboardLayout>
       </AuthGuard>
@@ -199,12 +175,7 @@ export default function QuestionDetailPage() {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* 헤더 */}
           <div className="flex items-center space-x-4">
-            <Link href="/client/qna">
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                목록으로
-              </Button>
-            </Link>
+            <BackButton />
           </div>
 
           {/* 질문 카드 */}
@@ -214,7 +185,7 @@ export default function QuestionDetailPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-3">
                     <Badge variant="secondary">
-                      {getCategoryName(question.category)}
+                      {getQnACategoryName(question.category)}
                     </Badge>
                     {question.has_accepted_answer && (
                       <Badge className="bg-green-100 text-green-800">
@@ -271,7 +242,7 @@ export default function QuestionDetailPage() {
                   </div>
                   <div className="flex items-center">
                     <Clock className="mr-1 h-4 w-4" />
-                    {formatDate(question.created_at)}
+                    {formatQnADate(question.created_at)}
                   </div>
                 </div>
                 
@@ -342,7 +313,7 @@ export default function QuestionDetailPage() {
                           )}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {formatDate(answer.created_at)}
+                          {formatQnADate(answer.created_at)}
                         </div>
                       </div>
                     </div>
@@ -360,6 +331,7 @@ export default function QuestionDetailPage() {
                   </div>
                   
                   <div className="flex items-center justify-between">
+                    {/* TODO: 백엔드에 답변 "도움됨" API가 없음(answer.likes_count/is_liked 필드 미제공, QnAAPI.likeAnswer 미구현) - 구현되면 복원
                     <Button
                       variant="outline"
                       size="sm"
@@ -369,7 +341,8 @@ export default function QuestionDetailPage() {
                       <ThumbsUp className={`mr-1 h-4 w-4 ${answer.is_liked ? 'fill-current' : ''}`} />
                       도움됨
                     </Button>
-                    
+                    */}
+
                     {user?.id === question.author.id && !answer.is_accepted && !question.has_accepted_answer && (
                       <Button size="sm" variant="outline">
                         답변 채택

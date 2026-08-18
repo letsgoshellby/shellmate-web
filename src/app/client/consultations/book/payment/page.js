@@ -6,10 +6,10 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { WalletAPI } from '@/lib/api/wallet';
 import { ConsultationsAPI } from '@/lib/api/consultations';
 import {
-  ArrowLeft,
   ChevronUp,
   ChevronDown,
   Coins,
@@ -119,12 +119,7 @@ function PaymentContent() {
         <div className="max-w-2xl mx-auto space-y-6">
           {/* 헤더 */}
           <div className="flex items-center space-x-4">
-            <Link href="/client/consultations/book">
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                돌아가기
-              </Button>
-            </Link>
+            <BackButton />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">결제하기</h1>
             </div>

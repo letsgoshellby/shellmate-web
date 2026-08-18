@@ -7,12 +7,12 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ColumnsAPI } from '@/lib/api/columns';
 import { getQuillTextLength } from '@/lib/quillText';
-import { ArrowLeft, Save, Eye, Loader2, FileText } from 'lucide-react';
-import Link from 'next/link';
+import { Save, Eye, Loader2, FileText } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const QuillEditor = dynamic(() => import('@/components/editor/QuillEditor'), { ssr: false });
@@ -56,12 +56,7 @@ export default function NewColumnPage() {
           {/* 헤더 */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link href="/expert/columns">
-                <Button variant="outline" size="sm">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  돌아가기
-                </Button>
-              </Link>
+              <BackButton />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">새 칼럼 작성</h1>
                 <p className="text-gray-600">전문적인 지식과 경험을 공유해주세요</p>

@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
@@ -17,7 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Star, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Star, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ConsultationsAPI } from '@/lib/api/consultations';
 import { ReviewAPI } from '@/lib/api/review';
@@ -115,11 +116,7 @@ export default function ReviewPage() {
           <CardContent className="flex flex-col items-center justify-center h-64">
             <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
             <p className="text-lg text-red-600 mb-4">{error}</p>
-            <Button 
-              onClick={() => router.push(`/client/consultations/${id}`)}
-            >
-              상담 상세로 돌아가기
-            </Button>
+            <BackButton />
           </CardContent>
         </Card>
       </div>
@@ -129,14 +126,7 @@ export default function ReviewPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <div className="mb-6">
-        <Button 
-          variant="outline" 
-          onClick={() => router.push(`/client/consultations/${id}`)}
-          className="mb-4"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          상담 상세로 돌아가기
-        </Button>
+        <BackButton className="mb-4" />
         
         <h1 className="text-3xl font-bold">리뷰 작성</h1>
         <p className="text-muted-foreground mt-2">

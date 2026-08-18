@@ -29,6 +29,15 @@ import {
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { AdminChat } from '@/components/chat/AdminChat';
+import {
+  isAdminChatMessage,
+  isSimpleSystemMessage,
+  isCurriculumRequestMessage,
+  formatMessageTime,
+  formatMessageDate,
+  isMyMessage,
+  shouldShowDateSeparator,
+} from '@/lib/chat';
 
 export default function ClientChatDetailPage() {
   const params = useParams();
@@ -186,76 +195,6 @@ export default function ClientChatDetailPage() {
     }
   };
 
-  const formatTime = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('ko-KR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      weekday: 'long'
-    });
-  };
-
-  const isMyMessage = (message) => {
-    // sender 객체의 id와 user.id 비교
-    if (message.sender?.id && user?.id) {
-      return message.sender.id == user.id;
-    }
-    // 구버전 호환: sender_id와 비교
-    if (message.sender_id && user?.id) {
-      return message.sender_id == user.id;
-    }
-    return message.sender === user?.name || message.sender === user?.email;
-  };
-
-  const isAdminChatMessage = (message) => {
-    // 상담 예약 관련 메시지만 AdminChat으로 표시
-    const adminChatTypes = [
-      'RESERVATION_REQUEST',
-      'SCHEDULE_CONFIRM',
-      'SESSION_REMINDER',
-      'SESSION_COMPLETE',
-      'SCHEDULE_CHANGE',
-      'PAYMENT_NOTICE',
-      'COUNSELING_LOG_COMPLETE',
-      'CURRICULUM',
-      'reservation_request',
-      'reservation_accept',
-      'reservation_imminent',
-      'reservation_complete',
-      'counseling_log_complete'
-    ];
-// 1. 명시된 관리자 채팅 타입이거나
-  if (adminChatTypes.includes(message.message_type)) return true;
-
-  // 2. SYSTEM 메시지 중 특정 문구가 포함된 경우 카드로 표시
-  if (message.message_type === 'SYSTEM' &&
-     (message.content?.includes('커리큘럼'))) {
-    return true;
-  }
-
-  return false;
-};
-  const isSimpleSystemMessage = (message) => {
-    // 채팅방 개설 등 간단한 시스템 메시지 (중앙 회색 배경)
-    return message.message_type === 'SYSTEM' && !isAdminChatMessage(message);
-  };
-
-  const shouldShowDate = (currentMsg, prevMsg) => {
-    if (!prevMsg) return true;
-    const currentDate = new Date(currentMsg.sent_at).toDateString();
-    const prevDate = new Date(prevMsg.sent_at).toDateString();
-    return currentDate !== prevDate;
-  };
-
   const handleDeleteMessage = async (messageId) => {
     if (!confirm('이 메시지를 삭제하시겠습니까?')) return;
 
@@ -343,14 +282,14 @@ export default function ClientChatDetailPage() {
             ) : (
               messages.map((message, index) => {
                 // 커리큘럼 작성 요청 메시지는 client에게 노출 안 함
-                if (message.message_type === 'SYSTEM' && message.content?.includes('커리큘럼')) return null;
+                if (isCurriculumRequestMessage(message)) return null;
 
                 return (<div key={message.id}>
                   {/* 날짜 구분선 */}
-                  {shouldShowDate(message, messages[index - 1]) && (
+                  {shouldShowDateSeparator(message, messages[index - 1]) && (
                     <div className="flex items-center justify-center my-4">
                       <span className="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">
-                        {formatDate(message.sent_at)}
+                        {formatMessageDate(message.sent_at)}
                       </span>
                     </div>
                   )}
@@ -383,11 +322,11 @@ export default function ClientChatDetailPage() {
                   ) : (
                     /* 메시지 */
                     <div
-                      className={`flex gap-2 group ${isMyMessage(message) ? 'justify-end' : 'justify-start'}`}
+                      className={`flex gap-2 group ${isMyMessage(message, user) ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
                         className={`max-w-[70%] ${
-                          isMyMessage(message) ? 'order-2' : 'order-1'
+                          isMyMessage(message, user) ? 'order-2' : 'order-1'
                         }`}
                       >
                         {/* 삭제된 메시지 */}
@@ -411,7 +350,7 @@ export default function ClientChatDetailPage() {
                             {message.content && (
                               <div
                                 className={`px-4 py-2 rounded-lg ${
-                                  isMyMessage(message)
+                                  isMyMessage(message, user)
                                     ? 'bg-primary text-white rounded-br-none'
                                     : 'bg-white text-gray-900 rounded-bl-none shadow-sm'
                                 }`}
@@ -427,11 +366,11 @@ export default function ClientChatDetailPage() {
                         {/* 시간 및 읽음 표시 */}
                         <div
                           className={`flex items-center gap-1 mt-1 text-xs text-gray-500 ${
-                            isMyMessage(message) ? 'justify-end' : 'justify-start'
+                            isMyMessage(message, user) ? 'justify-end' : 'justify-start'
                           }`}
                         >
-                          <span>{formatTime(message.sent_at)}</span>
-                          {isMyMessage(message) && (
+                          <span>{formatMessageTime(message.sent_at)}</span>
+                          {isMyMessage(message, user) && (
                             message.is_read ? (
                               <CheckCheck className="h-3 w-3 text-blue-500" />
                             ) : (
@@ -442,7 +381,7 @@ export default function ClientChatDetailPage() {
                       </div>
 
                       {/* 메시지 옵션 (내가 보낸 메시지만) */}
-                      {isMyMessage(message) && !message.is_deleted && (
+                      {isMyMessage(message, user) && !message.is_deleted && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -95,12 +96,7 @@ export default function ConsultationDetailPage() {
           <CardContent className="flex flex-col items-center justify-center h-64">
             <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
             <p className="text-lg text-red-600">{error || '상담 정보를 찾을 수 없습니다.'}</p>
-            <Button 
-              onClick={() => router.push('/client/consultations')}
-              className="mt-4"
-            >
-              상담 목록으로 돌아가기
-            </Button>
+            <BackButton className="mt-4" />
           </CardContent>
         </Card>
       </div>
@@ -117,13 +113,7 @@ export default function ConsultationDetailPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-6">
-        <Button 
-          variant="outline" 
-          onClick={() => router.push('/client/consultations')}
-          className="mb-4"
-        >
-          ← 상담 목록으로
-        </Button>
+        <BackButton className="mb-4" />
         
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">상담 상세 정보</h1>

@@ -6,10 +6,11 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
+import CurriculumView from '@/components/curriculum/CurriculumView';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'react-hot-toast';
 import { CurriculumAPI } from '@/lib/api/curriculum';
 import { ConsultationsAPI } from '@/lib/api/consultations';
@@ -20,7 +21,6 @@ import {
   Plus,
   Trash2,
   Save,
-  ArrowLeft,
   Calendar,
   X,
   Image as ImageIcon
@@ -319,78 +319,15 @@ export default function CurriculumPage() {
         <DashboardLayout>
           <div className="space-y-6">
             <div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/expert/consultations')}
-                className="mb-2"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                상담 목록으로
-              </Button>
+              <BackButton variant="ghost" className="mb-2" />
               <h1 className="text-2xl font-bold text-gray-900">커리큘럼</h1>
               <p className="text-gray-600">
                 {consultation?.client?.name || '내담자'}님의 커리큘럼
               </p>
             </div>
 
-            {/* 기본 정보 */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  {existingCurriculum.title}
-                </CardTitle>
-                {existingCurriculum.description && (
-                  <CardDescription className="text-sm text-gray-700 whitespace-pre-wrap">
-                    {existingCurriculum.description}
-                  </CardDescription>
-                )}
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Calendar className="h-4 w-4" />
-                  <span>총 {existingCurriculum.total_sessions}회차 커리큘럼</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 세션별 정보 */}
-            <div className="space-y-4">
-              {(existingCurriculum.sessions_info || []).map((session, index) => (
-                <Card key={index}>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <span className="bg-primary text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                        {session.session_number}
-                      </span>
-                      {session.session_number}회차 — {session.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {session.description && (
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
-                        {session.description}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      {session.duration_minutes && (
-                        <span>소요 시간: {session.duration_minutes}분</span>
-                      )}
-                      {session.tags && (
-                        <div className="flex flex-wrap gap-1">
-                          {(Array.isArray(session.tags) ? session.tags : session.tags.split(',')).map((tag, i) => (
-                            <span key={i} className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">
-                              {tag.trim()}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            {/* 커리큘럼 내용 */}
+            <CurriculumView curriculum={existingCurriculum} />
           </div>
         </DashboardLayout>
       </AuthGuard>
@@ -404,15 +341,7 @@ export default function CurriculumPage() {
           {/* 헤더 */}
           <div className="flex items-center justify-between">
             <div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push('/expert/consultations')}
-                className="mb-2"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                상담 목록으로
-              </Button>
+              <BackButton variant="ghost" className="mb-2" />
               <h1 className="text-2xl font-bold text-gray-900">커리큘럼 설계</h1>
               <p className="text-gray-600">
                 {consultation?.client?.name || '내담자'}님을 위한 맞춤 커리큘럼을 설계하세요
@@ -447,13 +376,14 @@ export default function CurriculumPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">커리큘럼 설명</Label>
+                  <Label htmlFor="description">커리큘럼 설명 *</Label>
                   <Textarea
                     id="description"
                     value={curriculumData.description}
                     onChange={(e) => setCurriculumData({ ...curriculumData, description: e.target.value })}
                     placeholder="커리큘럼의 전반적인 목표와 방향성을 설명해주세요"
                     rows={4}
+                    required
                   />
                 </div>
 
@@ -518,13 +448,14 @@ export default function CurriculumPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor={`session-description-${index}`}>세션 설명</Label>
+                        <Label htmlFor={`session-description-${index}`}>세션 설명 *</Label>
                         <Textarea
                           id={`session-description-${index}`}
                           value={session.description}
                           onChange={(e) => handleSessionInfoChange(index, 'description', e.target.value)}
                           placeholder="이 세션의 목표, 활동 내용, 기대 효과 등을 작성하세요"
                           rows={3}
+                          required
                         />
                       </div>
 

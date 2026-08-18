@@ -6,13 +6,14 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { QnAAPI, QnAExpertAPI } from '@/lib/api/qna';
+import { formatQnADate } from '@/lib/qna';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  ArrowLeft, 
-  Clock, 
+import {
+  Clock,
   User, 
   Heart, 
   MessageSquare, 
@@ -23,7 +24,6 @@ import {
   AlertCircle,
   Star
 } from 'lucide-react';
-import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
 export default function ExpertQuestionDetailPage() {
@@ -83,30 +83,6 @@ export default function ExpertQuestionDetailPage() {
     }
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
-    
-    if (diffHours < 24) return `${diffHours}시간 전`;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays < 7) return `${diffDays}일 전`;
-    return date.toLocaleDateString('ko-KR');
-  };
-
-  const getCategoryName = (category) => {
-    const categories = {
-      concentration: '집중력',
-      language: '언어발달',
-      social: '사회성',
-      behavior: '행동',
-      learning: '학습',
-      emotion: '정서발달'
-    };
-    return categories[category] || category;
-  };
-
   const getUrgencyColor = (urgency) => {
     switch (urgency) {
       case 'high': return 'bg-red-100 text-red-800';
@@ -145,9 +121,7 @@ export default function ExpertQuestionDetailPage() {
         <DashboardLayout>
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold mb-2">질문을 찾을 수 없습니다</h2>
-            <Link href="/expert/qna">
-              <Button>목록으로 돌아가기</Button>
-            </Link>
+            <BackButton />
           </div>
         </DashboardLayout>
       </AuthGuard>
@@ -161,12 +135,7 @@ export default function ExpertQuestionDetailPage() {
           {/* 헤더 */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link href="/expert/qna">
-                <Button variant="outline" size="sm">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  목록으로
-                </Button>
-              </Link>
+              <BackButton />
             </div>
             
             {/* {!hasExpertAnswer && (
@@ -240,7 +209,7 @@ export default function ExpertQuestionDetailPage() {
                   </div>
                   <div className="flex items-center">
                     <Clock className="mr-1 h-4 w-4" />
-                    {formatDate(question.created_at)}
+                    {formatQnADate(question.created_at)}
                   </div>
                 </div>
                 
@@ -295,7 +264,7 @@ export default function ExpertQuestionDetailPage() {
                             )}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {formatDate(answer.created_at)}
+                            {formatQnADate(answer.created_at)}
                           </div>
                         </div>
                       </div>

@@ -7,12 +7,12 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Badge } from '@/components/ui/badge';
 import { ExpertsAPI } from '@/lib/api/experts';
 import { ConsultationsAPI } from '@/lib/api/consultations';
 import { ReviewAPI } from '@/lib/api/review';
 import {
-  ArrowLeft,
   Star,
   Award,
   Briefcase,
@@ -25,7 +25,6 @@ import {
   Coins,
   ChevronRight
 } from 'lucide-react';
-import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
 export default function ExpertDetailPage({ params }) {
@@ -100,9 +99,7 @@ export default function ExpertDetailPage({ params }) {
         <DashboardLayout>
           <div className="text-center py-12">
             <p className="text-gray-500">전문가 정보를 찾을 수 없습니다.</p>
-            <Button className="mt-4" onClick={() => router.push('/client/experts')}>
-              목록으로 돌아가기
-            </Button>
+            <BackButton className="mt-4" />
           </div>
         </DashboardLayout>
       </AuthGuard>
@@ -164,12 +161,7 @@ export default function ExpertDetailPage({ params }) {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* 헤더 */}
           <div className="flex items-center space-x-4">
-            <Link href="/client/experts">
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                목록으로
-              </Button>
-            </Link>
+            <BackButton />
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-gray-900">전문가 상세 정보</h1>
             </div>
@@ -310,10 +302,10 @@ export default function ExpertDetailPage({ params }) {
                             <span className="text-2xl font-bold text-black">
                               {pricing.tokens_required.toLocaleString()}
                             </span>
-                            <span className="text-sm text-gray-600">토큰</span>
+                            <span className="text-sm text-gray-600">에그</span>
                           </div>
                           <p className="text-xs text-gray-500">
-                            회당 {Math.round(pricing.tokens_required / pricing.total_sessions)} 토큰
+                            회당 {Math.round(pricing.tokens_required / pricing.total_sessions)} 에그
                           </p>
                         </div>
                       </div>

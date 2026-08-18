@@ -271,7 +271,16 @@ export default function ClientConsultationsPage() {
                         </h3>
                         <div className="flex items-center gap-1 mt-1 text-sm text-gray-600">
                           <User className="h-3.5 w-3.5 text-gray-400" />
-                          <span>{consultation.expert?.name || '-'}</span>
+                          {consultation.expert?.id ? (
+                            <Link
+                              href={`/client/experts/${consultation.expert.id}`}
+                              className="hover:text-primary hover:underline"
+                            >
+                              {consultation.expert?.name || '-'}
+                            </Link>
+                          ) : (
+                            <span>{consultation.expert?.name || '-'}</span>
+                          )}
                           {consultation.expert?.specialty_display && (
                             <span className="text-gray-400">· {consultation.expert.specialty_display}</span>
                           )}

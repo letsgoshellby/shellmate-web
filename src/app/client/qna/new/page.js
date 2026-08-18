@@ -9,12 +9,13 @@ import { AuthGuard } from '@/components/auth/AuthGuard';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/ui/back-button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { QnAAPI } from '@/lib/api/qna';
-import { ArrowLeft, Plus, X, Loader2, HelpCircle } from 'lucide-react';
+import { Plus, X, Loader2, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
@@ -102,12 +103,7 @@ export default function NewQuestionPage() {
           {/* 헤더 */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link href="/client/qna">
-                <Button variant="outline" size="sm">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  돌아가기
-                </Button>
-              </Link>
+              <BackButton />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">새 질문 작성</h1>
                 <p className="text-gray-600">전문가에게 궁금한 점을 자세히 적어주세요</p>
